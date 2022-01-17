@@ -49,7 +49,7 @@ export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
         document.head.appendChild(node);
       }
     }
-    references.set(id, (references.get(id) ?? 0) + 1)
+    references.set(id, (references.get(id) ?? 0) + 1);
   }
 
   function remove(id: string) {
@@ -76,9 +76,9 @@ export type SolidStyledVariables = Record<string, () => string>;
 
 export function useSolidStyled(
   id: string,
-  sheet: string,
   scope: string,
   variables: SolidStyledVariables,
+  sheet: string,
 ): void {
   const ctx = useContext(StyleRegistryContext);
 
@@ -89,9 +89,11 @@ export function useSolidStyled(
 
   createEffect<Record<string, string>>((prev) => {
     const nodes = document.querySelectorAll(`[${SOLID_STYLED_ATTR}-${id}="${scope}"]`);
+    // eslint-disable-next-line no-restricted-syntax
     for (const key of Object.keys(variables)) {
       const value = variables[key]();
       if (prev[key] !== value) {
+        // eslint-disable-next-line no-param-reassign
         prev[key] = value;
 
         nodes.forEach((node) => {
@@ -103,6 +105,7 @@ export function useSolidStyled(
   }, {});
 }
 
-export function css(template: TemplateStringsArray, ...spans: string[]): void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function css(_template: TemplateStringsArray, ..._spans: string[]): void {
   throw new Error('Unexpected use of `css`');
 }

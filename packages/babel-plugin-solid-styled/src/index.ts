@@ -8,8 +8,8 @@ import { nanoid } from 'nanoid';
 const TAGGED_TEMPLATE = 'css';
 const SOURCE_MODULE = 'solid-styled';
 const SOLID_STYLED_ATTR = 'data-solid-styled';
-const SCOPE_ID = '$$scope';
-const SHEET_ID = '$$sheet';
+const SCOPE_ID = 'scope';
+const SHEET_ID = 'sheet';
 const SCOPE_LENGTH = 8;
 const VAR_LENGTH = 4;
 
@@ -30,6 +30,19 @@ function getHookIdentifier(
   return newID;
 }
 
+function isValidSpecifier(specifier: t.ImportSpecifier): boolean {
+  return (
+    (t.isIdentifier(specifier.imported) && specifier.imported.name === TAGGED_TEMPLATE)
+    || (t.isStringLiteral(specifier.imported) && specifier.imported.value === TAGGED_TEMPLATE)
+  );
+}
+
+interface ScopeMeta {
+  scope: t.Identifier;
+  sheet: t.Identifier;
+  sheetID: string;
+}
+
 export default function solidStyledPlugin(): PluginObj {
   return {
     name: 'solid-styled',
@@ -37,15 +50,17 @@ export default function solidStyledPlugin(): PluginObj {
       Program(programPath) {
         const validIdentifiers = new Set();
         const hooks: ImportHook = new Map();
-        const meta = new WeakMap<Scope, string>();
+        const meta = new WeakMap<Scope, ScopeMeta>();
 
-        function getSheetID(path: NodePath, functionParent: Scope): string {
-          let result = meta.get(functionParent);
+        function getScopeMeta(path: NodePath, functionParent: Scope): ScopeMeta {
+          const result = meta.get(functionParent);
           if (result) {
             return result;
           }
+          const scope = path.scope.generateUidIdentifier(SCOPE_ID);
+          const sheet = path.scope.generateUidIdentifier(SHEET_ID);
           functionParent.push({
-            id: t.identifier(SCOPE_ID),
+            id: scope,
             init: t.callExpression(
               getHookIdentifier(hooks, path, 'createUniqueId', 'solid-js'),
               [],
@@ -54,14 +69,17 @@ export default function solidStyledPlugin(): PluginObj {
           });
           const sheetID = nanoid(SCOPE_LENGTH);
           functionParent.push({
-            id: t.identifier(SHEET_ID),
+            id: sheet,
             init: t.stringLiteral(sheetID),
             kind: 'const',
           });
-
-          meta.set(functionParent, sheetID);
-          
-          return sheetID;
+          const metaValue = {
+            scope,
+            sheet,
+            sheetID,
+          };
+          meta.set(functionParent, metaValue);
+          return metaValue;
         }
 
         programPath.traverse({
@@ -71,10 +89,7 @@ export default function solidStyledPlugin(): PluginObj {
                 const specifier = path.node.specifiers[i];
                 if (
                   t.isImportSpecifier(specifier)
-                  && (
-                    (t.isIdentifier(specifier.imported) && specifier.imported.name === TAGGED_TEMPLATE)
-                    || (t.isStringLiteral(specifier.imported) && specifier.imported.value === TAGGED_TEMPLATE)
-                   )
+                  && isValidSpecifier(specifier)
                 ) {
                   validIdentifiers.add(specifier.local);
                 }
@@ -82,30 +97,30 @@ export default function solidStyledPlugin(): PluginObj {
             }
           },
           TaggedTemplateExpression(path) {
-            const tag = path.node.tag;
+            const { tag } = path.node;
             if (t.isIdentifier(tag)) {
               const binding = path.scope.getBinding(tag.name);
               if (binding && validIdentifiers.has(binding.identifier)) {
                 // Get the function parent first
                 const functionParent = path.scope.getFunctionParent();
                 if (functionParent) {
-                  const sheetID = getSheetID(path, functionParent);
+                  const { scope, sheet, sheetID } = getScopeMeta(path, functionParent);
 
                   // Convert template into a CSS sheet
                   const { expressions, quasis } = path.node.quasi;
 
                   const variables: t.ObjectProperty[] = [];
 
-                  let sheet = '';
+                  let cssSheet = '';
                   let a = 0;
 
                   for (let i = 0, len = quasis.length; i < len; i += 1) {
-                    sheet = `${sheet}${quasis[i].value.cooked}`;
+                    cssSheet = `${cssSheet}${quasis[i].value.cooked ?? ''}`;
                     if (a < expressions.length) {
                       const expr = expressions[a];
                       if (t.isExpression(expr)) {
                         const id = nanoid(VAR_LENGTH);
-                        sheet = `${sheet}var(--${id})`;
+                        cssSheet = `${cssSheet}var(--${id})`;
                         variables.push(t.objectProperty(
                           t.identifier(id),
                           t.arrowFunctionExpression([], expr),
@@ -115,11 +130,11 @@ export default function solidStyledPlugin(): PluginObj {
                     }
                   }
 
-                  const ast = csstree.parse(sheet)
+                  const ast = csstree.parse(cssSheet);
                   csstree.walk(ast, (node) => {
                     if (node.type === 'Selector') {
                       node.children.push({
-                        type: "AttributeSelector",
+                        type: 'AttributeSelector',
                         name: {
                           type: 'Identifier',
                           name: `${SOLID_STYLED_ATTR}-${sheetID}`,
@@ -135,10 +150,10 @@ export default function solidStyledPlugin(): PluginObj {
                   path.replaceWith(t.callExpression(
                     getHookIdentifier(hooks, path, 'useSolidStyled', SOURCE_MODULE),
                     [
-                      t.identifier(SHEET_ID),
-                      t.stringLiteral(compiledSheet),
-                      t.identifier(SCOPE_ID),
+                      sheet,
+                      scope,
                       t.objectExpression(variables),
+                      t.stringLiteral(compiledSheet),
                     ],
                   ));
                 }
@@ -154,10 +169,10 @@ export default function solidStyledPlugin(): PluginObj {
             if (/^[a-z]/.test(opening.name.name)) {
               const functionParent = path.scope.getFunctionParent();
               if (functionParent) {
-                const sheetID = getSheetID(path, functionParent);
+                const { sheetID, scope } = getScopeMeta(path, functionParent);
                 opening.attributes.push(t.jsxAttribute(
                   t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
-                  t.jsxExpressionContainer(t.identifier(SCOPE_ID)),
+                  t.jsxExpressionContainer(scope),
                 ));
               }
             }
@@ -166,5 +181,5 @@ export default function solidStyledPlugin(): PluginObj {
         programPath.scope.crawl();
       },
     },
-  }
+  };
 }
