@@ -8,7 +8,7 @@ import { css } from 'solid-styled';
 function A() {
   const [color, setColor] = createSignal('red');
   css\`
-    h1 {
+    a[b][c] {
       color: \${color()};
     }
   \`;

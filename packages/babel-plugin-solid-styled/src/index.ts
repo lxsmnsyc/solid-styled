@@ -12,6 +12,7 @@ const SCOPE_ID = 'scope';
 const SHEET_ID = 'sheet';
 const SCOPE_LENGTH = 8;
 const VAR_LENGTH = 8;
+const GLOBAL_SELECTOR = 'global';
 
 type ImportHook = Map<string, t.Identifier>;
 
@@ -131,18 +132,68 @@ export default function solidStyledPlugin(): PluginObj {
                   }
 
                   const ast = csstree.parse(cssSheet);
+                  const selector: csstree.AttributeSelector = {
+                    type: 'AttributeSelector',
+                    name: {
+                      type: 'Identifier',
+                      name: `${SOLID_STYLED_ATTR}-${sheetID}`,
+                    },
+                    matcher: null,
+                    flags: null,
+                    value: null,
+                  };
                   csstree.walk(ast, (node) => {
                     if (node.type === 'Selector') {
-                      node.children.push({
-                        type: 'AttributeSelector',
-                        name: {
-                          type: 'Identifier',
-                          name: `${SOLID_STYLED_ATTR}-${sheetID}`,
-                        },
-                        matcher: null,
-                        flags: null,
-                        value: null,
+                      const children: csstree.CssNode[] = [];
+                      let shouldPush = true;
+                      node.children.forEach((child) => {
+                        if (
+                          child.type === 'TypeSelector'
+                          || child.type === 'ClassSelector'
+                          || child.type === 'IdSelector'
+                          || child.type === 'AttributeSelector'
+                        ) {
+                          children.push(child);
+                          if (shouldPush) {
+                            children.push(selector);
+                            shouldPush = false;
+                          }
+                          return;
+                        }
+                        if (
+                          child.type === 'PseudoElementSelector'
+                        ) {
+                          if (shouldPush) {
+                            children.push(selector);
+                            shouldPush = false;
+                          }
+                          children.push(child);
+                          return;
+                        }
+                        if (
+                          child.type === 'Combinator'
+                          || child.type === 'WhiteSpace'
+                        ) {
+                          children.push(child);
+                          shouldPush = true;
+                          return;
+                        }
+                        if (child.type === 'PseudoClassSelector') {
+                          if (child.name === GLOBAL_SELECTOR) {
+                            child.children?.forEach((innerChild) => {
+                              children.push(innerChild);
+                            });
+                          } else {
+                            if (shouldPush) {
+                              children.push(selector);
+                              shouldPush = false;
+                            }
+                            children.push(child);
+                          }
+                        }
                       });
+                      // eslint-disable-next-line no-param-reassign
+                      node.children = new csstree.List<csstree.CssNode>().fromArray(children);
                     }
                   });
                   const compiledSheet = csstree.generate(ast);
