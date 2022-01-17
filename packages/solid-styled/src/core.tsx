@@ -2,6 +2,7 @@ import {
   createContext,
   createEffect,
   JSX,
+  onCleanup,
   useContext,
 } from 'solid-js';
 import { isServer } from 'solid-js/web';
@@ -86,6 +87,7 @@ export function useSolidStyled(
     throw new Error('Missing StyleRegistry');
   }
   ctx.insert(id, sheet);
+  onCleanup(() => ctx.remove(id));
 
   createEffect<Record<string, string>>((prev) => {
     const nodes = document.querySelectorAll(`[${SOLID_STYLED_ATTR}-${id}="${scope}"]`);
