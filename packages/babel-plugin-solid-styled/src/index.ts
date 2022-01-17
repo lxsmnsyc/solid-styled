@@ -123,8 +123,9 @@ export default function solidStyledPlugin(): PluginObj {
                         const id = nanoid(VAR_LENGTH);
                         cssSheet = `${cssSheet}var(--${id})`;
                         variables.push(t.objectProperty(
-                          t.identifier(id),
+                          t.stringLiteral(id),
                           t.arrowFunctionExpression([], expr),
+                          true,
                         ));
                         a += 1;
                       }
