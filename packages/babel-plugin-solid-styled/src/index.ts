@@ -11,7 +11,7 @@ const SOLID_STYLED_ATTR = 'data-solid-styled';
 const SCOPE_ID = 'scope';
 const SHEET_ID = 'sheet';
 const SCOPE_LENGTH = 8;
-const VAR_LENGTH = 4;
+const VAR_LENGTH = 8;
 
 type ImportHook = Map<string, t.Identifier>;
 
