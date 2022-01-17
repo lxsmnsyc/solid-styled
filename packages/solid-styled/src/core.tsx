@@ -14,8 +14,8 @@ interface StyleRegistryContext {
 
 const StyleRegistryContext = createContext<StyleRegistryContext>();
 
-const SOLID_SHEET_ATTR = 'data-solid-sheet';
-const SOLID_STYLED_ATTR = 'data-solid-styled';
+const SOLID_SHEET_ATTR = 'data-s';
+const SOLID_STYLED_ATTR = 'data-s';
 
 export interface StyleData {
   id: string;
@@ -105,6 +105,11 @@ export function useSolidStyled(
     }
     return prev;
   }, {});
+}
+
+export function renderSheets(sheets: StyleData[]): string {
+  return sheets.map((data) => `<style ${SOLID_SHEET_ATTR}="${data.id}">${data.sheet}</style>`)
+    .join('');
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -7,7 +7,7 @@ import { nanoid } from 'nanoid';
 
 const TAGGED_TEMPLATE = 'css';
 const SOURCE_MODULE = 'solid-styled';
-const SOLID_STYLED_ATTR = 'data-solid-styled';
+const SOLID_STYLED_ATTR = 'data-s';
 const SCOPE_ID = 'scope';
 const SHEET_ID = 'sheet';
 const SCOPE_LENGTH = 8;
