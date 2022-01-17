@@ -1,0 +1,8 @@
+{
+  "target": "es2017",
+  "jsx": "preserve",
+  "jest": {
+    "testEnvironment": "jsdom",
+    "preset": "solid-jest/preset/browser"
+  }
+}
