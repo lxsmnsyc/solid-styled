@@ -3,15 +3,15 @@ import { addNamed } from '@babel/helper-module-imports';
 import { NodePath, Scope } from '@babel/traverse';
 import * as t from '@babel/types';
 import * as csstree from 'css-tree';
-import { nanoid } from 'nanoid';
+import { customAlphabet } from 'nanoid';
 
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789_-';
+const nanoid = customAlphabet(ALPHABET, 10);
 const TAGGED_TEMPLATE = 'css';
 const SOURCE_MODULE = 'solid-styled';
 const SOLID_STYLED_ATTR = 'data-s';
 const SCOPE_ID = 'scope';
 const SHEET_ID = 'sheet';
-const SCOPE_LENGTH = 8;
-const VAR_LENGTH = 8;
 const GLOBAL_SELECTOR = 'global';
 
 type ImportHook = Map<string, t.Identifier>;
@@ -68,7 +68,7 @@ export default function solidStyledPlugin(): PluginObj {
             ),
             kind: 'const',
           });
-          const sheetID = nanoid(SCOPE_LENGTH);
+          const sheetID = nanoid();
           functionParent.push({
             id: sheet,
             init: t.stringLiteral(sheetID),
@@ -120,7 +120,7 @@ export default function solidStyledPlugin(): PluginObj {
                     if (a < expressions.length) {
                       const expr = expressions[a];
                       if (t.isExpression(expr)) {
-                        const id = nanoid(VAR_LENGTH);
+                        const id = nanoid();
                         cssSheet = `${cssSheet}var(--${id})`;
                         variables.push(t.objectProperty(
                           t.stringLiteral(id),
