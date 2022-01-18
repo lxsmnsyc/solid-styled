@@ -73,12 +73,12 @@ export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
   );
 }
 
-export type SolidStyledVariables = Record<string, () => string>;
+export type SolidStyledVariables = Record<string, string>;
 
 export function useSolidStyled(
   id: string,
   scope: string,
-  variables: SolidStyledVariables,
+  variables: () => SolidStyledVariables,
   sheet: string,
 ): void {
   const ctx = useContext(StyleRegistryContext);
@@ -91,9 +91,10 @@ export function useSolidStyled(
 
   createEffect<Record<string, string>>((prev) => {
     const nodes = document.querySelectorAll(`[${SOLID_STYLED_ATTR}-${id}="${scope}"]`);
+    const result = variables();
     // eslint-disable-next-line no-restricted-syntax
-    for (const key of Object.keys(variables)) {
-      const value = variables[key]();
+    for (const key of Object.keys(result)) {
+      const value = result[key];
       if (prev[key] !== value) {
         // eslint-disable-next-line no-param-reassign
         prev[key] = value;

@@ -124,7 +124,7 @@ export default function solidStyledPlugin(): PluginObj {
                         cssSheet = `${cssSheet}var(--${id})`;
                         variables.push(t.objectProperty(
                           t.stringLiteral(id),
-                          t.arrowFunctionExpression([], expr),
+                          expr,
                           true,
                         ));
                         a += 1;
@@ -204,7 +204,7 @@ export default function solidStyledPlugin(): PluginObj {
                     [
                       sheet,
                       scope,
-                      t.objectExpression(variables),
+                      t.arrowFunctionExpression([], t.objectExpression(variables)),
                       t.stringLiteral(compiledSheet),
                     ],
                   ));
