@@ -95,7 +95,7 @@ import { css } from 'solid-styled';
 function Button() {
   const [color, setColor] = createSignal('red');
   css`
-    h1 {
+    button {
       color: ${color()};
     }
   `;
