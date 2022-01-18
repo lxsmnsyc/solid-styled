@@ -74,6 +74,8 @@ const styles = renderSheets(styles);
 Use the `css` tagged template for writing stylesheets.
 
 ```js
+import { css } from 'solid-styled';
+
 function Title() {
   css`
     h1 {
@@ -88,6 +90,8 @@ function Title() {
 The template is also reactive. It works by replacing all templating values with a CSS variable. This allows the stylesheet to be only rendered once and can be shared by multiple components of the same scope.
 
 ```js
+import { css } from 'solid-styled';
+
 function Button() {
   const [color, setColor] = createSignal('red');
   css`
@@ -109,6 +113,8 @@ function Button() {
 By default, all styles are scoped to its component and cannot leak into another component. The scoping only applies all DOM nodes that can be found in the component, including the children of the external components.
 
 ```js
+import { css } from 'solid-styled';
+
 function ForeignTitle() {
   return <h1>This is not affected</h1>;
 }
@@ -137,6 +143,8 @@ function Title() {
 Since all selectors in a given stylesheet are scoped by default, you can use the `:global` pseudo selector to opt-out of scoping:
 
 ```js
+import { css } from 'solid-styled';
+
 function Feed(props) {
   css`
     div > :global(* + *) {
