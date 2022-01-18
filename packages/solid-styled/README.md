@@ -30,6 +30,8 @@ pnpm add solid-styled babel-plugin-solid-styled
 
 ### Babel
 
+**Note: This is required for `solid-styled` to work its magic properly!**
+
 ```json
 {
   "plugins": [
