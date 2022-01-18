@@ -23,7 +23,7 @@ export interface StyleData {
 }
 
 export interface StyleRegistryProps {
-  styles: StyleData[];
+  styles?: StyleData[];
   children?: JSX.Element;
 }
 
@@ -42,7 +42,7 @@ export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
       tracked.add(id);
 
       if (isServer) {
-        props.styles.push({ id, sheet });
+        props.styles?.push({ id, sheet });
       } else {
         const node = document.createElement('style');
         node.setAttribute(SOLID_SHEET_ATTR, id);
