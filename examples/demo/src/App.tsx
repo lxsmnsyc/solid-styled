@@ -38,6 +38,20 @@ function Main(): JSX.Element {
       justify-content: center;
     }
 
+    /* You can also do this! */
+    /* 
+    @global {
+      body {
+        width: 100%;
+        min-height: 100vh;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+    */
+
     div {
       display: flex;
       flex-direction: column;

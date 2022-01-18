@@ -143,59 +143,86 @@ export default function solidStyledPlugin(): PluginObj {
                     flags: null,
                     value: null,
                   };
-                  csstree.walk(ast, (node) => {
-                    if (node.type === 'Selector') {
-                      const children: csstree.CssNode[] = [];
-                      let shouldPush = true;
-                      node.children.forEach((child) => {
-                        if (
-                          child.type === 'TypeSelector'
-                          || child.type === 'ClassSelector'
-                          || child.type === 'IdSelector'
-                          || child.type === 'AttributeSelector'
-                        ) {
-                          children.push(child);
-                          if (shouldPush) {
-                            children.push(selector);
-                            shouldPush = false;
-                          }
-                          return;
-                        }
-                        if (
-                          child.type === 'PseudoElementSelector'
-                        ) {
-                          if (shouldPush) {
-                            children.push(selector);
-                            shouldPush = false;
-                          }
-                          children.push(child);
-                          return;
-                        }
-                        if (
-                          child.type === 'Combinator'
-                          || child.type === 'WhiteSpace'
-                        ) {
-                          children.push(child);
-                          shouldPush = true;
-                          return;
-                        }
-                        if (child.type === 'PseudoClassSelector') {
-                          if (child.name === GLOBAL_SELECTOR) {
-                            child.children?.forEach((innerChild) => {
+                  let inGlobal = false;
+                  csstree.walk(ast, {
+                    leave(node: csstree.CssNode) {
+                      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
+                        inGlobal = false;
+                      }
+                      if (node.type === 'StyleSheet' || node.type === 'Block') {
+                        const children: csstree.CssNode[] = [];
+                        node.children.forEach((child) => {
+                          if (child.type === 'Atrule' && child.name === 'global' && child.block) {
+                            child.block.children.forEach((innerChild) => {
                               children.push(innerChild);
                             });
                           } else {
+                            children.push(child);
+                          }
+                        });
+                        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
+                      }
+                    },
+                    enter(node: csstree.CssNode) {
+                      if (inGlobal) {
+                        return;
+                      }
+                      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
+                        inGlobal = true;
+                        return;
+                      }
+                      if (node.type === 'Selector') {
+                        const children: csstree.CssNode[] = [];
+                        let shouldPush = true;
+                        node.children.forEach((child) => {
+                          if (
+                            child.type === 'TypeSelector'
+                            || child.type === 'ClassSelector'
+                            || child.type === 'IdSelector'
+                            || child.type === 'AttributeSelector'
+                          ) {
+                            children.push(child);
+                            if (shouldPush) {
+                              children.push(selector);
+                              shouldPush = false;
+                            }
+                            return;
+                          }
+                          if (
+                            child.type === 'PseudoElementSelector'
+                          ) {
                             if (shouldPush) {
                               children.push(selector);
                               shouldPush = false;
                             }
                             children.push(child);
+                            return;
                           }
-                        }
-                      });
-                      // eslint-disable-next-line no-param-reassign
-                      node.children = new csstree.List<csstree.CssNode>().fromArray(children);
-                    }
+                          if (
+                            child.type === 'Combinator'
+                            || child.type === 'WhiteSpace'
+                          ) {
+                            children.push(child);
+                            shouldPush = true;
+                            return;
+                          }
+                          if (child.type === 'PseudoClassSelector') {
+                            if (child.name === GLOBAL_SELECTOR) {
+                              child.children?.forEach((innerChild) => {
+                                children.push(innerChild);
+                              });
+                            } else {
+                              if (shouldPush) {
+                                children.push(selector);
+                                shouldPush = false;
+                              }
+                              children.push(child);
+                            }
+                          }
+                        });
+                        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
+                      }
+                    },
                   });
                   const compiledSheet = csstree.generate(ast);
 

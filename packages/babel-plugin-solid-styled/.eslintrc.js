@@ -12,5 +12,6 @@ module.exports = {
         "devDependencies": ["**/*.test.tsx"]
       }
     ],
+    "no-param-reassign": "off"
   },
 };
