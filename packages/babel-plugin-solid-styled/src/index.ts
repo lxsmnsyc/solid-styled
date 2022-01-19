@@ -60,6 +60,67 @@ interface ScopeMeta {
   sheetID: string;
 }
 
+type MetaMap = WeakMap<Scope, ScopeMeta>;
+
+function getScopeMeta(
+  hooks: ImportHook,
+  meta: MetaMap,
+  path: NodePath,
+  functionParent: Scope,
+): ScopeMeta {
+  const result = meta.get(functionParent);
+  if (result) {
+    return result;
+  }
+  const scope = path.scope.generateUidIdentifier(SCOPE_ID);
+  const sheet = path.scope.generateUidIdentifier(SHEET_ID);
+  functionParent.push({
+    id: scope,
+    init: t.callExpression(
+      getHookIdentifier(hooks, path, 'createUniqueId', 'solid-js'),
+      [],
+    ),
+    kind: 'const',
+  });
+  const sheetID = nanoid();
+  functionParent.push({
+    id: sheet,
+    init: t.stringLiteral(sheetID),
+    kind: 'const',
+  });
+  const metaValue = {
+    scope,
+    sheet,
+    sheetID,
+  };
+  meta.set(functionParent, metaValue);
+  return metaValue;
+}
+
+function transformJSX(
+  hooks: ImportHook,
+  meta: MetaMap,
+  functionParent: Scope,
+) {
+  if (meta.has(functionParent)) {
+    functionParent.path.traverse({
+      JSXElement(path) {
+        const opening = path.node.openingElement;
+        if ((t.isJSXIdentifier(opening.name) && /^[a-z]/.test(opening.name.name)) || checkUseAttribute(opening)) {
+          const parent = path.scope.getFunctionParent();
+          if (parent === functionParent) {
+            const { sheetID, scope } = getScopeMeta(hooks, meta, path, parent);
+            opening.attributes.push(t.jsxAttribute(
+              t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
+              t.jsxExpressionContainer(scope),
+            ));
+          }
+        }
+      },
+    });
+  }
+}
+
 export default function solidStyledPlugin(): PluginObj {
   return {
     name: 'solid-styled',
@@ -68,36 +129,6 @@ export default function solidStyledPlugin(): PluginObj {
         const validIdentifiers = new Set();
         const hooks: ImportHook = new Map();
         const meta = new WeakMap<Scope, ScopeMeta>();
-
-        function getScopeMeta(path: NodePath, functionParent: Scope): ScopeMeta {
-          const result = meta.get(functionParent);
-          if (result) {
-            return result;
-          }
-          const scope = path.scope.generateUidIdentifier(SCOPE_ID);
-          const sheet = path.scope.generateUidIdentifier(SHEET_ID);
-          functionParent.push({
-            id: scope,
-            init: t.callExpression(
-              getHookIdentifier(hooks, path, 'createUniqueId', 'solid-js'),
-              [],
-            ),
-            kind: 'const',
-          });
-          const sheetID = nanoid();
-          functionParent.push({
-            id: sheet,
-            init: t.stringLiteral(sheetID),
-            kind: 'const',
-          });
-          const metaValue = {
-            scope,
-            sheet,
-            sheetID,
-          };
-          meta.set(functionParent, metaValue);
-          return metaValue;
-        }
 
         programPath.traverse({
           ImportDeclaration(path) {
@@ -121,7 +152,7 @@ export default function solidStyledPlugin(): PluginObj {
                 // Get the function parent first
                 const functionParent = path.scope.getFunctionParent();
                 if (functionParent) {
-                  const { scope, sheet, sheetID } = getScopeMeta(path, functionParent);
+                  const { scope, sheet, sheetID } = getScopeMeta(hooks, meta, path, functionParent);
 
                   // Convert template into a CSS sheet
                   const { expressions, quasis } = path.node.quasi;
@@ -253,20 +284,9 @@ export default function solidStyledPlugin(): PluginObj {
                       t.stringLiteral(compiledSheet),
                     ],
                   ));
+
+                  transformJSX(hooks, meta, functionParent);
                 }
-              }
-            }
-          },
-          JSXElement(path) {
-            const opening = path.node.openingElement;
-            if ((t.isJSXIdentifier(opening.name) && /^[a-z]/.test(opening.name.name)) || checkUseAttribute(opening)) {
-              const functionParent = path.scope.getFunctionParent();
-              if (functionParent) {
-                const { sheetID, scope } = getScopeMeta(path, functionParent);
-                opening.attributes.push(t.jsxAttribute(
-                  t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
-                  t.jsxExpressionContainer(scope),
-                ));
               }
             }
           },
