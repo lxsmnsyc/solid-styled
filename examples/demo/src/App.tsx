@@ -40,7 +40,7 @@ function ShowButton(): JSX.Element {
               'border-radius': '0.5rem',
             }}
           >
-            {show() ? 'Hide Div' : 'Show Div'}
+            {red() ? 'Red' : 'Blue'}
           </button>
         </div>
       </Show>
@@ -77,6 +77,8 @@ function ToggleButton(): JSX.Element {
 function Main(): JSX.Element {
   css`
     :global(body) {
+      padding: 0;
+      margin: 0;
       width: 100%;
       min-height: 100vh;
 
