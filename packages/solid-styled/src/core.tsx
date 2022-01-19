@@ -87,15 +87,15 @@ export function useSolidStyled(
   onCleanup(() => ctx.remove(id));
 }
 
-type CssVarsMerge = () => Record<string, string>;
+type CSSVarsMerge = () => Record<string, string>;
 
-interface CssVars {
+interface CSSVars {
   (): JSX.CSSProperties;
-  merge(vars: CssVarsMerge): void;
+  merge(vars: CSSVarsMerge): void;
 }
 
-export function createCssVars(): CssVars {
-  const patches: CssVarsMerge[] = [];
+export function createCSSVars(): CSSVars {
+  const patches: CSSVarsMerge[] = [];
   return Object.assign(createMemo(() => {
     let source = {};
     for (let i = 0, len = patches.length; i < len; i += 1) {
@@ -103,7 +103,7 @@ export function createCssVars(): CssVars {
     }
     return source;
   }), {
-    merge(vars: CssVarsMerge) {
+    merge(vars: CSSVarsMerge) {
       patches.push(vars);
     },
   });

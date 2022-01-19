@@ -96,7 +96,7 @@ function getScopeMeta(
   functionParent.push({
     id: vars,
     init: t.callExpression(
-      getHookIdentifier(hooks, path, 'createCssVars', SOURCE_MODULE),
+      getHookIdentifier(hooks, path, 'createCSSVars', SOURCE_MODULE),
       [],
     ),
     kind: 'const',
