@@ -3,6 +3,7 @@ import {
   createEffect,
   JSX,
   onCleanup,
+  onMount,
   useContext,
 } from 'solid-js';
 import { isServer } from 'solid-js/web';
@@ -90,14 +91,34 @@ export function useSolidStyled(
   onCleanup(() => ctx.remove(id));
 
   if (variables) {
+    onMount(() => {
+      const ob = new MutationObserver((records) => {
+        const result = variables();
+        for (let i = 0, len = records.length; i < len; i += 1) {
+          const record = records[i];
+          for (let k = 0, klen = record.addedNodes.length; k < klen; k += 1) {
+            const node = record.addedNodes[k];
+            if ((node instanceof HTMLElement || node instanceof SVGElement)) {
+              for (const key of Object.keys(result)) {
+                node.style.setProperty(`--s-${key}`, result[key]);
+              }
+            }
+          }
+        }
+      });
+      ob.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
+      onCleanup(() => ob.disconnect());
+    });
+
     createEffect<Record<string, string>>((prev) => {
       const nodes = document.querySelectorAll(`[${SOLID_STYLED_ATTR}-${id}="${scope}"]`);
       const result = variables();
-      // eslint-disable-next-line no-restricted-syntax
       for (const key of Object.keys(result)) {
         const value = result[key];
         if (prev[key] !== value) {
-          // eslint-disable-next-line no-param-reassign
           prev[key] = value;
 
           nodes.forEach((node) => {

@@ -12,5 +12,7 @@ module.exports = {
         "devDependencies": ["**/*.test.tsx"]
       }
     ],
+    "no-restricted-syntax": "off",
+    "no-param-reassign": "off"
   },
 };
