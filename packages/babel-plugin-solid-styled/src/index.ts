@@ -38,6 +38,22 @@ function isValidSpecifier(specifier: t.ImportSpecifier): boolean {
   );
 }
 
+function checkUseAttribute(opening: t.JSXOpeningElement): boolean {
+  for (let i = 0, len = opening.attributes.length; i < len; i += 1) {
+    const attr = opening.attributes[i];
+    if (
+      t.isJSXAttribute(attr)
+      && t.isJSXNamespacedName(attr.name)
+      && attr.name.namespace.name === 'use'
+      && attr.name.name.name === 'solid-styled'
+    ) {
+      opening.attributes = [...opening.attributes.slice(0, i), ...opening.attributes.slice(i + 1)];
+      return true;
+    }
+  }
+  return false;
+}
+
 interface ScopeMeta {
   scope: t.Identifier;
   sheet: t.Identifier;
@@ -121,7 +137,7 @@ export default function solidStyledPlugin(): PluginObj {
                       const expr = expressions[a];
                       if (t.isExpression(expr)) {
                         const id = nanoid();
-                        cssSheet = `${cssSheet}var(--${id})`;
+                        cssSheet = `${cssSheet}var(--s-${id})`;
                         variables.push(t.objectProperty(
                           t.stringLiteral(id),
                           expr,
@@ -241,11 +257,7 @@ export default function solidStyledPlugin(): PluginObj {
           },
           JSXElement(path) {
             const opening = path.node.openingElement;
-
-            if (t.isJSXNamespacedName(opening.name) || t.isJSXMemberExpression(opening.name)) {
-              return;
-            }
-            if (/^[a-z]/.test(opening.name.name)) {
+            if ((t.isJSXIdentifier(opening.name) && /^[a-z]/.test(opening.name.name)) || checkUseAttribute(opening)) {
               const functionParent = path.scope.getFunctionParent();
               if (functionParent) {
                 const { sheetID, scope } = getScopeMeta(path, functionParent);

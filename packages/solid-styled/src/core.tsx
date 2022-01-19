@@ -100,7 +100,7 @@ export function useSolidStyled(
         prev[key] = value;
 
         nodes.forEach((node) => {
-          (node as HTMLElement).style.setProperty(`--${key}`, value);
+          (node as HTMLElement).style.setProperty(`--s-${key}`, value);
         });
       }
     }

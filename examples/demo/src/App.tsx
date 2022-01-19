@@ -64,7 +64,7 @@ function Main(): JSX.Element {
 
   return (
     <div>
-      <ToggleButton />
+      <ToggleButton use:solid-styled />
       <ToggleButton />
     </div>
   );
