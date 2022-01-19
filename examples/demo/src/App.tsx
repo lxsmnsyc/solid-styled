@@ -22,7 +22,7 @@ function ShowButton(): JSX.Element {
       border: none;
       color: white;
       font-size: 2rem;
-      border-radius: 0.5rem;
+      /* border-radius: 0.5rem; */
       background-color: ${red() ? '#ef4444' : '#3b82f6'};
     }
   `;
@@ -33,7 +33,13 @@ function ShowButton(): JSX.Element {
       </button>
       <Show when={show()}>
         <div>
-          <button class="toggle" type="button" onClick={() => setRed(!red())}>
+          <button
+            type="button"
+            onClick={() => setRed(!red())}
+            style={{
+              'border-radius': '0.5rem',
+            }}
+          >
             {show() ? 'Hide Div' : 'Show Div'}
           </button>
         </div>

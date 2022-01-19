@@ -216,6 +216,11 @@ useSolidStyled('xxxx', 'yyyy', vars, '*{color:red}');
 </Dynamic>
 ```
 
+## Limitations
+
+- Does not support dynamic CSS properties
+- Dynamic CSS values
+
 ## License
 
 MIT © [lxsmnsyc](https://github.com/lxsmnsyc)
