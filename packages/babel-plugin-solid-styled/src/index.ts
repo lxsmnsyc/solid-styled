@@ -296,10 +296,7 @@ export default function solidStyledPlugin(): PluginObj {
             }
           },
           JSXAttribute(path) {
-            if (
-              t.isJSXNamespacedName(path.node.name)
-              && isUseAttribute(attr.name)
-            ) {
+            if (isUseAttribute(path.node.name)) {
               path.remove();
             }
           },
