@@ -1,6 +1,5 @@
 import {
   createContext,
-  createEffect,
   JSX,
   onCleanup,
   useContext,
@@ -15,7 +14,6 @@ interface StyleRegistryContext {
 const StyleRegistryContext = createContext<StyleRegistryContext>();
 
 const SOLID_SHEET_ATTR = 'data-s';
-const SOLID_STYLED_ATTR = 'data-s';
 
 export interface StyleData {
   id: string;
@@ -77,8 +75,6 @@ export type SolidStyledVariables = Record<string, string>;
 
 export function useSolidStyled(
   id: string,
-  scope: string,
-  variables: () => SolidStyledVariables,
   sheet: string,
 ): void {
   const ctx = useContext(StyleRegistryContext);
@@ -88,24 +84,46 @@ export function useSolidStyled(
   }
   ctx.insert(id, sheet);
   onCleanup(() => ctx.remove(id));
+}
 
-  createEffect<Record<string, string>>((prev) => {
-    const nodes = document.querySelectorAll(`[${SOLID_STYLED_ATTR}-${id}="${scope}"]`);
-    const result = variables();
-    // eslint-disable-next-line no-restricted-syntax
-    for (const key of Object.keys(result)) {
-      const value = result[key];
-      if (prev[key] !== value) {
-        // eslint-disable-next-line no-param-reassign
-        prev[key] = value;
+type CssVarsMerge = () => Record<string, string>;
 
-        nodes.forEach((node) => {
-          (node as HTMLElement).style.setProperty(`--${key}`, value);
-        });
-      }
+interface CssVars {
+  (): JSX.CSSProperties;
+  merge(vars: CssVarsMerge): void;
+}
+
+export function createCssVars(): CssVars {
+  const patches: CssVarsMerge[] = [];
+  return Object.assign(() => {
+    let source = {};
+    for (let i = 0, len = patches.length; i < len; i += 1) {
+      source = Object.assign(source, patches[i]());
     }
-    return prev;
-  }, {});
+    return source;
+  }, {
+    merge(vars: CssVarsMerge) {
+      patches.push(vars);
+    },
+  });
+}
+
+function serializeStyle(source: JSX.CSSProperties): string {
+  let result = '';
+  Object.keys(source).forEach((key) => {
+    result = `${result}${key}:${String(source[key])};`;
+  });
+  return result;
+}
+
+export function mergeStyles(
+  source: JSX.CSSProperties | string,
+  other: JSX.CSSProperties,
+): string {
+  const sourceString = typeof source === 'string' ? source : serializeStyle(source);
+  const otherString = serializeStyle(other);
+  const result = `${sourceString};${otherString}`;
+  return result;
 }
 
 export function renderSheets(sheets: StyleData[]): string {

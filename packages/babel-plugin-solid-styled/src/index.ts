@@ -10,7 +10,7 @@ const nanoid = customAlphabet(ALPHABET, 10);
 const TAGGED_TEMPLATE = 'css';
 const SOURCE_MODULE = 'solid-styled';
 const SOLID_STYLED_ATTR = 'data-s';
-const SCOPE_ID = 'scope';
+const VARS_ID = 'vars';
 const SHEET_ID = 'sheet';
 const GLOBAL_SELECTOR = 'global';
 
@@ -38,10 +38,154 @@ function isValidSpecifier(specifier: t.ImportSpecifier): boolean {
   );
 }
 
+function isUseAttribute(name: t.JSXNamespacedName | t.JSXIdentifier): boolean {
+  return (
+    t.isJSXNamespacedName(name)
+    && name.namespace.name === 'use'
+    && name.name.name === 'solid-styled'
+  );
+}
+
+function checkScopedAttribute(opening: t.JSXOpeningElement, sheetID: string): boolean {
+  for (let i = 0, len = opening.attributes.length; i < len; i += 1) {
+    const attr = opening.attributes[i];
+    if (
+      t.isJSXAttribute(attr)
+      && t.isJSXIdentifier(attr.name)
+      && attr.name.name === `${SOLID_STYLED_ATTR}-${sheetID}`
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkUseAttribute(opening: t.JSXOpeningElement): boolean {
+  for (let i = 0, len = opening.attributes.length; i < len; i += 1) {
+    const attr = opening.attributes[i];
+    if (
+      t.isJSXAttribute(attr)
+      && isUseAttribute(attr.name)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 interface ScopeMeta {
-  scope: t.Identifier;
+  vars: t.Identifier;
   sheet: t.Identifier;
   sheetID: string;
+}
+
+type MetaMap = WeakMap<Scope, ScopeMeta>;
+
+function getScopeMeta(
+  hooks: ImportHook,
+  meta: MetaMap,
+  path: NodePath,
+  functionParent: Scope,
+): ScopeMeta {
+  const result = meta.get(functionParent);
+  if (result) {
+    return result;
+  }
+  const vars = path.scope.generateUidIdentifier(VARS_ID);
+  const sheet = path.scope.generateUidIdentifier(SHEET_ID);
+  functionParent.push({
+    id: vars,
+    init: t.callExpression(
+      getHookIdentifier(hooks, path, 'createCssVars', SOURCE_MODULE),
+      [],
+    ),
+    kind: 'const',
+  });
+  const sheetID = nanoid();
+  functionParent.push({
+    id: sheet,
+    init: t.stringLiteral(sheetID),
+    kind: 'const',
+  });
+  const metaValue = {
+    vars,
+    sheet,
+    sheetID,
+  };
+  meta.set(functionParent, metaValue);
+  return metaValue;
+}
+
+function getStyleAttribute(opening: t.JSXOpeningElement) {
+  for (let i = 0, len = opening.attributes.length; i < len; i += 1) {
+    const attr = opening.attributes[i];
+    if (t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'style') {
+      return attr;
+    }
+  }
+  return null;
+}
+
+function transformJSX(
+  hooks: ImportHook,
+  meta: MetaMap,
+  functionParent: Scope,
+) {
+  if (meta.has(functionParent)) {
+    functionParent.path.traverse({
+      JSXElement(path) {
+        const opening = path.node.openingElement;
+        if (
+          (t.isJSXIdentifier(opening.name) && /^[a-z]/.test(opening.name.name))
+          || checkUseAttribute(opening)
+        ) {
+          const parent = path.scope.getFunctionParent();
+          if (parent === functionParent) {
+            const { sheetID, vars } = getScopeMeta(hooks, meta, path, parent);
+            if (checkScopedAttribute(opening, sheetID)) {
+              return;
+            }
+            // Find style
+            const style = getStyleAttribute(opening);
+            if (style) {
+              if (style.value) {
+                let expr: t.Expression;
+                if (
+                  t.isJSXExpressionContainer(style.value)
+                  && t.isExpression(style.value.expression)
+                ) {
+                  expr = style.value.expression;
+                } else if (t.isStringLiteral(style.value)) {
+                  expr = style.value;
+                } else {
+                  throw new Error('Invalid style value');
+                }
+                style.value = t.jsxExpressionContainer(
+                  t.callExpression(
+                    getHookIdentifier(hooks, path, 'mergeStyles', SOURCE_MODULE),
+                    [
+                      expr,
+                      t.callExpression(vars, []),
+                    ],
+                  ),
+                );
+              } else {
+                style.value = t.jsxExpressionContainer(t.callExpression(vars, []));
+              }
+            } else {
+              opening.attributes.push(t.jsxAttribute(
+                t.jsxIdentifier('style'),
+                t.jsxExpressionContainer(t.callExpression(vars, [])),
+              ));
+            }
+            opening.attributes.push(t.jsxAttribute(
+              t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
+            ));
+          }
+        }
+      },
+    });
+  }
 }
 
 export default function solidStyledPlugin(): PluginObj {
@@ -52,36 +196,6 @@ export default function solidStyledPlugin(): PluginObj {
         const validIdentifiers = new Set();
         const hooks: ImportHook = new Map();
         const meta = new WeakMap<Scope, ScopeMeta>();
-
-        function getScopeMeta(path: NodePath, functionParent: Scope): ScopeMeta {
-          const result = meta.get(functionParent);
-          if (result) {
-            return result;
-          }
-          const scope = path.scope.generateUidIdentifier(SCOPE_ID);
-          const sheet = path.scope.generateUidIdentifier(SHEET_ID);
-          functionParent.push({
-            id: scope,
-            init: t.callExpression(
-              getHookIdentifier(hooks, path, 'createUniqueId', 'solid-js'),
-              [],
-            ),
-            kind: 'const',
-          });
-          const sheetID = nanoid();
-          functionParent.push({
-            id: sheet,
-            init: t.stringLiteral(sheetID),
-            kind: 'const',
-          });
-          const metaValue = {
-            scope,
-            sheet,
-            sheetID,
-          };
-          meta.set(functionParent, metaValue);
-          return metaValue;
-        }
 
         programPath.traverse({
           ImportDeclaration(path) {
@@ -101,11 +215,15 @@ export default function solidStyledPlugin(): PluginObj {
             const { tag } = path.node;
             if (t.isIdentifier(tag)) {
               const binding = path.scope.getBinding(tag.name);
-              if (binding && validIdentifiers.has(binding.identifier)) {
+              if (
+                binding
+                && validIdentifiers.has(binding.identifier)
+                && t.isStatement(path.parent)
+              ) {
                 // Get the function parent first
                 const functionParent = path.scope.getFunctionParent();
                 if (functionParent) {
-                  const { scope, sheet, sheetID } = getScopeMeta(path, functionParent);
+                  const { vars, sheet, sheetID } = getScopeMeta(hooks, meta, path, functionParent);
 
                   // Convert template into a CSS sheet
                   const { expressions, quasis } = path.node.quasi;
@@ -120,12 +238,11 @@ export default function solidStyledPlugin(): PluginObj {
                     if (a < expressions.length) {
                       const expr = expressions[a];
                       if (t.isExpression(expr)) {
-                        const id = nanoid();
-                        cssSheet = `${cssSheet}var(--${id})`;
+                        const id = `--s-${nanoid()}`;
+                        cssSheet = `${cssSheet}var(${id})`;
                         variables.push(t.objectProperty(
                           t.stringLiteral(id),
                           expr,
-                          true,
                         ));
                         a += 1;
                       }
@@ -230,30 +347,22 @@ export default function solidStyledPlugin(): PluginObj {
                     getHookIdentifier(hooks, path, 'useSolidStyled', SOURCE_MODULE),
                     [
                       sheet,
-                      scope,
-                      t.arrowFunctionExpression([], t.objectExpression(variables)),
                       t.stringLiteral(compiledSheet),
                     ],
                   ));
+                  path.insertAfter(t.callExpression(
+                    t.memberExpression(vars, t.identifier('merge')),
+                    [t.arrowFunctionExpression([], t.objectExpression(variables))],
+                  ));
+
+                  transformJSX(hooks, meta, functionParent);
                 }
               }
             }
           },
-          JSXElement(path) {
-            const opening = path.node.openingElement;
-
-            if (t.isJSXNamespacedName(opening.name) || t.isJSXMemberExpression(opening.name)) {
-              return;
-            }
-            if (/^[a-z]/.test(opening.name.name)) {
-              const functionParent = path.scope.getFunctionParent();
-              if (functionParent) {
-                const { sheetID, scope } = getScopeMeta(path, functionParent);
-                opening.attributes.push(t.jsxAttribute(
-                  t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
-                  t.jsxExpressionContainer(scope),
-                ));
-              }
+          JSXAttribute(path) {
+            if (isUseAttribute(path.node.name)) {
+              path.remove();
             }
           },
         });

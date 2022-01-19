@@ -55,6 +55,8 @@ import { StyleRegistry } from 'solid-styled';
 For SSR, you can pass an array to the `styles` prop of `<StyleRegistry>`. This array collects all of the "critical" (initial render) stylesheets, that which you can render as a string with `renderSheets`.
 
 ```js
+import { renderSheets } from 'solid-styled';
+
 const styles = [];
 
 renderToString(() => (
@@ -163,6 +165,55 @@ function Feed(props) {
     </div>
   );
 }
+```
+
+#### `@global`
+
+You can use `@global` instead of `:global` if you want to declare multiple global styles
+
+```js
+css`
+  /* this is global */
+  @global {
+    body {
+      background-color: black;
+    }
+
+    main {
+      padding: 0.5rem;
+    }
+  }
+
+  h1 {
+    color: white;
+  }
+`;
+```
+
+### Forward scope
+
+Since `solid-styled` scopes valid elements and not components by default, it doesn't affect things like `<Dynamic>`. Using `use:solid-styled`, we can forward the current scope/sheet to the component.
+
+```js
+css`
+  * {
+    color: red;
+  }
+`;
+
+<Dynamic component={props.as} use:solid-styled>
+  {props.children}
+</Dynamic>
+```
+
+which compiles into
+
+```js
+useSolidStyled('xxxx', 'yyyy', vars, '*{color:red}');
+
+<Dynamic component={props.as} data-s-xxxx="yyyy">
+  {props.children}
+</Dynamic>
 ```
 
 ## License

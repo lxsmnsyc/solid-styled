@@ -1,5 +1,52 @@
-import { createSignal, JSX } from 'solid-js';
+import { createSignal, JSX, Show } from 'solid-js';
 import { css, StyleRegistry } from 'solid-styled';
+
+function ShowButton(): JSX.Element {
+  const [show, setShow] = createSignal(false);
+  const [red, setRed] = createSignal(false);
+
+  css`
+    .toggle {
+      width: 50vw;
+      padding: 0.5rem;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      border-radius: 0.5rem;
+      background-color: #111827;
+    }
+
+    div > button {
+      width: 50vw;
+      padding: 0.5rem;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      /* border-radius: 0.5rem; */
+      background-color: ${red() ? '#ef4444' : '#3b82f6'};
+    }
+  `;
+  return (
+    <>
+      <button class="toggle" type="button" onClick={() => setShow(!show())}>
+        {show() ? 'Hide Div' : 'Show Div'}
+      </button>
+      <Show when={show()}>
+        <div>
+          <button
+            type="button"
+            onClick={() => setRed(!red())}
+            style={{
+              'border-radius': '0.5rem',
+            }}
+          >
+            {show() ? 'Hide Div' : 'Show Div'}
+          </button>
+        </div>
+      </Show>
+    </>
+  );
+}
 
 function ToggleButton(): JSX.Element {
   const [show, setShow] = createSignal(false);
@@ -64,8 +111,9 @@ function Main(): JSX.Element {
 
   return (
     <div>
+      <ToggleButton use:solid-styled />
       <ToggleButton />
-      <ToggleButton />
+      <ShowButton />
     </div>
   );
 }
