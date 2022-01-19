@@ -1,5 +1,7 @@
 import {
   createContext,
+  createMemo,
+  createRoot,
   JSX,
   onCleanup,
   useContext,
@@ -93,15 +95,30 @@ interface CSSVars {
   merge(vars: CSSVarsMerge): void;
 }
 
+function createLazyMemo<T>(fn: () => T): () => T {
+  let s: () => T;
+  let dispose: () => void | undefined;
+  onCleanup(() => dispose());
+  return () => {
+    if (!s) {
+      s = createRoot((d) => {
+        dispose = d;
+        return createMemo(fn);
+      });
+    }
+    return s();
+  };
+}
+
 export function createCSSVars(): CSSVars {
   const patches: CSSVarsMerge[] = [];
-  return Object.assign(() => {
+  return Object.assign(createLazyMemo(() => {
     let source = {};
     for (let i = 0, len = patches.length; i < len; i += 1) {
       source = Object.assign(source, patches[i]());
     }
     return source;
-  }, {
+  }), {
     merge(vars: CSSVarsMerge) {
       patches.push(vars);
     },
