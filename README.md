@@ -209,17 +209,12 @@ css`
 which compiles into
 
 ```js
-useSolidStyled('xxxx', 'yyyy', vars, '*{color:red}');
+useSolidStyled('xxxx', '*{color:red}');
 
-<Dynamic component={props.as} data-s-xxxx="yyyy">
+<Dynamic component={props.as} data-s-xxxx style={vars()}>
   {props.children}
 </Dynamic>
 ```
-
-## Limitations
-
-- Does not support dynamic CSS properties
-- Dynamic CSS values
 
 ## License
 
