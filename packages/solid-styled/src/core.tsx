@@ -1,5 +1,6 @@
 import {
   createContext,
+  createMemo,
   JSX,
   onCleanup,
   useContext,
@@ -95,13 +96,13 @@ interface CssVars {
 
 export function createCssVars(): CssVars {
   const patches: CssVarsMerge[] = [];
-  return Object.assign(() => {
+  return Object.assign(createMemo(() => {
     let source = {};
     for (let i = 0, len = patches.length; i < len; i += 1) {
       source = Object.assign(source, patches[i]());
     }
     return source;
-  }, {
+  }), {
     merge(vars: CssVarsMerge) {
       patches.push(vars);
     },
