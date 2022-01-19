@@ -99,8 +99,10 @@ export function useSolidStyled(
           for (let k = 0, klen = record.addedNodes.length; k < klen; k += 1) {
             const node = record.addedNodes[k];
             if ((node instanceof HTMLElement || node instanceof SVGElement)) {
-              for (const key of Object.keys(result)) {
-                node.style.setProperty(`--s-${key}`, result[key]);
+              if (node.getAttribute(`data-s-${id}`) === scope) {
+                for (const key of Object.keys(result)) {
+                  node.style.setProperty(`--s-${key}`, result[key]);
+                }
               }
             }
           }
