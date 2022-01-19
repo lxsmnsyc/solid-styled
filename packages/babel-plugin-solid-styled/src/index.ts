@@ -38,16 +38,21 @@ function isValidSpecifier(specifier: t.ImportSpecifier): boolean {
   );
 }
 
+function isUseAttribute(name: t.JSXNamespacedName | t.JSXIdentifier): boolean {
+  return (
+    t.isJSXNamespacedName(name)
+    && name.namespace.name === 'use'
+    && name.name.name === 'solid-styled'
+  );
+}
+
 function checkUseAttribute(opening: t.JSXOpeningElement): boolean {
   for (let i = 0, len = opening.attributes.length; i < len; i += 1) {
     const attr = opening.attributes[i];
     if (
       t.isJSXAttribute(attr)
-      && t.isJSXNamespacedName(attr.name)
-      && attr.name.namespace.name === 'use'
-      && attr.name.name.name === 'solid-styled'
+      && isUseAttribute(attr.name)
     ) {
-      opening.attributes = [...opening.attributes.slice(0, i), ...opening.attributes.slice(i + 1)];
       return true;
     }
   }
@@ -288,6 +293,14 @@ export default function solidStyledPlugin(): PluginObj {
                   transformJSX(hooks, meta, functionParent);
                 }
               }
+            }
+          },
+          JSXAttribute(path) {
+            if (
+              t.isJSXNamespacedName(path.node.name)
+              && isUseAttribute(attr.name)
+            ) {
+              path.remove();
             }
           },
         });
