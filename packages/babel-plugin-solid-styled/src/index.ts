@@ -247,7 +247,9 @@ export default function solidStyledPlugin(): PluginObj {
                     [
                       sheet,
                       scope,
-                      t.arrowFunctionExpression([], t.objectExpression(variables)),
+                      variables.length
+                        ? t.arrowFunctionExpression([], t.objectExpression(variables))
+                        : t.identifier(null),
                       t.stringLiteral(compiledSheet),
                     ],
                   ));

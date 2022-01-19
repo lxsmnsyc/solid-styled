@@ -78,7 +78,7 @@ export type SolidStyledVariables = Record<string, string>;
 export function useSolidStyled(
   id: string,
   scope: string,
-  variables: () => SolidStyledVariables,
+  variables: null | (() => SolidStyledVariables),
   sheet: string,
 ): void {
   const ctx = useContext(StyleRegistryContext);
@@ -89,23 +89,25 @@ export function useSolidStyled(
   ctx.insert(id, sheet);
   onCleanup(() => ctx.remove(id));
 
-  createEffect<Record<string, string>>((prev) => {
-    const nodes = document.querySelectorAll(`[${SOLID_STYLED_ATTR}-${id}="${scope}"]`);
-    const result = variables();
-    // eslint-disable-next-line no-restricted-syntax
-    for (const key of Object.keys(result)) {
-      const value = result[key];
-      if (prev[key] !== value) {
-        // eslint-disable-next-line no-param-reassign
-        prev[key] = value;
+  if (variables) {
+    createEffect<Record<string, string>>((prev) => {
+      const nodes = document.querySelectorAll(`[${SOLID_STYLED_ATTR}-${id}="${scope}"]`);
+      const result = variables();
+      // eslint-disable-next-line no-restricted-syntax
+      for (const key of Object.keys(result)) {
+        const value = result[key];
+        if (prev[key] !== value) {
+          // eslint-disable-next-line no-param-reassign
+          prev[key] = value;
 
-        nodes.forEach((node) => {
-          (node as HTMLElement).style.setProperty(`--s-${key}`, value);
-        });
+          nodes.forEach((node) => {
+            (node as HTMLElement).style.setProperty(`--s-${key}`, value);
+          });
+        }
       }
-    }
-    return prev;
-  }, {});
+      return prev;
+    }, {});
+  }
 }
 
 export function renderSheets(sheets: StyleData[]): string {
