@@ -185,6 +185,157 @@ function transformJSX(
   }
 }
 
+function replaceDynamicTemplate(
+  { expressions, quasis }: t.TemplateLiteral,
+) {
+  const variables: t.ObjectProperty[] = [];
+
+  let sheet = '';
+  let currentExpr = 0;
+
+  for (let i = 0, len = quasis.length; i < len; i += 1) {
+    sheet = `${sheet}${quasis[i].value.cooked ?? ''}`;
+    if (currentExpr < expressions.length) {
+      const expr = expressions[currentExpr];
+      if (t.isExpression(expr)) {
+        const id = `--s-${nanoid()}`;
+        sheet = `${sheet}var(${id})`;
+        variables.push(t.objectProperty(
+          t.stringLiteral(id),
+          expr,
+        ));
+        currentExpr += 1;
+      }
+    }
+  }
+
+  return {
+    sheet,
+    variables,
+  };
+}
+
+function processScopedSheet(
+  sheetID: string,
+  ast: csstree.CssNode,
+) {
+  // [data-s-${sheetID}]
+  const selector: csstree.AttributeSelector = {
+    type: 'AttributeSelector',
+    name: {
+      type: 'Identifier',
+      name: `${SOLID_STYLED_ATTR}-${sheetID}`,
+    },
+    matcher: null,
+    flags: null,
+    value: null,
+  };
+
+  let inGlobal = false;
+
+  csstree.walk(ast, {
+    leave(node: csstree.CssNode) {
+      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
+        inGlobal = false;
+      }
+      if (node.type === 'StyleSheet' || node.type === 'Block') {
+        const children: csstree.CssNode[] = [];
+        node.children.forEach((child) => {
+          if (child.type === 'Atrule' && child.name === 'global' && child.block) {
+            child.block.children.forEach((innerChild) => {
+              children.push(innerChild);
+            });
+          } else {
+            children.push(child);
+          }
+        });
+        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
+      }
+    },
+    enter(node: csstree.CssNode) {
+      if (inGlobal) {
+        return;
+      }
+      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
+        inGlobal = true;
+        return;
+      }
+      if (node.type === 'Selector') {
+        const children: csstree.CssNode[] = [];
+        let shouldPush = true;
+        node.children.forEach((child) => {
+          if (
+            child.type === 'TypeSelector'
+            || child.type === 'ClassSelector'
+            || child.type === 'IdSelector'
+            || child.type === 'AttributeSelector'
+          ) {
+            children.push(child);
+            if (shouldPush) {
+              children.push(selector);
+              shouldPush = false;
+            }
+            return;
+          }
+          if (
+            child.type === 'PseudoElementSelector'
+          ) {
+            if (shouldPush) {
+              children.push(selector);
+              shouldPush = false;
+            }
+            children.push(child);
+            return;
+          }
+          if (
+            child.type === 'Combinator'
+            || child.type === 'WhiteSpace'
+          ) {
+            children.push(child);
+            shouldPush = true;
+            return;
+          }
+          if (child.type === 'PseudoClassSelector') {
+            if (child.name === GLOBAL_SELECTOR) {
+              child.children?.forEach((innerChild) => {
+                children.push(innerChild);
+              });
+            } else {
+              if (shouldPush) {
+                children.push(selector);
+                shouldPush = false;
+              }
+              children.push(child);
+            }
+          }
+        });
+        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
+      }
+    },
+  });
+}
+
+function processTemplate(
+  sheetID: string,
+  templateLiteral: t.TemplateLiteral,
+  isScoped: boolean,
+) {
+  const { sheet, variables } = replaceDynamicTemplate(templateLiteral);
+
+  const ast = csstree.parse(sheet);
+
+  if (isScoped) {
+    processScopedSheet(sheetID, ast);
+  }
+
+  const compiledSheet = csstree.generate(ast);
+
+  return {
+    sheet: compiledSheet,
+    variables,
+  };
+}
+
 export default function solidStyledPlugin(): PluginObj {
   return {
     name: 'solid-styled',
@@ -208,6 +359,66 @@ export default function solidStyledPlugin(): PluginObj {
               }
             }
           },
+          JSXElement(path) {
+            const opening = path.node.openingElement;
+            if (!t.isJSXIdentifier(opening.name)) {
+              return;
+            }
+            if (opening.name.name !== 'style') {
+              return;
+            }
+            let isGlobal = false;
+            let isJSX = false;
+            for (let i = 0, len = opening.attributes.length; i < len; i += 1) {
+              const attr = opening.attributes[i];
+              if (t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name)) {
+                if (attr.name.name === 'jsx') {
+                  isJSX = true;
+                }
+                if (attr.name.name === 'global') {
+                  isGlobal = true;
+                }
+              }
+            }
+            if (!isJSX) {
+              return;
+            }
+            const functionParent = path.scope.getFunctionParent();
+            if (functionParent) {
+              const { vars, sheet, sheetID } = getScopeMeta(hooks, meta, path, functionParent);
+              const statement = path.getStatementParent();
+              if (statement) {
+                for (let i = 0, len = path.node.children.length; i < len; i += 1) {
+                  const child = path.node.children[i];
+                  if (t.isJSXExpressionContainer(child) && t.isTemplateLiteral(child.expression)) {
+                    const { sheet: compiledSheet, variables } = processTemplate(
+                      sheetID,
+                      child.expression,
+                      !isGlobal,
+                    );
+
+                    statement.insertBefore(t.callExpression(
+                      getHookIdentifier(hooks, path, 'useSolidStyled', SOURCE_MODULE),
+                      [
+                        sheet,
+                        t.stringLiteral(compiledSheet),
+                      ],
+                    ));
+
+                    if (variables.length) {
+                      statement.insertBefore(t.callExpression(
+                        vars,
+                        [t.arrowFunctionExpression([], t.objectExpression(variables))],
+                      ));
+                    }
+
+                    transformJSX(hooks, meta, functionParent);
+                  }
+                }
+              }
+              path.remove();
+            }
+          },
           TaggedTemplateExpression(path) {
             const { tag } = path.node;
             if (t.isIdentifier(tag)) {
@@ -223,122 +434,11 @@ export default function solidStyledPlugin(): PluginObj {
                   const { vars, sheet, sheetID } = getScopeMeta(hooks, meta, path, functionParent);
 
                   // Convert template into a CSS sheet
-                  const { expressions, quasis } = path.node.quasi;
-
-                  const variables: t.ObjectProperty[] = [];
-
-                  let cssSheet = '';
-                  let a = 0;
-
-                  for (let i = 0, len = quasis.length; i < len; i += 1) {
-                    cssSheet = `${cssSheet}${quasis[i].value.cooked ?? ''}`;
-                    if (a < expressions.length) {
-                      const expr = expressions[a];
-                      if (t.isExpression(expr)) {
-                        const id = `--s-${nanoid()}`;
-                        cssSheet = `${cssSheet}var(${id})`;
-                        variables.push(t.objectProperty(
-                          t.stringLiteral(id),
-                          expr,
-                        ));
-                        a += 1;
-                      }
-                    }
-                  }
-
-                  const ast = csstree.parse(cssSheet);
-                  const selector: csstree.AttributeSelector = {
-                    type: 'AttributeSelector',
-                    name: {
-                      type: 'Identifier',
-                      name: `${SOLID_STYLED_ATTR}-${sheetID}`,
-                    },
-                    matcher: null,
-                    flags: null,
-                    value: null,
-                  };
-                  let inGlobal = false;
-                  csstree.walk(ast, {
-                    leave(node: csstree.CssNode) {
-                      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
-                        inGlobal = false;
-                      }
-                      if (node.type === 'StyleSheet' || node.type === 'Block') {
-                        const children: csstree.CssNode[] = [];
-                        node.children.forEach((child) => {
-                          if (child.type === 'Atrule' && child.name === 'global' && child.block) {
-                            child.block.children.forEach((innerChild) => {
-                              children.push(innerChild);
-                            });
-                          } else {
-                            children.push(child);
-                          }
-                        });
-                        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
-                      }
-                    },
-                    enter(node: csstree.CssNode) {
-                      if (inGlobal) {
-                        return;
-                      }
-                      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
-                        inGlobal = true;
-                        return;
-                      }
-                      if (node.type === 'Selector') {
-                        const children: csstree.CssNode[] = [];
-                        let shouldPush = true;
-                        node.children.forEach((child) => {
-                          if (
-                            child.type === 'TypeSelector'
-                            || child.type === 'ClassSelector'
-                            || child.type === 'IdSelector'
-                            || child.type === 'AttributeSelector'
-                          ) {
-                            children.push(child);
-                            if (shouldPush) {
-                              children.push(selector);
-                              shouldPush = false;
-                            }
-                            return;
-                          }
-                          if (
-                            child.type === 'PseudoElementSelector'
-                          ) {
-                            if (shouldPush) {
-                              children.push(selector);
-                              shouldPush = false;
-                            }
-                            children.push(child);
-                            return;
-                          }
-                          if (
-                            child.type === 'Combinator'
-                            || child.type === 'WhiteSpace'
-                          ) {
-                            children.push(child);
-                            shouldPush = true;
-                            return;
-                          }
-                          if (child.type === 'PseudoClassSelector') {
-                            if (child.name === GLOBAL_SELECTOR) {
-                              child.children?.forEach((innerChild) => {
-                                children.push(innerChild);
-                              });
-                            } else {
-                              if (shouldPush) {
-                                children.push(selector);
-                                shouldPush = false;
-                              }
-                              children.push(child);
-                            }
-                          }
-                        });
-                        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
-                      }
-                    },
-                  });
-                  const compiledSheet = csstree.generate(ast);
+                  const { sheet: compiledSheet, variables } = processTemplate(
+                    sheetID,
+                    path.node.quasi,
+                    true,
+                  );
 
                   path.replaceWith(t.callExpression(
                     getHookIdentifier(hooks, path, 'useSolidStyled', SOURCE_MODULE),
@@ -350,7 +450,7 @@ export default function solidStyledPlugin(): PluginObj {
 
                   if (variables.length) {
                     path.insertAfter(t.callExpression(
-                      t.memberExpression(vars, t.identifier('merge')),
+                      vars,
                       [t.arrowFunctionExpression([], t.objectExpression(variables))],
                     ));
                   }

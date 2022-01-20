@@ -5,29 +5,31 @@ function ShowButton(): JSX.Element {
   const [show, setShow] = createSignal(false);
   const [red, setRed] = createSignal(false);
 
-  css`
-    .toggle {
-      width: 50vw;
-      padding: 0.5rem;
-      border: none;
-      color: white;
-      font-size: 2rem;
-      border-radius: 0.5rem;
-      background-color: #111827;
-    }
-
-    div > button {
-      width: 50vw;
-      padding: 0.5rem;
-      border: none;
-      color: white;
-      font-size: 2rem;
-      /* border-radius: 0.5rem; */
-      background-color: ${red() ? '#ef4444' : '#3b82f6'};
-    }
-  `;
   return (
     <>
+      <style jsx>
+        {`
+          .toggle {
+            width: 50vw;
+            padding: 0.5rem;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            border-radius: 0.5rem;
+            background-color: #111827;
+          }
+      
+          div > button {
+            width: 50vw;
+            padding: 0.5rem;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            /* border-radius: 0.5rem; */
+            background-color: ${red() ? '#ef4444' : '#3b82f6'};
+          }
+        `}
+      </style>
       <button class="toggle" type="button" onClick={() => setShow(!show())}>
         {show() ? 'Hide Div' : 'Show Div'}
       </button>

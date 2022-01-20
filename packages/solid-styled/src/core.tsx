@@ -91,8 +91,7 @@ export function useSolidStyled(
 type CSSVarsMerge = () => Record<string, string>;
 
 interface CSSVars {
-  (): JSX.CSSProperties;
-  merge(vars: CSSVarsMerge): void;
+  (vars?: CSSVarsMerge): JSX.CSSProperties | undefined;
 }
 
 function createLazyMemo<T>(fn: () => T): () => T {
@@ -112,17 +111,21 @@ function createLazyMemo<T>(fn: () => T): () => T {
 
 export function createCSSVars(): CSSVars {
   const patches: CSSVarsMerge[] = [];
-  return Object.assign(createLazyMemo(() => {
-    let source = {};
+  const signal = createLazyMemo(() => {
+    let source: JSX.CSSProperties = {};
     for (let i = 0, len = patches.length; i < len; i += 1) {
       source = Object.assign(source, patches[i]());
     }
     return source;
-  }), {
-    merge(vars: CSSVarsMerge) {
-      patches.push(vars);
-    },
   });
+
+  return (vars?: CSSVarsMerge) => {
+    if (vars) {
+      patches.push(vars);
+      return undefined;
+    }
+    return signal();
+  };
 }
 
 function serializeStyle(source: JSX.CSSProperties): string {
