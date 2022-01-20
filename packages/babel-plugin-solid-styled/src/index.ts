@@ -350,10 +350,13 @@ export default function solidStyledPlugin(): PluginObj {
                       t.stringLiteral(compiledSheet),
                     ],
                   ));
-                  path.insertAfter(t.callExpression(
-                    t.memberExpression(vars, t.identifier('merge')),
-                    [t.arrowFunctionExpression([], t.objectExpression(variables))],
-                  ));
+
+                  if (variables.length) {
+                    path.insertAfter(t.callExpression(
+                      t.memberExpression(vars, t.identifier('merge')),
+                      [t.arrowFunctionExpression([], t.objectExpression(variables))],
+                    ));
+                  }
 
                   transformJSX(hooks, meta, functionParent);
                 }
