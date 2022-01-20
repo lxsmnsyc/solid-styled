@@ -216,6 +216,36 @@ useSolidStyled('xxxx', '*[data-s-xxxx]{color:red}');
 </Dynamic>
 ```
 
+### `<style jsx>`
+
+Inspired by [`styled-jsx`](https://github.com/vercel/styled-jsx).
+
+Use `<style jsx>` instead of `css` for declaring styles in JSX expressions. Both `<style jsx>` and `css` functions the same.
+
+```js
+function Button() {
+  const [color, setColor] = createSignal('red');
+  return (
+    <>
+      <style jsx>
+        {`
+          button {
+            color: ${color()};
+          }
+        `}
+      </style>
+      <button onClick={() => {
+        setColor((c) => (c === 'red' ? 'blue' : 'red'));
+      }}>
+        Current color: {color()}
+      </button>
+    </>
+  );
+}
+```
+
+You can also use `<style jsx global>` for declaring global styles.
+
 ## Limitations
 
 - Scoping `css` can only be called directly on components. This is so that the Babel plugin can find and transform the JSX of the component. Global `css` (i.e. `:global` or `@global`) can be used inside other functions i.e. hooks, utilities.
