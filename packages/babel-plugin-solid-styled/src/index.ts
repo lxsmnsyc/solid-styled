@@ -139,49 +139,46 @@ function transformJSX(
           (t.isJSXIdentifier(opening.name) && /^[a-z]/.test(opening.name.name))
           || checkUseAttribute(opening)
         ) {
-          const parent = path.scope.getFunctionParent();
-          if (parent === functionParent) {
-            const { sheetID, vars } = getScopeMeta(hooks, meta, path, parent);
-            if (checkScopedAttribute(opening, sheetID)) {
-              return;
-            }
-            // Find style
-            const style = getStyleAttribute(opening);
-            if (style) {
-              if (style.value) {
-                let expr: t.Expression;
-                if (
-                  t.isJSXExpressionContainer(style.value)
-                  && t.isExpression(style.value.expression)
-                ) {
-                  expr = style.value.expression;
-                } else if (t.isStringLiteral(style.value)) {
-                  expr = style.value;
-                } else {
-                  throw new Error('Invalid style value');
-                }
-                style.value = t.jsxExpressionContainer(
-                  t.callExpression(
-                    getHookIdentifier(hooks, path, 'mergeStyles', SOURCE_MODULE),
-                    [
-                      expr,
-                      t.callExpression(vars, []),
-                    ],
-                  ),
-                );
+          const { sheetID, vars } = getScopeMeta(hooks, meta, path, functionParent);
+          if (checkScopedAttribute(opening, sheetID)) {
+            return;
+          }
+          // Find style
+          const style = getStyleAttribute(opening);
+          if (style) {
+            if (style.value) {
+              let expr: t.Expression;
+              if (
+                t.isJSXExpressionContainer(style.value)
+                && t.isExpression(style.value.expression)
+              ) {
+                expr = style.value.expression;
+              } else if (t.isStringLiteral(style.value)) {
+                expr = style.value;
               } else {
-                style.value = t.jsxExpressionContainer(t.callExpression(vars, []));
+                throw new Error('Invalid style value');
               }
+              style.value = t.jsxExpressionContainer(
+                t.callExpression(
+                  getHookIdentifier(hooks, path, 'mergeStyles', SOURCE_MODULE),
+                  [
+                    expr,
+                    t.callExpression(vars, []),
+                  ],
+                ),
+              );
             } else {
-              opening.attributes.push(t.jsxAttribute(
-                t.jsxIdentifier('style'),
-                t.jsxExpressionContainer(t.callExpression(vars, [])),
-              ));
+              style.value = t.jsxExpressionContainer(t.callExpression(vars, []));
             }
+          } else {
             opening.attributes.push(t.jsxAttribute(
-              t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
+              t.jsxIdentifier('style'),
+              t.jsxExpressionContainer(t.callExpression(vars, [])),
             ));
           }
+          opening.attributes.push(t.jsxAttribute(
+            t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
+          ));
         }
       },
     });
