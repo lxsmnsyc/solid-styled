@@ -416,7 +416,11 @@ export default function solidStyledPlugin(): PluginObj {
                   }
                 }
               }
-              path.remove();
+              path.replaceWith(t.jsxFragment(
+                t.jsxOpeningFragment(),
+                t.jsxClosingFragment(),
+                [],
+              ));
             }
           },
           TaggedTemplateExpression(path) {
