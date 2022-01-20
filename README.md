@@ -209,11 +209,48 @@ css`
 which compiles into
 
 ```js
-useSolidStyled('xxxx', '*{color:red}');
+useSolidStyled('xxxx', '*[data-s-xxxx]{color:red}');
 
 <Dynamic component={props.as} data-s-xxxx style={vars()}>
   {props.children}
 </Dynamic>
+```
+
+## Limitations
+
+- Scoping `css` can only be called directly on components. This is so that the Babel plugin can find and transform the JSX of the component. Global `css` (i.e. `:global` or `@global`) can be used inside other functions i.e. hooks, utilities.
+
+- Function element/children aren't affected by scoping.
+
+```js
+import { css } from 'solid-styled';
+function Test() {
+  css`
+    h1 {
+      color: red;
+    }
+  `;
+
+  // The h1 here is unaffected.
+  return () => <h1>Hello World</h1>;
+}
+```
+
+The workaround is to redeclare the same stylesheet into that children.
+
+```js
+import { css } from 'solid-styled';
+function Test() {
+  return () => {
+    css`
+      h1 {
+        color: red;
+      }
+    `;
+
+    return <h1>Hello World</h1>;
+  };
+}
 ```
 
 ## License
