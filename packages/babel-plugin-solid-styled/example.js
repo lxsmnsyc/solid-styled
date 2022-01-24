@@ -4,12 +4,13 @@ const plugin = require('./dist/cjs/development');
 babel.transformAsync(`
 import { css } from 'solid-styled';
 function Test() {
+  const [color, setColor] = createSignal('red');
   return (
     <div>
-      <style jsx global>
+      <style jsx>
         {\`
           div {
-            background-color: black;
+            background-color: \${color()};
           }
         \`}
       </style>

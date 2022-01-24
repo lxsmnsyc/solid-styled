@@ -73,26 +73,20 @@ function checkUseAttribute(opening: t.JSXOpeningElement): boolean {
   return false;
 }
 
-interface ScopeMeta {
-  vars: t.Identifier;
-  sheet: t.Identifier;
-  sheetID: string;
-}
+type VarsMap = WeakMap<Scope, t.Identifier>;
+type SheetMap = WeakMap<Scope, { sheet: t.Identifier, id: string }>;
 
-type MetaMap = WeakMap<Scope, ScopeMeta>;
-
-function getScopeMeta(
+function generateVars(
   hooks: ImportHook,
-  meta: MetaMap,
+  varsMap: VarsMap,
   path: NodePath,
   functionParent: Scope,
-): ScopeMeta {
-  const result = meta.get(functionParent);
+) {
+  const result = varsMap.get(functionParent);
   if (result) {
     return result;
   }
-  const vars = path.scope.generateUidIdentifier(VARS_ID);
-  const sheet = path.scope.generateUidIdentifier(SHEET_ID);
+  const vars = functionParent.generateUidIdentifier(VARS_ID);
   functionParent.push({
     id: vars,
     init: t.callExpression(
@@ -101,19 +95,32 @@ function getScopeMeta(
     ),
     kind: 'const',
   });
-  const sheetID = nanoid();
-  functionParent.push({
+  varsMap.set(functionParent, vars);
+  return vars;
+}
+
+function generateSheet(
+  sheetMap: SheetMap,
+  functionParent: Scope,
+) {
+  const result = sheetMap.get(functionParent);
+  if (result) {
+    return result;
+  }
+  const program = functionParent.getProgramParent();
+  const sheet = program.generateUidIdentifier(SHEET_ID);
+  const id = nanoid();
+  program.push({
     id: sheet,
-    init: t.stringLiteral(sheetID),
+    init: t.stringLiteral(id),
     kind: 'const',
   });
-  const metaValue = {
-    vars,
+  const value = {
     sheet,
-    sheetID,
+    id,
   };
-  meta.set(functionParent, metaValue);
-  return metaValue;
+  sheetMap.set(functionParent, value);
+  return value;
 }
 
 function getStyleAttribute(opening: t.JSXOpeningElement) {
@@ -128,10 +135,11 @@ function getStyleAttribute(opening: t.JSXOpeningElement) {
 
 function transformJSX(
   hooks: ImportHook,
-  meta: MetaMap,
+  sheetMap: SheetMap,
+  varsMap: VarsMap,
   functionParent: Scope,
 ) {
-  if (meta.has(functionParent)) {
+  if (sheetMap.has(functionParent)) {
     functionParent.path.traverse({
       JSXElement(path) {
         const opening = path.node.openingElement;
@@ -139,10 +147,18 @@ function transformJSX(
           (t.isJSXIdentifier(opening.name) && /^[a-z]/.test(opening.name.name))
           || checkUseAttribute(opening)
         ) {
-          const { sheetID, vars } = getScopeMeta(hooks, meta, path, functionParent);
+          const { id: sheetID } = generateSheet(sheetMap, functionParent);
           if (checkScopedAttribute(opening, sheetID)) {
             return;
           }
+          opening.attributes.push(t.jsxAttribute(
+            t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
+          ));
+          // Check if there's any dynamic vars call
+          if (!varsMap.has(functionParent)) {
+            return;
+          }
+          const vars = generateVars(hooks, varsMap, path, functionParent);
           // Find style
           const style = getStyleAttribute(opening);
           if (style) {
@@ -176,9 +192,6 @@ function transformJSX(
               t.jsxExpressionContainer(t.callExpression(vars, [])),
             ));
           }
-          opening.attributes.push(t.jsxAttribute(
-            t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
-          ));
         }
       },
     });
@@ -336,14 +349,21 @@ function processTemplate(
   };
 }
 
-export default function solidStyledPlugin(): PluginObj {
+export interface SolidStyledOptions {
+  verbose?: boolean;
+}
+
+type State = babel.PluginPass & { opts: SolidStyledOptions };
+
+export default function solidStyledPlugin(): PluginObj<State> {
   return {
     name: 'solid-styled',
     visitor: {
       Program(programPath) {
         const validIdentifiers = new Set();
         const hooks: ImportHook = new Map();
-        const meta = new WeakMap<Scope, ScopeMeta>();
+        const sheetMap: SheetMap = new WeakMap();
+        const varsMap: VarsMap = new WeakMap();
 
         programPath.traverse({
           ImportDeclaration(path) {
@@ -385,7 +405,7 @@ export default function solidStyledPlugin(): PluginObj {
             }
             const functionParent = path.scope.getFunctionParent();
             if (functionParent) {
-              const { vars, sheet, sheetID } = getScopeMeta(hooks, meta, path, functionParent);
+              const { sheet, id: sheetID } = generateSheet(sheetMap, functionParent);
               const statement = path.getStatementParent();
               if (statement) {
                 for (let i = 0, len = path.node.children.length; i < len; i += 1) {
@@ -397,22 +417,31 @@ export default function solidStyledPlugin(): PluginObj {
                       !isGlobal,
                     );
 
+                    const cssID = programPath.scope.generateUidIdentifier('css');
+
+                    programPath.scope.push({
+                      id: cssID,
+                      init: t.stringLiteral(compiledSheet),
+                      kind: 'const',
+                    });
+
                     statement.insertBefore(t.callExpression(
                       getHookIdentifier(hooks, path, 'useSolidStyled', SOURCE_MODULE),
                       [
                         sheet,
-                        t.stringLiteral(compiledSheet),
+                        cssID,
                       ],
                     ));
 
                     if (variables.length) {
+                      const vars = generateVars(hooks, varsMap, path, functionParent);
                       statement.insertBefore(t.callExpression(
                         vars,
                         [t.arrowFunctionExpression([], t.objectExpression(variables))],
                       ));
                     }
 
-                    transformJSX(hooks, meta, functionParent);
+                    transformJSX(hooks, sheetMap, varsMap, functionParent);
                   }
                 }
               }
@@ -435,7 +464,7 @@ export default function solidStyledPlugin(): PluginObj {
                 // Get the function parent first
                 const functionParent = path.scope.getFunctionParent();
                 if (functionParent) {
-                  const { vars, sheet, sheetID } = getScopeMeta(hooks, meta, path, functionParent);
+                  const { sheet, id: sheetID } = generateSheet(sheetMap, functionParent);
 
                   // Convert template into a CSS sheet
                   const { sheet: compiledSheet, variables } = processTemplate(
@@ -453,13 +482,14 @@ export default function solidStyledPlugin(): PluginObj {
                   ));
 
                   if (variables.length) {
+                    const vars = generateVars(hooks, varsMap, path, functionParent);
                     path.insertAfter(t.callExpression(
                       vars,
                       [t.arrowFunctionExpression([], t.objectExpression(variables))],
                     ));
                   }
 
-                  transformJSX(hooks, meta, functionParent);
+                  transformJSX(hooks, sheetMap, varsMap, functionParent);
                 }
               }
             }
