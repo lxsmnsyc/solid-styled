@@ -30,6 +30,7 @@ function ShowButton(): JSX.Element {
           }
         `}
       </style>
+      <style jsx></style>
       <button class="toggle" type="button" onClick={() => setShow(!show())}>
         {show() ? 'Hide Div' : 'Show Div'}
       </button>

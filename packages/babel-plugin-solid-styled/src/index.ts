@@ -473,11 +473,19 @@ export default function solidStyledPlugin(): PluginObj<State> {
                     true,
                   );
 
+                  const cssID = programPath.scope.generateUidIdentifier('css');
+
+                  programPath.scope.push({
+                    id: cssID,
+                    init: t.stringLiteral(compiledSheet),
+                    kind: 'const',
+                  });
+
                   path.replaceWith(t.callExpression(
                     getHookIdentifier(hooks, path, 'useSolidStyled', SOURCE_MODULE),
                     [
                       sheet,
-                      t.stringLiteral(compiledSheet),
+                      cssID,
                     ],
                   ));
 

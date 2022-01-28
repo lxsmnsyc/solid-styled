@@ -5,15 +5,13 @@ babel.transformAsync(`
 import { css } from 'solid-styled';
 function Test() {
   const [color, setColor] = createSignal('red');
+  css\`
+    div {
+      background-color: \${color()};
+    }
+  \`;
   return (
     <div>
-      <style jsx>
-        {\`
-          div {
-            background-color: \${color()};
-          }
-        \`}
-      </style>
       <h1>Hello World</h1>
     </div>
   );
