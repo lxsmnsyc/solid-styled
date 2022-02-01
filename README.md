@@ -24,7 +24,10 @@ pnpm add solid-styled babel-plugin-solid-styled
 - Fine-grained reactive CSS properties
 - Scoped stylesheets
 - `:global` selector
+- `@global` at-rule
 - SSR
+- Near zero-runtime
+- `<style jsx>`
 
 ## Usage
 
@@ -249,6 +252,7 @@ You can also use `<style jsx global>` for declaring global styles.
 ## Limitations
 
 - Scoping `css` can only be called directly on components. This is so that the Babel plugin can find and transform the JSX of the component. Global `css` (i.e. `:global` or `@global`) can be used inside other functions i.e. hooks, utilities.
+- Dynamic styles are only limited to CSS properties.
 
 ## License
 

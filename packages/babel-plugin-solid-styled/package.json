@@ -60,20 +60,20 @@
   "peerDependencies": {
     "@babel/core": "^7.16"
   },
-  "private": false,
-  "description": "",
+  "description": "Reactive stylesheets for SolidJS",
   "repository": {
-    "url": "",
+    "url": "https://github.com/lxsmnsyc/solid-styled.git",
     "type": "git"
   },
-  "homepage": "",
+  "homepage": "https://github.com/lxsmnsyc/solid-styled/tree/main/packages/babel-plugin-solid-styled",
   "bugs": {
-    "url": ""
+    "url": "https://github.com/lxsmnsyc/solid-styled/issues"
   },
-  "author": "",
   "publishConfig": {
     "access": "public"
   },
+  "author": "Alexis Munsayac",
+  "private": false,
   "scripts": {
     "prepublishOnly": "pridepack clean && pridepack build",
     "build": "pridepack build",
