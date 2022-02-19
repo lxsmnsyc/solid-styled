@@ -1,6 +1,6 @@
 {
   "name": "solid-styled",
-  "version": "0.3.0",
+  "version": "0.3.3",
   "types": "dist/types/index.d.ts",
   "main": "dist/cjs/production/index.jsx",
   "module": "dist/esm/production/index.jsx",
