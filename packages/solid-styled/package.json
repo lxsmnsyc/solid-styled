@@ -44,9 +44,6 @@
     "node": ">=10"
   },
   "license": "MIT",
-  "keywords": [
-    "pridepack"
-  ],
   "devDependencies": {
     "@types/node": "^17.0.0",
     "eslint": "^8.7.0",
@@ -83,5 +80,18 @@
     "watch": "pridepack watch",
     "start": "pridepack start",
     "dev": "pridepack dev"
-  }
+  },
+  "contributors": [
+    {
+      "name": "Alexis Munsayac",
+      "email": "alexis.munsayac@gmail.com",
+      "url": "https://lxsmnsyc.vercel.app"
+    }
+  ],
+  "keywords": [
+    "pridepack",
+    "solidhack",
+    "best_ecosystem"
+  ],
+  "info": "Create SSR-friendly, reactive stylesheets for SolidJS."
 }
