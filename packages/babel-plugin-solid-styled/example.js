@@ -18,7 +18,7 @@ function Test() {
 }
 `, {
   plugins: [
-    plugin
+    [plugin, { verbose: true }]
   ],
   parserOpts: {
     plugins: [

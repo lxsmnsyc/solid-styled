@@ -99,9 +99,18 @@ function generateVars(
   return vars;
 }
 
+function getFunctionParentName(functionParent: Scope): string {
+  const { node } = functionParent.path;
+  if ((t.isFunctionExpression(node) || t.isFunctionDeclaration(node)) && t.isIdentifier(node.id)) {
+    return node.id.name;
+  }
+  return 'Anonymous';
+}
+
 function generateSheet(
   sheetMap: SheetMap,
   functionParent: Scope,
+  verbose?: boolean,
 ) {
   const result = sheetMap.get(functionParent);
   if (result) {
@@ -109,7 +118,8 @@ function generateSheet(
   }
   const program = functionParent.getProgramParent();
   const sheet = program.generateUidIdentifier(SHEET_ID);
-  const id = nanoid();
+  const baseID = nanoid();
+  const id = verbose ? `${getFunctionParentName(functionParent)}-${baseID}`: baseID
   program.push({
     id: sheet,
     init: t.stringLiteral(id),
@@ -138,6 +148,7 @@ function transformJSX(
   sheetMap: SheetMap,
   varsMap: VarsMap,
   functionParent: Scope,
+  verbose?: boolean,
 ) {
   if (sheetMap.has(functionParent)) {
     functionParent.path.traverse({
@@ -147,7 +158,7 @@ function transformJSX(
           (t.isJSXIdentifier(opening.name) && /^[a-z]/.test(opening.name.name))
           || checkUseAttribute(opening)
         ) {
-          const { id: sheetID } = generateSheet(sheetMap, functionParent);
+          const { id: sheetID } = generateSheet(sheetMap, functionParent, verbose);
           if (checkScopedAttribute(opening, sheetID)) {
             return;
           }
@@ -359,7 +370,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
   return {
     name: 'solid-styled',
     visitor: {
-      Program(programPath) {
+      Program(programPath, ctx) {
         const validIdentifiers = new Set();
         const hooks: ImportHook = new Map();
         const sheetMap: SheetMap = new WeakMap();
@@ -405,7 +416,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
             }
             const functionParent = path.scope.getFunctionParent();
             if (functionParent) {
-              const { sheet, id: sheetID } = generateSheet(sheetMap, functionParent);
+              const { sheet, id: sheetID } = generateSheet(sheetMap, functionParent, ctx.opts.verbose);
               const statement = path.getStatementParent();
               if (statement) {
                 for (let i = 0, len = path.node.children.length; i < len; i += 1) {
@@ -441,7 +452,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                       ));
                     }
 
-                    transformJSX(hooks, sheetMap, varsMap, functionParent);
+                    transformJSX(hooks, sheetMap, varsMap, functionParent, ctx.opts.verbose);
                   }
                 }
               }
@@ -464,7 +475,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                 // Get the function parent first
                 const functionParent = path.scope.getFunctionParent();
                 if (functionParent) {
-                  const { sheet, id: sheetID } = generateSheet(sheetMap, functionParent);
+                  const { sheet, id: sheetID } = generateSheet(sheetMap, functionParent, ctx.opts.verbose);
 
                   // Convert template into a CSS sheet
                   const { sheet: compiledSheet, variables } = processTemplate(
@@ -497,7 +508,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                     ));
                   }
 
-                  transformJSX(hooks, sheetMap, varsMap, functionParent);
+                  transformJSX(hooks, sheetMap, varsMap, functionParent, ctx.opts.verbose);
                 }
               }
             }
