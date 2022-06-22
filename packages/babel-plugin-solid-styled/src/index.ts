@@ -119,7 +119,9 @@ function generateSheet(
   const program = functionParent.getProgramParent();
   const sheet = program.generateUidIdentifier(SHEET_ID);
   const baseID = nanoid();
-  const id = verbose ? `${getFunctionParentName(functionParent)}-${baseID}`: baseID
+  const id = verbose
+    ? `${getFunctionParentName(functionParent)}-${baseID}`
+    : baseID;
   program.push({
     id: sheet,
     init: t.stringLiteral(id),
@@ -416,7 +418,11 @@ export default function solidStyledPlugin(): PluginObj<State> {
             }
             const functionParent = path.scope.getFunctionParent();
             if (functionParent) {
-              const { sheet, id: sheetID } = generateSheet(sheetMap, functionParent, ctx.opts.verbose);
+              const { sheet, id: sheetID } = generateSheet(
+                sheetMap,
+                functionParent,
+                ctx.opts.verbose,
+              );
               const statement = path.getStatementParent();
               if (statement) {
                 for (let i = 0, len = path.node.children.length; i < len; i += 1) {
@@ -475,7 +481,11 @@ export default function solidStyledPlugin(): PluginObj<State> {
                 // Get the function parent first
                 const functionParent = path.scope.getFunctionParent();
                 if (functionParent) {
-                  const { sheet, id: sheetID } = generateSheet(sheetMap, functionParent, ctx.opts.verbose);
+                  const { sheet, id: sheetID } = generateSheet(
+                    sheetMap,
+                    functionParent,
+                    ctx.opts.verbose,
+                  );
 
                   // Convert template into a CSS sheet
                   const { sheet: compiledSheet, variables } = processTemplate(
