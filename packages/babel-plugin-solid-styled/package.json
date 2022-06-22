@@ -1,6 +1,7 @@
 {
   "name": "babel-plugin-solid-styled",
   "version": "0.3.3",
+	"type": "module",
   "types": "dist/types/index.d.ts",
   "main": "dist/cjs/production/index.js",
   "module": "dist/esm/production/index.js",
