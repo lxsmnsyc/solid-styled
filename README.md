@@ -43,6 +43,14 @@ pnpm add solid-styled babel-plugin-solid-styled
 }
 ```
 
+### Typescript
+
+Add this to any d.ts file
+
+```ts
+/// <reference types="solid-styled" />
+```
+
 ### `<StyleRegistry>`
 
 `<StyleRegistry>` manages the lifecycle of stylesheets. It is required only to be used once, preferably at the root of your SolidJS application
