@@ -63,6 +63,7 @@ export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
       if (node) {
         document.head.removeChild(node);
       }
+      tracked.delete(id);
     }
   }
 
