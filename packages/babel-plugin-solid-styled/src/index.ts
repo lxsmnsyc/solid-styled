@@ -3,10 +3,10 @@ import { addNamed } from '@babel/helper-module-imports';
 import { NodePath, Scope } from '@babel/traverse';
 import * as t from '@babel/types';
 import * as csstree from 'css-tree';
-import { customAlphabet } from 'nanoid';
+import UniqueIdGenerator from './id-generator';
 
-const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789_-';
-const nanoid = customAlphabet(ALPHABET, 10);
+const ssrUniqueId = new UniqueIdGenerator();
+const domUniqueId = new UniqueIdGenerator();
 const TAGGED_TEMPLATE = 'css';
 const SOURCE_MODULE = 'solid-styled';
 const SOLID_STYLED_ATTR = 'data-s';
@@ -14,20 +14,39 @@ const VARS_ID = 'vars';
 const SHEET_ID = 'sheet';
 const GLOBAL_SELECTOR = 'global';
 
-type ImportHook = Map<string, t.Identifier>;
+export interface SolidStyledOptions {
+  verbose?: boolean;
+  prefix?: string;
+  ssr?: boolean;
+}
+
+interface StateContext {
+  hooks: Map<string, t.Identifier>;
+  vars: WeakMap<Scope, t.Identifier>;
+  sheets: WeakMap<Scope, { sheet: t.Identifier, id: string }>;
+  opts: SolidStyledOptions;
+}
+
+function getPrefix(ctx: StateContext) {
+  return ctx.opts.prefix ? `${ctx.opts.prefix}-` : '';
+}
+
+function nextId(ctx: StateContext) {
+  return ctx.opts.ssr ? ssrUniqueId.next() : domUniqueId.next();
+}
 
 function getHookIdentifier(
-  hooks: ImportHook,
+  ctx: StateContext,
   path: NodePath,
   name: string,
   source = 'solid-js',
 ): t.Identifier {
-  const current = hooks.get(name);
+  const current = ctx.hooks.get(name);
   if (current) {
     return current;
   }
   const newID = addNamed(path, name, source);
-  hooks.set(name, newID);
+  ctx.hooks.set(name, newID);
   return newID;
 }
 
@@ -73,16 +92,12 @@ function checkUseAttribute(opening: t.JSXOpeningElement): boolean {
   return false;
 }
 
-type VarsMap = WeakMap<Scope, t.Identifier>;
-type SheetMap = WeakMap<Scope, { sheet: t.Identifier, id: string }>;
-
 function generateVars(
-  hooks: ImportHook,
-  varsMap: VarsMap,
+  ctx: StateContext,
   path: NodePath,
   functionParent: Scope,
 ) {
-  const result = varsMap.get(functionParent);
+  const result = ctx.vars.get(functionParent);
   if (result) {
     return result;
   }
@@ -90,12 +105,12 @@ function generateVars(
   functionParent.push({
     id: vars,
     init: t.callExpression(
-      getHookIdentifier(hooks, path, 'createCSSVars', SOURCE_MODULE),
+      getHookIdentifier(ctx, path, 'createCSSVars', SOURCE_MODULE),
       [],
     ),
     kind: 'const',
   });
-  varsMap.set(functionParent, vars);
+  ctx.vars.set(functionParent, vars);
   return vars;
 }
 
@@ -108,20 +123,20 @@ function getFunctionParentName(functionParent: Scope): string {
 }
 
 function generateSheet(
-  sheetMap: SheetMap,
+  ctx: StateContext,
   functionParent: Scope,
-  verbose?: boolean,
 ) {
-  const result = sheetMap.get(functionParent);
+  const result = ctx.sheets.get(functionParent);
   if (result) {
     return result;
   }
   const program = functionParent.getProgramParent();
   const sheet = program.generateUidIdentifier(SHEET_ID);
-  const baseID = nanoid();
-  const id = verbose
+  const baseID = nextId(ctx);
+  const verboseId = ctx.opts.verbose
     ? `${getFunctionParentName(functionParent)}-${baseID}`
     : baseID;
+  const id = `${getPrefix(ctx)}${verboseId}`;
   program.push({
     id: sheet,
     init: t.stringLiteral(id),
@@ -131,7 +146,7 @@ function generateSheet(
     sheet,
     id,
   };
-  sheetMap.set(functionParent, value);
+  ctx.sheets.set(functionParent, value);
   return value;
 }
 
@@ -146,13 +161,10 @@ function getStyleAttribute(opening: t.JSXOpeningElement) {
 }
 
 function transformJSX(
-  hooks: ImportHook,
-  sheetMap: SheetMap,
-  varsMap: VarsMap,
+  ctx: StateContext,
   functionParent: Scope,
-  verbose?: boolean,
 ) {
-  if (sheetMap.has(functionParent)) {
+  if (ctx.sheets.has(functionParent)) {
     functionParent.path.traverse({
       JSXElement(path) {
         const opening = path.node.openingElement;
@@ -160,7 +172,7 @@ function transformJSX(
           (t.isJSXIdentifier(opening.name) && /^[a-z]/.test(opening.name.name))
           || checkUseAttribute(opening)
         ) {
-          const { id: sheetID } = generateSheet(sheetMap, functionParent, verbose);
+          const { id: sheetID } = generateSheet(ctx, functionParent);
           if (checkScopedAttribute(opening, sheetID)) {
             return;
           }
@@ -168,10 +180,10 @@ function transformJSX(
             t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheetID}`),
           ));
           // Check if there's any dynamic vars call
-          if (!varsMap.has(functionParent)) {
+          if (!ctx.vars.has(functionParent)) {
             return;
           }
-          const vars = generateVars(hooks, varsMap, path, functionParent);
+          const vars = generateVars(ctx, path, functionParent);
           // Find style
           const style = getStyleAttribute(opening);
           if (style) {
@@ -189,7 +201,7 @@ function transformJSX(
               }
               style.value = t.jsxExpressionContainer(
                 t.callExpression(
-                  getHookIdentifier(hooks, path, 'mergeStyles', SOURCE_MODULE),
+                  getHookIdentifier(ctx, path, 'mergeStyles', SOURCE_MODULE),
                   [
                     expr,
                     t.callExpression(vars, []),
@@ -212,6 +224,7 @@ function transformJSX(
 }
 
 function replaceDynamicTemplate(
+  ctx: StateContext,
   { expressions, quasis }: t.TemplateLiteral,
 ) {
   const variables: t.ObjectProperty[] = [];
@@ -224,7 +237,7 @@ function replaceDynamicTemplate(
     if (currentExpr < expressions.length) {
       const expr = expressions[currentExpr];
       if (t.isExpression(expr)) {
-        const id = `--s-${nanoid()}`;
+        const id = `--s-${getPrefix(ctx)}${nextId(ctx)}`;
         sheet = `${sheet}var(${id})`;
         variables.push(t.objectProperty(
           t.stringLiteral(id),
@@ -342,11 +355,12 @@ function processScopedSheet(
 }
 
 function processTemplate(
+  ctx: StateContext,
   sheetID: string,
   templateLiteral: t.TemplateLiteral,
   isScoped: boolean,
 ) {
-  const { sheet, variables } = replaceDynamicTemplate(templateLiteral);
+  const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
 
   const ast = csstree.parse(sheet);
 
@@ -362,21 +376,20 @@ function processTemplate(
   };
 }
 
-export interface SolidStyledOptions {
-  verbose?: boolean;
-}
-
 type State = babel.PluginPass & { opts: SolidStyledOptions };
 
 export default function solidStyledPlugin(): PluginObj<State> {
   return {
     name: 'solid-styled',
     visitor: {
-      Program(programPath, ctx) {
+      Program(programPath, state) {
         const validIdentifiers = new Set();
-        const hooks: ImportHook = new Map();
-        const sheetMap: SheetMap = new WeakMap();
-        const varsMap: VarsMap = new WeakMap();
+        const ctx: StateContext = {
+          hooks: new Map(),
+          sheets: new WeakMap(),
+          vars: new WeakMap(),
+          opts: state.opts,
+        };
 
         programPath.traverse({
           ImportDeclaration(path) {
@@ -419,9 +432,8 @@ export default function solidStyledPlugin(): PluginObj<State> {
             const functionParent = path.scope.getFunctionParent();
             if (functionParent) {
               const { sheet, id: sheetID } = generateSheet(
-                sheetMap,
+                ctx,
                 functionParent,
-                ctx.opts.verbose,
               );
               const statement = path.getStatementParent();
               if (statement) {
@@ -429,6 +441,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                   const child = path.node.children[i];
                   if (t.isJSXExpressionContainer(child) && t.isTemplateLiteral(child.expression)) {
                     const { sheet: compiledSheet, variables } = processTemplate(
+                      ctx,
                       sheetID,
                       child.expression,
                       !isGlobal,
@@ -443,7 +456,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                     });
 
                     statement.insertBefore(t.callExpression(
-                      getHookIdentifier(hooks, path, 'useSolidStyled', SOURCE_MODULE),
+                      getHookIdentifier(ctx, path, 'useSolidStyled', SOURCE_MODULE),
                       [
                         sheet,
                         cssID,
@@ -451,14 +464,14 @@ export default function solidStyledPlugin(): PluginObj<State> {
                     ));
 
                     if (variables.length) {
-                      const vars = generateVars(hooks, varsMap, path, functionParent);
+                      const vars = generateVars(ctx, path, functionParent);
                       statement.insertBefore(t.callExpression(
                         vars,
                         [t.arrowFunctionExpression([], t.objectExpression(variables))],
                       ));
                     }
 
-                    transformJSX(hooks, sheetMap, varsMap, functionParent, ctx.opts.verbose);
+                    transformJSX(ctx, functionParent);
                   }
                 }
               }
@@ -482,13 +495,13 @@ export default function solidStyledPlugin(): PluginObj<State> {
                 const functionParent = path.scope.getFunctionParent();
                 if (functionParent) {
                   const { sheet, id: sheetID } = generateSheet(
-                    sheetMap,
+                    ctx,
                     functionParent,
-                    ctx.opts.verbose,
                   );
 
                   // Convert template into a CSS sheet
                   const { sheet: compiledSheet, variables } = processTemplate(
+                    ctx,
                     sheetID,
                     path.node.quasi,
                     true,
@@ -503,7 +516,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                   });
 
                   path.replaceWith(t.callExpression(
-                    getHookIdentifier(hooks, path, 'useSolidStyled', SOURCE_MODULE),
+                    getHookIdentifier(ctx, path, 'useSolidStyled', SOURCE_MODULE),
                     [
                       sheet,
                       cssID,
@@ -511,14 +524,14 @@ export default function solidStyledPlugin(): PluginObj<State> {
                   ));
 
                   if (variables.length) {
-                    const vars = generateVars(hooks, varsMap, path, functionParent);
+                    const vars = generateVars(ctx, path, functionParent);
                     path.insertAfter(t.callExpression(
                       vars,
                       [t.arrowFunctionExpression([], t.objectExpression(variables))],
                     ));
                   }
 
-                  transformJSX(hooks, sheetMap, varsMap, functionParent, ctx.opts.verbose);
+                  transformJSX(ctx, functionParent);
                 }
               }
             }
