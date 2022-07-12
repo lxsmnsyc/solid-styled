@@ -7,7 +7,11 @@ export default defineConfig({
     solidPlugin({
       babel: {
         plugins: [
-          [solidStyled, { verbose: true }]
+          [solidStyled, {
+            verbose: true,
+            prefix: 'example',
+            // ssr: true
+          }]
         ],
       },
     }),
