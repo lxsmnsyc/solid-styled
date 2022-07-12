@@ -13,27 +13,6 @@
       "require": "./dist/cjs/production/index.js",
       "import": "./dist/esm/production/index.js",
       "types": "./dist/types/index.d.ts"
-    },
-    "./dev": {
-      "production": {
-        "require": "./dist/cjs/production/index.js",
-        "import": "./dist/esm/production/index.js"
-      },
-      "require": "./dist/cjs/development/index.js",
-      "import": "./dist/esm/development/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./esm": {
-      "development": "./dist/esm/development/index.js",
-      "production": "./dist/esm/production/index.js",
-      "default": "./dist/esm/production/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./cjs": {
-      "development": "./dist/cjs/development/index.js",
-      "production": "./dist/cjs/production/index.js",
-      "default": "./dist/cjs/production/index.js",
-      "types": "./dist/types/index.d.ts"
     }
   },
   "files": [
@@ -50,8 +29,8 @@
     "@types/babel__traverse": "^7.17.1",
     "@types/node": "^17.0.25",
     "eslint": "^8.18.0",
-    "eslint-config-lxsmnsyc": "^0.4.1",
-    "pridepack": "1.1.1",
+    "eslint-config-lxsmnsyc": "^0.4.4",
+    "pridepack": "2.0.1",
     "solid-styled": "0.3.4",
     "tslib": "^2.4.0",
     "typescript": "^4.7.4"
@@ -89,7 +68,13 @@
     "@babel/traverse": "^7.17.9",
     "@babel/types": "^7.17.0",
     "@types/css-tree": "^1.0.7",
-    "css-tree": "^2.1.0",
-    "nanoid": "^3.3.3"
+    "css-tree": "^2.1.0"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/index.d.ts"
+      ]
+    }
   }
 }
