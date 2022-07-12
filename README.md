@@ -61,7 +61,7 @@ plugins: [
 
 ### `<StyleRegistry>`
 
-`<StyleRegistry>` manages the lifecycle of stylesheets (for instance styles of a component get removed from memory if all instances of that component unmount). It needs to be included only once, preferably at the root of your SolidJS application.
+`<StyleRegistry>` manages the lifecycle of stylesheets (for instance, on the client side, styles of a component get removed from memory if all instances of that component unmount). It needs to be included only once, preferably at the root of your SolidJS application.
 
 ```js
 import { StyleRegistry } from 'solid-styled';
@@ -265,7 +265,7 @@ function Button() {
 
 You can also use `<style jsx global>` for declaring global styles.
 
-The main motivation for writing an alternative way of declaring styles with `<style jsx>` is to facilitate the migration from `solid-styled-jsx` to `solid-styled`.
+The main motivation for writing an alternative way of declaring styles with `<style jsx>` is to facilitate the migration from `solid-styled-jsx` to `solid-styled`. Possibly, some developers may as well use `<style jsx>` because of their familiarity with adding the styles inside the JSX.
 
 ## Limitations
 
