@@ -42,7 +42,7 @@ plugins: [
   solidPlugin({
     babel: {
       plugins: [
-        [solidStyled, { verbose: true }]
+        [solidStyled, {}]
       ],
     },
   }),
@@ -58,6 +58,30 @@ plugins: [
   ]
 }
 ```
+
+### Config options
+
+```json
+{
+  // Toggle verbose scope names based
+  // on the owning component's name,
+  // useful for debugging
+  // Default: false
+  "verbose": true,
+
+  // Allows prefixing scope names
+  // useful for package publishing
+  // Default: undefined ('')
+  "prefix": "example",
+
+  // Opt to SSR mode, allows
+  // ids to be consistent
+  // on separate bundles.
+  "ssr": false,
+}
+```
+
+**TIP**: if `solid-styled` transform is applied before SolidJS transform (e.g. shipping preserved JSX), you can skip the `ssr` option.
 
 ### `<StyleRegistry>`
 
