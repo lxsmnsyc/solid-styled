@@ -38,15 +38,35 @@ For `solid-styled` to make its magic work properly, you need to add the `babel-p
 ```js
 import solidStyled from 'babel-plugin-solid-styled';
 
-plugins: [
-  solidPlugin({
-    babel: {
-      plugins: [
-        [solidStyled, {}]
-      ],
-    },
-  }),
-]
+export default {
+  plugins: [
+    solidPlugin({
+      babel: {
+        plugins: [
+          [solidStyled, {}]
+        ],
+      },
+    }),
+  ]
+}
+```
+
+### SolidStart / Astro / any Vite SSR framework
+
+```js
+import solidStyled from 'babel-plugin-solid-styled';
+
+export default {
+  plugins: [
+    solidPlugin({
+      babel: (source, id, ssr) => ({
+        plugins: [
+          [solidStyled, { ssr }]
+        ],
+      }),
+    }),
+  ]
+}
 ```
 
 ### Babel
