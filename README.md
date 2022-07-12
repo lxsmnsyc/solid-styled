@@ -81,7 +81,7 @@ export default {
 
 ### Config options
 
-```json
+```js
 {
   // Toggle verbose scope names based
   // on the owning component's name,

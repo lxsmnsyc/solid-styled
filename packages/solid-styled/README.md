@@ -71,7 +71,7 @@ export default {
 
 ### Babel
 
-```json
+```js
 {
   "plugins": [
     "babel-plugin-solid-styled"
