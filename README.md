@@ -31,9 +31,25 @@ pnpm add solid-styled babel-plugin-solid-styled
 
 ## Usage
 
-### Babel
+For `solid-styled` to make its magic work properly, you need to add the `babel-plugin-solid-styled` plugin in the babel configuration:
 
-**Note: This is required for `solid-styled` to work its magic properly!**
+### Vite
+
+```js
+import solidStyled from 'babel-plugin-solid-styled';
+
+plugins: [
+  solidPlugin({
+    babel: {
+      plugins: [
+        [solidStyled, { verbose: true }]
+      ],
+    },
+  }),
+]
+```
+
+### Babel
 
 ```json
 {
@@ -43,17 +59,9 @@ pnpm add solid-styled babel-plugin-solid-styled
 }
 ```
 
-### Typescript
-
-Add this to any d.ts file
-
-```ts
-/// <reference types="solid-styled" />
-```
-
 ### `<StyleRegistry>`
 
-`<StyleRegistry>` manages the lifecycle of stylesheets. It is required only to be used once, preferably at the root of your SolidJS application
+`<StyleRegistry>` manages the lifecycle of stylesheets (for instance, on the client side, styles of a component get removed from memory if all instances of that component unmount). It needs to be included only once, preferably at the root of your SolidJS application.
 
 ```js
 import { StyleRegistry } from 'solid-styled';
@@ -123,7 +131,7 @@ function Button() {
 }
 ```
 
-By default, all styles are scoped to its component and cannot leak into another component. The scoping only applies all DOM nodes that can be found in the component, including the children of the external components.
+By default, all styles are scoped to its component and cannot leak into another component. The scoping only applies to all DOM nodes that can be found in the component, including the children of the external components.
 
 ```js
 import { css } from 'solid-styled';
@@ -203,7 +211,7 @@ css`
 
 ### Forward scope
 
-Since `solid-styled` scopes valid elements and not components by default, it doesn't affect things like `<Dynamic>`. Using `use:solid-styled`, we can forward the current scope/sheet to the component.
+Since `solid-styled` scopes DOM elements and not components by default, it doesn't affect things like `<Dynamic>`. Using `use:solid-styled`, we can forward the current scope/sheet to the component.
 
 ```js
 css`
@@ -256,6 +264,8 @@ function Button() {
 ```
 
 You can also use `<style jsx global>` for declaring global styles.
+
+The main motivation for writing an alternative way of declaring styles with `<style jsx>` is to facilitate the migration from `solid-styled-jsx` to `solid-styled`. Possibly, some developers may as well use `<style jsx>` because of their familiarity with adding the styles inside the JSX.
 
 ## Limitations
 
