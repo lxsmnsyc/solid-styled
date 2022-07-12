@@ -32,10 +32,35 @@ function createPseudoEncrypt(sauce = secretSauce): (value: number) => number {
 
 const DEFAULT_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
+function prefix(x: number) {
+  if (x < 0) {
+    return 'n';
+  }
+  if (x > 0) {
+    return 'p';
+  }
+  return 'z';
+}
+
+function findDigits(base: number): number {
+  let x = 1;
+  let current = base;
+
+  while (current < 2147483647) {
+    current *= base;
+    x += 1;
+  }
+  return x;
+}
+
 export default class UniqueIdGenerator {
   private alphabet: string;
 
+  private padding: string;
+
   private base: number;
+
+  private digits: number;
 
   private encrypt: (value: number) => number;
 
@@ -43,21 +68,25 @@ export default class UniqueIdGenerator {
 
   constructor(alphabet: string = DEFAULT_ALPHABET, sauce = secretSauce) {
     this.alphabet = alphabet;
+    // eslint-disable-next-line prefer-destructuring
+    this.padding = alphabet[0];
     this.base = alphabet.length;
     this.encrypt = createPseudoEncrypt(sauce);
+    this.digits = findDigits(this.base);
   }
 
   next(): string {
     let output = '';
-    let n = Math.abs(this.encrypt(this.index)) | 0;
+    const encrypted = this.encrypt(this.index);
+    let n = Math.abs(encrypted) | 0;
 
     while (n > 0) {
-      output += this.alphabet[(n % this.base)];
+      output = this.alphabet[(n % this.base)] + output;
       n = (n / this.base) | 0;
     }
 
     this.index += 1;
 
-    return output;
+    return `${prefix(encrypted)}${output.padStart(this.digits, this.padding)}`;
   }
 }
