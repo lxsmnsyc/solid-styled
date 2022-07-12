@@ -265,6 +265,8 @@ function Button() {
 
 You can also use `<style jsx global>` for declaring global styles.
 
+The main motivation for writing an alternative way of declaring styles with `<style jsx>` is to facilitate the migration from `solid-styled-jsx` to `solid-styled`.
+
 ## Limitations
 
 - Scoping `css` can only be called directly on components. This is so that the Babel plugin can find and transform the JSX of the component. Global `css` (i.e. `:global` or `@global`) can be used inside other functions i.e. hooks, utilities.
