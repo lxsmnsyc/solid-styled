@@ -5,12 +5,12 @@ importers:
   .:
     specifiers:
       eslint: ^8.18.0
-      eslint-config-lxsmnsyc: ^0.4.1
+      eslint-config-lxsmnsyc: ^0.4.4
       lerna: ^5.1.4
       typescript: ^4.7.4
     devDependencies:
       eslint: 8.18.0
-      eslint-config-lxsmnsyc: 0.4.1_b5e7v2qnwxfo6hmiq56u52mz3e
+      eslint-config-lxsmnsyc: 0.4.4_b5e7v2qnwxfo6hmiq56u52mz3e
       lerna: 5.1.4
       typescript: 4.7.4
 
