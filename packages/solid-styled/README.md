@@ -94,14 +94,17 @@ export default {
   // Default: undefined ('')
   "prefix": "example",
 
-  // Opt to SSR mode, allows
+  // Opt to different mode, allows
   // ids to be consistent
   // on separate bundles.
-  "ssr": false,
+  // e.g. if you're building for client and server
+  // you'll use "client" and "server. If you're producing
+  // different formats, you can do "client+esm", "client+cjs", etc.
+  "mode": "default",
 }
 ```
 
-**TIP**: if `solid-styled` transform is applied before SolidJS transform (e.g. shipping preserved JSX), you can skip the `ssr` option.
+**TIP**: if `solid-styled` transform is applied before SolidJS transform (e.g. shipping preserved JSX), you can skip the `mode` option.
 
 ### `<StyleRegistry>`
 
