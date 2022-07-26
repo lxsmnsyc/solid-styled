@@ -1,4 +1,5 @@
 import {
+  createComponent,
   createContext,
   createMemo,
   createRoot,
@@ -68,9 +69,12 @@ export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
   }
 
   return (
-    <StyleRegistryContext.Provider value={{ insert, remove }}>
-      {props.children}
-    </StyleRegistryContext.Provider>
+    createComponent(StyleRegistryContext.Provider, {
+      value: { insert, remove },
+      get children() {
+        return props.children;
+      },
+    })
   );
 }
 

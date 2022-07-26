@@ -61,7 +61,7 @@ export default {
     solidPlugin({
       babel: (source, id, ssr) => ({
         plugins: [
-          [solidStyled, { ssr }]
+          [solidStyled, { mode: ssr ? 'ssr' : 'dom' }]
         ],
       }),
     }),

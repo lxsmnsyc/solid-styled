@@ -7,18 +7,15 @@
 ## Install
 
 ```bash
-npm i -D babel-plugin-solid-styled
-npm i solid-styled
+npm i solid-styled babel-plugin-solid-styled
 ```
 
 ```bash
-yarn add -D babel-plugin-solid-styled
-yarn add solid-styled
+yarn add solid-styled babel-plugin-solid-styled
 ```
 
 ```bash
-pnpm add -D babel-plugin-solid-styled
-pnpm add solid-styled
+pnpm add solid-styled babel-plugin-solid-styled
 ```
 
 ## Features
@@ -64,7 +61,7 @@ export default {
     solidPlugin({
       babel: (source, id, ssr) => ({
         plugins: [
-          [solidStyled, { ssr }]
+          [solidStyled, { mode: ssr ? 'ssr' : 'dom' }]
         ],
       }),
     }),
@@ -74,7 +71,7 @@ export default {
 
 ### Babel
 
-```json
+```js
 {
   "plugins": [
     "babel-plugin-solid-styled"
@@ -84,7 +81,7 @@ export default {
 
 ### Config options
 
-```js
+```json
 {
   // Toggle verbose scope names based
   // on the owning component's name,
@@ -97,14 +94,17 @@ export default {
   // Default: undefined ('')
   "prefix": "example",
 
-  // Opt to SSR mode, allows
+  // Opt to different mode, allows
   // ids to be consistent
   // on separate bundles.
-  "ssr": false,
+  // e.g. if you're building for client and server
+  // you'll use "client" and "server. If you're producing
+  // different formats, you can do "client+esm", "client+cjs", etc.
+  "mode": "default",
 }
 ```
 
-**TIP**: if `solid-styled` transform is applied before SolidJS transform (e.g. shipping preserved JSX), you can skip the `ssr` option.
+**TIP**: if `solid-styled` transform is applied before SolidJS transform (e.g. shipping preserved JSX), you can skip the `mode` option.
 
 ### `<StyleRegistry>`
 

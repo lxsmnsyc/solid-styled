@@ -5,8 +5,8 @@ import * as t from '@babel/types';
 import * as csstree from 'css-tree';
 import UniqueIdGenerator from './id-generator';
 
-const ssrUniqueId = new UniqueIdGenerator();
-const domUniqueId = new UniqueIdGenerator();
+const uniqueIdMap = new Map<string, UniqueIdGenerator>();
+
 const TAGGED_TEMPLATE = 'css';
 const SOURCE_MODULE = 'solid-styled';
 const SOLID_STYLED_ATTR = 'data-s';
@@ -17,7 +17,7 @@ const GLOBAL_SELECTOR = 'global';
 export interface SolidStyledOptions {
   verbose?: boolean;
   prefix?: string;
-  ssr?: boolean;
+  mode?: string;
 }
 
 interface StateContext {
@@ -27,12 +27,20 @@ interface StateContext {
   opts: SolidStyledOptions;
 }
 
-function getPrefix(ctx: StateContext) {
-  return ctx.opts.prefix ? `${ctx.opts.prefix}-` : '';
+function getUniqueId(ctx: StateContext) {
+  const mode = ctx.opts.mode ?? 'default';
+  let idgen = uniqueIdMap.get(mode);
+
+  if (!idgen) {
+    idgen = new UniqueIdGenerator();
+    uniqueIdMap.set(mode, idgen);
+  }
+
+  return idgen.next();
 }
 
-function nextId(ctx: StateContext) {
-  return ctx.opts.ssr ? ssrUniqueId.next() : domUniqueId.next();
+function getPrefix(ctx: StateContext) {
+  return ctx.opts.prefix ? `${ctx.opts.prefix}-` : '';
 }
 
 function getHookIdentifier(
@@ -132,7 +140,7 @@ function generateSheet(
   }
   const program = functionParent.getProgramParent();
   const sheet = program.generateUidIdentifier(SHEET_ID);
-  const baseID = nextId(ctx);
+  const baseID = getUniqueId(ctx);
   const verboseId = ctx.opts.verbose
     ? `${getFunctionParentName(functionParent)}-${baseID}`
     : baseID;
@@ -237,7 +245,7 @@ function replaceDynamicTemplate(
     if (currentExpr < expressions.length) {
       const expr = expressions[currentExpr];
       if (t.isExpression(expr)) {
-        const id = `--s-${getPrefix(ctx)}${nextId(ctx)}`;
+        const id = `--s-${getPrefix(ctx)}${getUniqueId(ctx)}`;
         sheet = `${sheet}var(${id})`;
         variables.push(t.objectProperty(
           t.stringLiteral(id),
