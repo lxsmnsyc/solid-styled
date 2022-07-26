@@ -7,15 +7,18 @@
 ## Install
 
 ```bash
-npm i solid-styled babel-plugin-solid-styled
+npm i solid-styled
+npm i -D babel-plugin-solid-styled
 ```
 
 ```bash
-yarn add solid-styled babel-plugin-solid-styled
+yarn add solid-styled
+yarn add -D babel-plugin-solid-styled
 ```
 
 ```bash
-pnpm add solid-styled babel-plugin-solid-styled
+pnpm add solid-styled
+pnpm add -D babel-plugin-solid-styled
 ```
 
 ## Usage
