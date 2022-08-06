@@ -61,7 +61,7 @@
   "typesVersions": {
     "*": {
       "*": [
-        "./dist/types/index.d.ts"
+        "./dist/types/*"
       ]
     }
   }
