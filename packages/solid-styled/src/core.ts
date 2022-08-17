@@ -157,6 +157,6 @@ export function renderSheets(sheets: StyleData[]): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function css(_template: TemplateStringsArray, ..._spans: string[]): void {
+export function css(_template: TemplateStringsArray, ..._spans: (string | boolean)[]): void {
   throw new Error('Unexpected use of `css`');
 }
