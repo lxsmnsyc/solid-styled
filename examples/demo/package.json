@@ -1,13 +1,13 @@
 {
   "name": "demo",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview"
   },
   "devDependencies": {
-    "babel-plugin-solid-styled": "0.5.1",
+    "babel-plugin-solid-styled": "0.6.0",
     "eslint": "^8.21.0",
     "eslint-config-lxsmnsyc": "^0.4.1",
     "typescript": "^4.7.4",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "solid-js": "^1.4.4",
-    "solid-styled": "0.5.1"
+    "solid-styled": "0.6.0"
   },
   "private": true,
   "publishConfig": {
