@@ -3,9 +3,11 @@ import { addNamed } from '@babel/helper-module-imports';
 import { NodePath, Scope } from '@babel/traverse';
 import * as t from '@babel/types';
 import * as csstree from 'css-tree';
-import UniqueIdGenerator from './id-generator';
+import { xxHash32 } from 'js-xxhash';
 
-const uniqueIdMap = new Map<string, UniqueIdGenerator>();
+function getFileId(file: string) {
+  return xxHash32(file).toString(16);
+}
 
 const TAGGED_TEMPLATE = 'css';
 const SOURCE_MODULE = 'solid-styled';
@@ -17,7 +19,7 @@ const GLOBAL_SELECTOR = 'global';
 export interface SolidStyledOptions {
   verbose?: boolean;
   prefix?: string;
-  mode?: string;
+  source?: string;
 }
 
 interface StateContext {
@@ -25,18 +27,14 @@ interface StateContext {
   vars: WeakMap<Scope, t.Identifier>;
   sheets: WeakMap<Scope, { sheet: t.Identifier, id: string }>;
   opts: SolidStyledOptions;
+  ids: number;
+  ns: string;
 }
 
 function getUniqueId(ctx: StateContext) {
-  const mode = ctx.opts.mode ?? 'default';
-  let idgen = uniqueIdMap.get(mode);
-
-  if (!idgen) {
-    idgen = new UniqueIdGenerator();
-    uniqueIdMap.set(mode, idgen);
-  }
-
-  return idgen.next();
+  const currentID = ctx.ids;
+  ctx.ids += 1;
+  return `${ctx.ns}-${currentID}`;
 }
 
 function getPrefix(ctx: StateContext) {
@@ -397,6 +395,8 @@ export default function solidStyledPlugin(): PluginObj<State> {
           sheets: new WeakMap(),
           vars: new WeakMap(),
           opts: state.opts,
+          ns: getFileId(state.opts.source ?? state.filename ?? ''),
+          ids: 0,
         };
 
         programPath.traverse({

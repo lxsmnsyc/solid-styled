@@ -62,9 +62,9 @@ import solidStyled from 'babel-plugin-solid-styled';
 export default {
   plugins: [
     solidPlugin({
-      babel: (source, id, ssr) => ({
+      babel: (source, id) => ({
         plugins: [
-          [solidStyled, { mode: ssr ? 'ssr' : 'dom' }]
+          [solidStyled, { source: id }]
         ],
       }),
     }),
@@ -97,17 +97,10 @@ export default {
   // Default: undefined ('')
   "prefix": "example",
 
-  // Opt to different mode, allows
-  // ids to be consistent
-  // on separate bundles.
-  // e.g. if you're building for client and server
-  // you'll use "client" and "server. If you're producing
-  // different formats, you can do "client+esm", "client+cjs", etc.
-  "mode": "default",
+  // Path of the filename, used for hashing
+  "source": "/path/to/file"
 }
 ```
-
-**TIP**: if `solid-styled` transform is applied before SolidJS transform (e.g. shipping preserved JSX), you can skip the `mode` option.
 
 ### `<StyleRegistry>`
 
