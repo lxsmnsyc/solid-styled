@@ -18,7 +18,10 @@ function ShowButton(): JSX.Element {
             border-radius: 0.5rem;
             background-color: #111827;
           }
-      
+        `}
+      </style>
+      <style jsx>
+        {/* css */`
           div > button {
             width: 50vw;
             padding: 0.5rem;
