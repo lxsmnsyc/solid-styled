@@ -101,8 +101,8 @@ interface CSSVars {
 
 function createLazyMemo<T>(fn: () => T): () => T {
   let s: () => T;
-  let dispose: () => void | undefined;
-  onCleanup(() => dispose());
+  let dispose: (() => void) | undefined;
+  onCleanup(() => dispose?.());
   return () => {
     if (!s) {
       s = createRoot((d) => {
@@ -135,9 +135,9 @@ export function createCSSVars(): CSSVars {
 
 function serializeStyle(source: JSX.CSSProperties): string {
   let result = '';
-  Object.keys(source).forEach((key) => {
-    result = `${result}${key}:${String(source[key])};`;
-  });
+  for (const key of Object.keys(source)) {
+    result = `${result}${key}:${String(source[key as keyof JSX.CSSProperties])};`;
+  }
   return result;
 }
 
