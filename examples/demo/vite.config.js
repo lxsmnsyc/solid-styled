@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
-import solidStyled from 'babel-plugin-solid-styled';
+import solidStyled from 'solid-styled/babel';
 
 export default defineConfig({
   plugins: [

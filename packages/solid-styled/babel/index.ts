@@ -283,6 +283,8 @@ function processScopedSheet(
   sheetID: string,
   ast: csstree.CssNode,
 ) {
+  // This selector is going to be inserted
+  // on every non-global selector
   // [s\:${sheetID}]
   const selector: csstree.AttributeSelector = {
     type: 'AttributeSelector',
@@ -295,16 +297,20 @@ function processScopedSheet(
     value: null,
   };
 
+  // Flag to indicate that the currently visited
+  // node is inside a global block
   let inGlobal = false;
 
   csstree.walk(ast, {
     leave(node: csstree.CssNode) {
+      // Check if block is `@global`
       if (node.type === 'Atrule' && node.name === 'global' && node.block) {
         inGlobal = false;
       }
       if (node.type === 'StyleSheet' || node.type === 'Block') {
         const children: csstree.CssNode[] = [];
         node.children.forEach((child) => {
+          // This moves all the selectors in `@global`
           if (child.type === 'Atrule' && child.name === 'global' && child.block) {
             child.block.children.forEach((innerChild) => {
               children.push(innerChild);
@@ -317,10 +323,13 @@ function processScopedSheet(
       }
     },
     enter(node: csstree.CssNode) {
+      // No transforms needed if in global
       if (inGlobal) {
         return;
       }
+      // Check if block is `@global`
       if (node.type === 'Atrule' && node.name === 'global' && node.block) {
+        // Shift to global mode
         inGlobal = true;
         return;
       }
@@ -328,6 +337,7 @@ function processScopedSheet(
         const children: csstree.CssNode[] = [];
         let shouldPush = true;
         node.children.forEach((child) => {
+          // Push the selector after the node
           if (
             child.type === 'TypeSelector'
             || child.type === 'ClassSelector'
@@ -341,6 +351,7 @@ function processScopedSheet(
             }
             return;
           }
+          // Push the selector before the node
           if (
             child.type === 'PseudoElementSelector'
           ) {
@@ -351,6 +362,7 @@ function processScopedSheet(
             children.push(child);
             return;
           }
+          // Not a selector
           if (
             child.type === 'Combinator'
             || child.type === 'WhiteSpace'
@@ -360,6 +372,7 @@ function processScopedSheet(
             return;
           }
           if (child.type === 'PseudoClassSelector') {
+            // `:global`
             if (child.name === GLOBAL_SELECTOR) {
               child.children?.forEach((innerChild) => {
                 children.push(innerChild);
@@ -483,7 +496,12 @@ function processJSXTemplate(
         }
       }
     }
-    path.replaceWith(t.jsxText(''));
+    const empty = t.jsxText('');
+    // softfix
+    empty.extra = {
+      raw: '',
+    };
+    path.replaceWith(empty);
   }
 }
 
@@ -609,7 +627,6 @@ export default function solidStyledPlugin(): PluginObj<State> {
               && t.isIdentifier(tag.property)
               && !tag.computed
             ) {
-              const targetName = tag.property.name;
               const binding = path.scope.getBindingIdentifier(tag.object.name);
               if (
                 binding

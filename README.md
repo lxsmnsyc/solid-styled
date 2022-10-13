@@ -8,17 +8,14 @@
 
 ```bash
 npm i solid-styled
-npm i -D babel-plugin-solid-styled
 ```
 
 ```bash
 yarn add solid-styled
-yarn add -D babel-plugin-solid-styled
 ```
 
 ```bash
 pnpm add solid-styled
-pnpm add -D babel-plugin-solid-styled
 ```
 
 ## Features
@@ -34,12 +31,12 @@ pnpm add -D babel-plugin-solid-styled
 
 ## Usage
 
-For `solid-styled` to make its magic work properly, you need to add the `babel-plugin-solid-styled` plugin in the babel configuration:
+For `solid-styled` to make its magic work properly, you need to add the `solid-styled/babel` plugin in the babel configuration:
 
 ### Vite
 
 ```js
-import solidStyled from 'babel-plugin-solid-styled';
+import solidStyled from 'solid-styled/babel';
 
 export default {
   plugins: [
@@ -57,7 +54,7 @@ export default {
 ### SolidStart / Astro / any Vite SSR framework
 
 ```js
-import solidStyled from 'babel-plugin-solid-styled';
+import solidStyled from 'solid-styled/babel';
 
 export default {
   plugins: [
@@ -77,7 +74,7 @@ export default {
 ```js
 {
   "plugins": [
-    "babel-plugin-solid-styled"
+    "solid-styled/babel"
   ]
 }
 ```
@@ -100,37 +97,6 @@ export default {
   // Path of the filename, used for hashing
   "source": "/path/to/file"
 }
-```
-
-### `<StyleRegistry>`
-
-`<StyleRegistry>` manages the lifecycle of stylesheets (for instance, on the client side, styles of a component get removed from memory if all instances of that component unmount). It needs to be included only once, preferably at the root of your SolidJS application.
-
-```js
-import { StyleRegistry } from 'solid-styled';
-
-<StyleRegistry>
-  <App />
-</StyleRegistry>
-```
-
-For SSR, you can pass an array to the `styles` prop of `<StyleRegistry>`. This array collects all of the "critical" (initial render) stylesheets, that which you can render as a string with `renderSheets`.
-
-```js
-import { renderSheets } from 'solid-styled';
-
-const styles = [];
-
-renderToString(() => (
-  <StyleRegistry styles={styles}>
-    <App />
-  </StyleRegistry>
-));
-
-// Render sheets
-// You can use the resulting sheet by inserting
-// it into an HTML template.
-const styles = renderSheets(styles);
 ```
 
 ### `css`
@@ -309,6 +275,30 @@ function Button() {
 You can also use `<style jsx global>` for declaring global styles.
 
 The main motivation for writing an alternative way of declaring styles with `<style jsx>` is to facilitate the migration from `solid-styled-jsx` to `solid-styled`. Possibly, some developers may as well use `<style jsx>` because of their familiarity with adding the styles inside the JSX.
+
+## SSR
+
+
+### `<StyleRegistry>`
+
+For SSR, you can pass an array to the `styles` prop of `<StyleRegistry>`. This array collects all of the "critical" (initial render) stylesheets, that which you can render as a string with `renderSheets`.
+
+```js
+import { renderSheets } from 'solid-styled';
+
+const styles = [];
+
+renderToString(() => (
+  <StyleRegistry styles={styles}>
+    <App />
+  </StyleRegistry>
+));
+
+// Render sheets
+// You can use the resulting sheet by inserting
+// it into an HTML template.
+const styles = renderSheets(styles);
+```
 
 ## Limitations
 
