@@ -150,13 +150,15 @@ function serializeStyle(source: JSX.CSSProperties): string {
 }
 
 export function mergeStyles(
-  source: JSX.CSSProperties | string,
+  source: JSX.CSSProperties | string | null | undefined,
   other: JSX.CSSProperties,
 ): string {
-  const sourceString = typeof source === 'string' ? source : serializeStyle(source);
   const otherString = serializeStyle(other);
-  const result = `${sourceString};${otherString}`;
-  return result;
+  if (source) {
+    const sourceString = typeof source === 'string' ? source : serializeStyle(source);
+    return `${sourceString};${otherString}`;
+  }
+  return otherString;
 }
 
 export function renderSheets(sheets: StyleData[]): string {
