@@ -237,9 +237,9 @@ css`
 which compiles into
 
 ```js
-useSolidStyled('xxxx', '*[data-s-xxxx]{color:red}');
+useSolidStyled('xxxx', '*[s\\:xxxx]{color:red}');
 
-<Dynamic component={props.as} data-s-xxxx style={vars()}>
+<Dynamic component={props.as} s:xxxx style={vars()}>
   {props.children}
 </Dynamic>
 ```
