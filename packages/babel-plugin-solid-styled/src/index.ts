@@ -9,9 +9,12 @@ function getFileId(file: string) {
   return xxHash32(file).toString(16);
 }
 
+// The identifier for the tagged template
 const TAGGED_TEMPLATE = 'css';
+// The module
 const SOURCE_MODULE = 'solid-styled';
-const SOLID_STYLED_ATTR = 'data-s';
+// The namespace used for scoping
+const SOLID_STYLED_NS = 's';
 const VARS_ID = 'vars';
 const SHEET_ID = 'sheet';
 const GLOBAL_SELECTOR = 'global';
@@ -82,8 +85,9 @@ function checkScopedAttribute(opening: t.JSXOpeningElement, sheetID: string): bo
     const attr = opening.attributes[i];
     if (
       t.isJSXAttribute(attr)
-      && t.isJSXIdentifier(attr.name)
-      && attr.name.name === `${SOLID_STYLED_ATTR}-${sheetID}`
+      && t.isJSXNamespacedName(attr.name)
+      && attr.name.namespace.name === SOLID_STYLED_NS
+      && attr.name.name.name === sheetID
     ) {
       return true;
     }
@@ -195,7 +199,10 @@ function transformJSX(
             return;
           }
           opening.attributes.push(t.jsxAttribute(
-            t.jsxIdentifier(`${SOLID_STYLED_ATTR}-${sheet.scope}`),
+            t.jsxNamespacedName(
+              t.jsxIdentifier(SOLID_STYLED_NS),
+              t.jsxIdentifier(sheet.scope),
+            ),
           ));
           // Check if there's any dynamic vars call
           if (!ctx.vars.has(functionParent)) {
@@ -276,12 +283,12 @@ function processScopedSheet(
   sheetID: string,
   ast: csstree.CssNode,
 ) {
-  // [data-s-${sheetID}]
+  // [s\:${sheetID}]
   const selector: csstree.AttributeSelector = {
     type: 'AttributeSelector',
     name: {
       type: 'Identifier',
-      name: `${SOLID_STYLED_ATTR}-${sheetID}`,
+      name: `${SOLID_STYLED_NS}\\:${sheetID}`,
     },
     matcher: null,
     flags: null,

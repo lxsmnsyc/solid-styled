@@ -16,7 +16,8 @@ interface StyleRegistryContext {
 
 const StyleRegistryContext = createContext<StyleRegistryContext>();
 
-const SOLID_SHEET_ATTR = 'data-s';
+const SOLID_SHEET_ATTR = 's:id';
+const SOLID_SHEET_ATTR_ESCAPED = 's\\:id';
 
 export interface StyleData {
   id: string;
@@ -33,7 +34,7 @@ export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
   const references = new Map<string, number>();
 
   if (!isServer) {
-    document.head.querySelectorAll(`style[${SOLID_SHEET_ATTR}]`).forEach((node) => {
+    document.head.querySelectorAll(`style[${SOLID_SHEET_ATTR_ESCAPED}]`).forEach((node) => {
       tracked.add(node.getAttribute(SOLID_SHEET_ATTR));
     });
   }
