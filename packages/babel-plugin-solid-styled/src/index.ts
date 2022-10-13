@@ -510,11 +510,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                   }
                 }
               }
-              path.replaceWith(t.jsxFragment(
-                t.jsxOpeningFragment(),
-                t.jsxClosingFragment(),
-                [],
-              ));
+              path.replaceWith(t.jsxText(''));
             }
           },
           TaggedTemplateExpression(path) {
