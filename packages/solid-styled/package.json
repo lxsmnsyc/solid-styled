@@ -10,7 +10,16 @@
       },
       "require": "./dist/cjs/production/index.cjs",
       "import": "./dist/esm/production/index.mjs",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/types/src/index.d.ts"
+    },
+    "./babel": {
+      "development": {
+        "require": "./dist/cjs/development/babel.cjs",
+        "import": "./dist/esm/development/babel.mjs"
+      },
+      "require": "./dist/cjs/production/babel.cjs",
+      "import": "./dist/esm/production/babel.mjs",
+      "types": "./dist/types/babel/index.d.ts"
     }
   },
   "files": [
@@ -22,16 +31,28 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.18.5",
+    "@types/babel__core": "^7.1.19",
+    "@types/babel__traverse": "^7.17.1",
     "@types/node": "^18.7.3",
     "eslint": "^8.23.1",
     "eslint-config-lxsmnsyc": "^0.4.8",
     "pridepack": "^2.3.0",
     "solid-js": "^1.5.6",
     "tslib": "^2.4.0",
-    "typescript": "^4.8.3"
+    "typescript": "^4.8.4"
   },
   "peerDependencies": {
+    "@babel/core": "^7.16",
     "solid-js": "^1.2"
+  },
+  "dependencies": {
+    "@babel/helper-module-imports": "^7.16.7",
+    "@babel/traverse": "^7.17.9",
+    "@babel/types": "^7.17.0",
+    "@types/css-tree": "^1.0.7",
+    "css-tree": "^2.1.0",
+    "js-xxhash": "^1.0.4"
   },
   "description": "Reactive stylesheets for SolidJS",
   "repository": {
@@ -59,9 +80,13 @@
     "dev": "pridepack dev"
   },
   "typesVersions": {
-    "*": {}
+    "*": {
+      "babel": [
+        "./dist/types/babel/index.d.ts"
+      ]
+    }
   },
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/types/src/index.d.ts",
   "main": "./dist/cjs/production/index.cjs",
   "module": "./dist/esm/production/index.mjs"
 }

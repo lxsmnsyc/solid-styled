@@ -16,7 +16,46 @@ interface StyleRegistryContext {
 
 const StyleRegistryContext = createContext<StyleRegistryContext>();
 
-const SOLID_SHEET_ATTR = 'data-s';
+const SOLID_SHEET_ATTR = 's:id';
+const SOLID_SHEET_ATTR_ESCAPED = 's\\:id';
+
+const tracked = new Set();
+const references = new Map<string, number>();
+
+// Hydrate the sheets
+if (!isServer) {
+  document.head.querySelectorAll(`style[${SOLID_SHEET_ATTR_ESCAPED}]`).forEach((node) => {
+    tracked.add(node.getAttribute(SOLID_SHEET_ATTR));
+  });
+}
+
+function insert(id: string, sheet: string) {
+  if (!tracked.has(id)) {
+    tracked.add(id);
+
+    if (!isServer) {
+      const node = document.createElement('style');
+      node.setAttribute(SOLID_SHEET_ATTR, id);
+      node.innerHTML = sheet;
+      document.head.appendChild(node);
+    }
+  }
+  references.set(id, (references.get(id) ?? 0) + 1);
+}
+
+function remove(id: string) {
+  const count = references.get(id) ?? 0;
+  if (count > 1) {
+    references.set(id, count - 1);
+  } else {
+    references.set(id, 0);
+    const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR}="${id}"]`);
+    if (node) {
+      document.head.removeChild(node);
+    }
+    tracked.delete(id);
+  }
+}
 
 export interface StyleData {
   id: string;
@@ -29,48 +68,21 @@ export interface StyleRegistryProps {
 }
 
 export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
-  const tracked = new Set();
-  const references = new Map<string, number>();
+  const sheets = new Set<string>();
 
-  if (!isServer) {
-    document.head.querySelectorAll(`style[${SOLID_SHEET_ATTR}]`).forEach((node) => {
-      tracked.add(node.getAttribute(SOLID_SHEET_ATTR));
-    });
-  }
-
-  function insert(id: string, sheet: string) {
-    if (!tracked.has(id)) {
-      tracked.add(id);
-
+  function wrappedInsert(id: string, sheet: string) {
+    if (!sheets.has(id)) {
+      sheets.add(id);
       if (isServer) {
         props.styles?.push({ id, sheet });
-      } else {
-        const node = document.createElement('style');
-        node.setAttribute(SOLID_SHEET_ATTR, id);
-        node.innerHTML = sheet;
-        document.head.appendChild(node);
       }
     }
-    references.set(id, (references.get(id) ?? 0) + 1);
-  }
-
-  function remove(id: string) {
-    const count = references.get(id) ?? 0;
-    if (count > 1) {
-      references.set(id, count - 1);
-    } else {
-      references.set(id, 0);
-      const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR}="${id}"]`);
-      if (node) {
-        document.head.removeChild(node);
-      }
-      tracked.delete(id);
-    }
+    insert(id, sheet);
   }
 
   return (
     createComponent(StyleRegistryContext.Provider, {
-      value: { insert, remove },
+      value: { insert: wrappedInsert, remove },
       get children() {
         return props.children;
       },
@@ -84,11 +96,7 @@ export function useSolidStyled(
   id: string,
   sheet: string,
 ): void {
-  const ctx = useContext(StyleRegistryContext);
-
-  if (!ctx) {
-    throw new Error('Missing StyleRegistry');
-  }
+  const ctx = useContext(StyleRegistryContext) ?? { insert, remove };
   ctx.insert(id, sheet);
   onCleanup(() => ctx.remove(id));
 }
@@ -142,13 +150,15 @@ function serializeStyle(source: JSX.CSSProperties): string {
 }
 
 export function mergeStyles(
-  source: JSX.CSSProperties | string,
+  source: JSX.CSSProperties | string | null | undefined,
   other: JSX.CSSProperties,
 ): string {
-  const sourceString = typeof source === 'string' ? source : serializeStyle(source);
   const otherString = serializeStyle(other);
-  const result = `${sourceString};${otherString}`;
-  return result;
+  if (source) {
+    const sourceString = typeof source === 'string' ? source : serializeStyle(source);
+    return `${sourceString};${otherString}`;
+  }
+  return otherString;
 }
 
 export function renderSheets(sheets: StyleData[]): string {
