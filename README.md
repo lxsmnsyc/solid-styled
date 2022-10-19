@@ -31,14 +31,14 @@ pnpm add solid-styled
 
 ## Usage
 
-For `solid-styled` to make its magic work properly, you need to add the `solid-styled/babel` plugin in the babel configuration:
-
 ### Integrations
 
-- [Rollup](https://github.com/lxsmnsyc/solid-styled)
-- [Vite](https://github.com/lxsmnsyc/solid-styled)
+- [Rollup](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/rollup)
+- [Vite](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/vite)
 
 ### Babel
+
+For `solid-styled` to make its magic work properly, you need to add the `solid-styled/babel` plugin in the babel configuration:
 
 ```js
 {
