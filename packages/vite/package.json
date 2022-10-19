@@ -32,7 +32,7 @@
     "@rollup/pluginutils": "^5.0.1"
   },
   "peerDependencies": {
-    "solid-styled": "^0",
+    "solid-styled": ">=0.7",
     "vite": "^3"
   },
   "scripts": {
