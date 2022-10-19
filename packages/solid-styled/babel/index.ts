@@ -46,8 +46,9 @@ function getUniqueId(ctx: StateContext) {
   return `${ctx.ns}-${currentID}`;
 }
 
-function getPrefix(ctx: StateContext) {
-  return ctx.opts.prefix ? `${ctx.opts.prefix}-` : '';
+function getPrefix(ctx: StateContext, isVar = false) {
+  const defaultPrefix = isVar ? 'v-' : 'c-';
+  return ctx.opts.prefix ? `${ctx.opts.prefix}-` : defaultPrefix;
 }
 
 function getHookIdentifier(
@@ -262,7 +263,7 @@ function replaceDynamicTemplate(
     if (currentExpr < expressions.length) {
       const expr = expressions[currentExpr];
       if (t.isExpression(expr)) {
-        const id = `--s-${getPrefix(ctx)}${getUniqueId(ctx)}`;
+        const id = `--s-${getPrefix(ctx, true)}${getUniqueId(ctx)}`;
         sheet = `${sheet}var(${id})`;
         variables.push(t.objectProperty(
           t.stringLiteral(id),
