@@ -33,41 +33,10 @@ pnpm add solid-styled
 
 For `solid-styled` to make its magic work properly, you need to add the `solid-styled/babel` plugin in the babel configuration:
 
-### Vite
+### Integrations
 
-```js
-import solidStyled from 'solid-styled/babel';
-
-export default {
-  plugins: [
-    solidPlugin({
-      babel: {
-        plugins: [
-          [solidStyled, {}]
-        ],
-      },
-    }),
-  ]
-}
-```
-
-### SolidStart / Astro / any Vite SSR framework
-
-```js
-import solidStyled from 'solid-styled/babel';
-
-export default {
-  plugins: [
-    solidPlugin({
-      babel: (source, id) => ({
-        plugins: [
-          [solidStyled, { source: id }]
-        ],
-      }),
-    }),
-  ]
-}
-```
+- [Rollup](https://github.com/lxsmnsyc/solid-styled)
+- [Vite](https://github.com/lxsmnsyc/solid-styled)
 
 ### Babel
 
@@ -79,7 +48,7 @@ export default {
 }
 ```
 
-### Config options
+#### Config options
 
 ```js
 {
@@ -277,7 +246,6 @@ You can also use `<style jsx global>` for declaring global styles.
 The main motivation for writing an alternative way of declaring styles with `<style jsx>` is to facilitate the migration from `solid-styled-jsx` to `solid-styled`. Possibly, some developers may as well use `<style jsx>` because of their familiarity with adding the styles inside the JSX.
 
 ## SSR
-
 
 ### `<StyleRegistry>`
 

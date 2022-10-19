@@ -1,19 +1,16 @@
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
-import solidStyled from 'solid-styled/babel';
+import solidStyled from 'vite-plugin-solid-styled';
 
 export default defineConfig({
   plugins: [
-    solidPlugin({
-      babel: {
-        plugins: [
-          [solidStyled, {
-            verbose: true,
-            prefix: 'example',
-            // ssr: true
-          }]
-        ],
-      },
+    solidPlugin(),
+    solidStyled({
+      prefix: 'example',
+      filter: {
+        include: 'src/**/*.tsx',
+        exclude: 'node_modules/**/*.{ts,js}',
+      }
     }),
   ],
 });
