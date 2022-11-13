@@ -16,15 +16,15 @@
   ],
   "devDependencies": {
     "@types/babel__core": "^7.1.19",
-    "@types/node": "^18.11.0",
-    "eslint": "^8.25.0",
+    "@types/node": "^18.11.9",
+    "eslint": "^8.27.0",
     "eslint-config-lxsmnsyc": "^0.4.8",
     "pridepack": "2.3.0",
     "solid-styled": "0.7.3",
     "tslib": "^2.4.0",
     "typescript": "^4.8.4",
-    "vite": "^3.1.8",
-    "vitest": "^0.24.3"
+    "vite": "^3.2.3",
+    "vitest": "^0.25.1"
   },
   "dependencies": {
     "@babel/core": "^7.19.3",
