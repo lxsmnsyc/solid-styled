@@ -253,6 +253,7 @@ function replaceDynamicTemplate(
   ctx: StateContext,
   { expressions, quasis }: t.TemplateLiteral,
 ) {
+  // Collects all the variables
   const variables: t.ObjectProperty[] = [];
 
   let sheet = '';
@@ -263,8 +264,11 @@ function replaceDynamicTemplate(
     if (currentExpr < expressions.length) {
       const expr = expressions[currentExpr];
       if (t.isExpression(expr)) {
+        // Create a new variable
         const id = `--s-${getPrefix(ctx, true)}${getUniqueId(ctx)}`;
+        // Push the variable access
         sheet = `${sheet}var(${id})`;
+        // Register the variable and its expression
         variables.push(t.objectProperty(
           t.stringLiteral(id),
           expr,
@@ -393,12 +397,13 @@ function processScopedSheet(
   });
 }
 
-function processTemplate(
+function processCSSTemplate(
   ctx: StateContext,
   sheetID: string,
   templateLiteral: t.TemplateLiteral,
   isScoped: boolean,
 ) {
+  // Replace the template's dynamic parts with CSS variables
   const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
 
   const ast = csstree.parse(sheet);
@@ -454,7 +459,7 @@ function processJSXTemplate(
       for (let i = 0, len = path.node.children.length; i < len; i += 1) {
         const child = path.node.children[i];
         if (t.isJSXExpressionContainer(child) && t.isTemplateLiteral(child.expression)) {
-          const { sheet: compiledSheet, variables } = processTemplate(
+          const { sheet: compiledSheet, variables } = processCSSTemplate(
             ctx,
             sheet.scope,
             child.expression,
@@ -506,7 +511,7 @@ function processJSXTemplate(
   }
 }
 
-function processTaggedTemplate(
+function processCSSTaggedTemplate(
   ctx: StateContext,
   programPath: NodePath<t.Program>,
   path: NodePath<t.TaggedTemplateExpression>,
@@ -520,7 +525,7 @@ function processTaggedTemplate(
     );
 
     // Convert template into a CSS sheet
-    const { sheet: compiledSheet, variables } = processTemplate(
+    const { sheet: compiledSheet, variables } = processCSSTemplate(
       ctx,
       sheet.scope,
       path.node.quasi,
@@ -616,7 +621,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                 binding
                 && validIdentifiers.has(binding)
               ) {
-                processTaggedTemplate(
+                processCSSTaggedTemplate(
                   ctx,
                   programPath,
                   path,
@@ -633,7 +638,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                 binding
                 && validNamespaces.has(binding)
               ) {
-                processTaggedTemplate(
+                processCSSTaggedTemplate(
                   ctx,
                   programPath,
                   path,
