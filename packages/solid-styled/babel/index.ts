@@ -379,9 +379,11 @@ function processScopedSheet(
           if (child.type === 'PseudoClassSelector') {
             // `:global`
             if (child.name === GLOBAL_SELECTOR) {
-              child.children?.forEach((innerChild) => {
-                children.push(innerChild);
-              });
+              if (child.children) {
+                child.children.forEach((innerChild) => {
+                  children.push(innerChild);
+                });
+              }
             } else {
               if (shouldPush) {
                 children.push(selector);
