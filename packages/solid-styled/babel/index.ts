@@ -302,9 +302,43 @@ function processScopedSheet(
     value: null,
   };
 
+  const keyframes = new Set();
+
   // Flag to indicate that the currently visited
   // node is inside a global block
   let inGlobal = false;
+
+  // Check all keyframes first
+  csstree.walk(ast, {
+    leave(node: csstree.CssNode) {
+      // Check if block is `@global`
+      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
+        inGlobal = false;
+      }
+    },
+    enter(node: csstree.CssNode) {
+      // No transforms needed if in global
+      if (inGlobal) {
+        return;
+      }
+      // Check if block is `@global`
+      if (node.type === 'Atrule') {
+        if (node.name === 'global' && node.block) {
+          // Shift to global mode
+          inGlobal = true;
+          return;
+        }
+        if (node.name === 'keyframes' && node.block && node.prelude && node.prelude.type === 'AtrulePrelude') {
+          node.prelude.children.forEach((child) => {
+            if (child.type === 'Identifier') {
+              keyframes.add(child.name);
+              child.name = `${sheetID}-${child.name}`;
+            }
+          });
+        }
+      }
+    },
+  });
 
   csstree.walk(ast, {
     leave(node: csstree.CssNode) {
@@ -337,6 +371,26 @@ function processScopedSheet(
         // Shift to global mode
         inGlobal = true;
         return;
+      }
+      // Transform animations
+      if (node.type === 'Declaration') {
+        // animation-name
+        switch (node.property) {
+          case 'animation-name':
+          // For some reason, animation has an arbitrary sequence
+          // so we just have to guess
+          case 'animation':
+            if (node.value.type === 'Value') {
+              node.value.children.forEach((item) => {
+                if (item.type === 'Identifier' && keyframes.has(item.name)) {
+                  item.name = `${sheetID}-${item.name}`;
+                }
+              });
+            }
+            break;
+          default:
+            break;
+        }
       }
       if (node.type === 'Selector') {
         const children: csstree.CssNode[] = [];
