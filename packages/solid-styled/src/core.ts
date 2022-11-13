@@ -49,9 +49,11 @@ function remove(id: string) {
     references.set(id, count - 1);
   } else {
     references.set(id, 0);
-    const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR}="${id}"]`);
-    if (node) {
-      document.head.removeChild(node);
+    if (!isServer) {
+      const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR}="${id}"]`);
+      if (node) {
+        document.head.removeChild(node);
+      }
     }
     tracked.delete(id);
   }
@@ -73,8 +75,8 @@ export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
   function wrappedInsert(id: string, sheet: string) {
     if (!sheets.has(id)) {
       sheets.add(id);
-      if (isServer) {
-        props.styles?.push({ id, sheet });
+      if (isServer && props.styles) {
+        props.styles.push({ id, sheet });
       }
     }
     insert(id, sheet);
@@ -110,7 +112,11 @@ interface CSSVars {
 function createLazyMemo<T>(fn: () => T): () => T {
   let s: () => T;
   let dispose: (() => void) | undefined;
-  onCleanup(() => dispose?.());
+  onCleanup(() => {
+    if (dispose) {
+      dispose();
+    }
+  });
   return () => {
     if (!s) {
       s = createRoot((d) => {
@@ -162,8 +168,12 @@ export function mergeStyles(
 }
 
 export function renderSheets(sheets: StyleData[]): string {
-  return sheets.map((data) => `<style ${SOLID_SHEET_ATTR}="${data.id}">${data.sheet}</style>`)
-    .join('');
+  let sheet = '';
+  for (let i = 0, len = sheets.length; i < len; i += 1) {
+    const data = sheets[i];
+    sheet = `${sheet}<style ${SOLID_SHEET_ATTR}="${data.id}">${data.sheet}</style>`;
+  }
+  return sheet;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
