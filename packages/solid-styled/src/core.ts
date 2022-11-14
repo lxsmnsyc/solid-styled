@@ -96,11 +96,13 @@ export type SolidStyledVariables = Record<string, string>;
 
 export function useSolidStyled(
   id: string,
+  offset: string,
   sheet: string,
 ): void {
+  const index = `${id}-${offset}`;
   const ctx = useContext(StyleRegistryContext) ?? { insert, remove };
-  ctx.insert(id, sheet);
-  onCleanup(() => ctx.remove(id));
+  ctx.insert(index, sheet);
+  onCleanup(() => ctx.remove(index));
 }
 
 type CSSVarsMerge = () => Record<string, string>;

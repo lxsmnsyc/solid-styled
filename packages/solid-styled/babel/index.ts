@@ -539,7 +539,8 @@ function processJSXTemplate(
               t.callExpression(
                 getHookIdentifier(ctx, path, 'useSolidStyled', SOURCE_MODULE),
                 [
-                  t.binaryExpression('+', sheet.id, t.stringLiteral(`-${current}`)),
+                  sheet.id,
+                  t.numericLiteral(current),
                   cssID,
                 ],
               ),
@@ -606,7 +607,8 @@ function processCSSTaggedTemplate(
         t.callExpression(
           getHookIdentifier(ctx, path, 'useSolidStyled', SOURCE_MODULE),
           [
-            t.binaryExpression('+', sheet.id, t.stringLiteral(`-${current}`)),
+            sheet.id,
+            t.numericLiteral(current),
             cssID,
           ],
         ),
