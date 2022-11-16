@@ -49,7 +49,7 @@ function remove(id: string) {
     references.set(id, count - 1);
   } else {
     references.set(id, 0);
-    const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR}="${id}"]`);
+    const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`);
     if (node) {
       document.head.removeChild(node);
     }
