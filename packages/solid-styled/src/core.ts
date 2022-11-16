@@ -50,7 +50,7 @@ function remove(id: string) {
   } else {
     references.set(id, 0);
     if (!isServer) {
-      const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR}="${id}"]`);
+      const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`);
       if (node) {
         document.head.removeChild(node);
       }
