@@ -178,7 +178,43 @@ export function renderSheets(sheets: StyleData[]): string {
   return sheet;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function css(_template: TemplateStringsArray, ..._spans: (string | boolean)[]): void {
-  throw new Error('Unexpected use of `css`. Make sure that solid-styled\'s plugin is setup correctly.');
+// export type CSSStyleSpan<Args extends any[]> = (...args: Args) => string | boolean;
+// export type CSSStyleFunction<Args extends any[]> = (...args: Args) => Record<string, any>;
+
+// export interface CSSClassFunction {
+
+// }
+
+export interface CSSConstructorNS {
+  // style<Args extends any[]>(template: TemplateStringsArray, ...spans: CSSStyleSpan<Args>[]): CSSStyleFunction<Args>;
+  // class(template: TemplateStringsArray): string;
 }
+
+export interface CSSBaseConstructor {
+  (template: TemplateStringsArray, ...spans: (string | boolean)[]): void;
+}
+
+export type CSSConstructor = CSSBaseConstructor & CSSConstructorNS;
+
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+function invariant(methodName: string) {
+  return new Error(`Unexpected use of \`${methodName}\`. Make sure that solid-styled\'s plugin is setup correctly.`);
+}
+
+// const cssNamespace: CSSConstructorNS = {
+//   style() {
+//     throw invariant('css.style');
+//   },
+//   class() {
+//     throw invariant('css.class');
+//   },
+// };
+
+const cssConstructor: CSSBaseConstructor = () => {
+  throw invariant('css');
+};
+
+// export const css: CSSConstructor = /* @__PURE__ */Object.assign(cssConstructor, cssNamespace);
+export const css: CSSConstructor = cssConstructor;
