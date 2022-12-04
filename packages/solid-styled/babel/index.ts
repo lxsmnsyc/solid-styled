@@ -253,6 +253,7 @@ function replaceDynamicTemplate(
   ctx: StateContext,
   { expressions, quasis }: t.TemplateLiteral,
 ) {
+  // Collects all the variables
   const variables: t.ObjectProperty[] = [];
 
   let sheet = '';
@@ -263,8 +264,11 @@ function replaceDynamicTemplate(
     if (currentExpr < expressions.length) {
       const expr = expressions[currentExpr];
       if (t.isExpression(expr)) {
+        // Create a new variable
         const id = `--s-${getPrefix(ctx, true)}${getUniqueId(ctx)}`;
+        // Push the variable access
         sheet = `${sheet}var(${id})`;
+        // Register the variable and its expression
         variables.push(t.objectProperty(
           t.stringLiteral(id),
           expr,
@@ -298,9 +302,43 @@ function processScopedSheet(
     value: null,
   };
 
+  const keyframes = new Set();
+
   // Flag to indicate that the currently visited
   // node is inside a global block
   let inGlobal = false;
+
+  // Check all keyframes first
+  csstree.walk(ast, {
+    leave(node: csstree.CssNode) {
+      // Check if block is `@global`
+      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
+        inGlobal = false;
+      }
+    },
+    enter(node: csstree.CssNode) {
+      // No transforms needed if in global
+      if (inGlobal) {
+        return;
+      }
+      // Check if block is `@global`
+      if (node.type === 'Atrule') {
+        if (node.name === 'global' && node.block) {
+          // Shift to global mode
+          inGlobal = true;
+          return;
+        }
+        if (node.name === 'keyframes' && node.block && node.prelude && node.prelude.type === 'AtrulePrelude') {
+          node.prelude.children.forEach((child) => {
+            if (child.type === 'Identifier') {
+              keyframes.add(child.name);
+              child.name = `${sheetID}-${child.name}`;
+            }
+          });
+        }
+      }
+    },
+  });
 
   csstree.walk(ast, {
     leave(node: csstree.CssNode) {
@@ -333,6 +371,26 @@ function processScopedSheet(
         // Shift to global mode
         inGlobal = true;
         return;
+      }
+      // Transform animations
+      if (node.type === 'Declaration') {
+        // animation-name
+        switch (node.property) {
+          case 'animation-name':
+          // For some reason, animation has an arbitrary sequence
+          // so we just have to guess
+          case 'animation':
+            if (node.value.type === 'Value') {
+              node.value.children.forEach((item) => {
+                if (item.type === 'Identifier' && keyframes.has(item.name)) {
+                  item.name = `${sheetID}-${item.name}`;
+                }
+              });
+            }
+            break;
+          default:
+            break;
+        }
       }
       if (node.type === 'Selector') {
         const children: csstree.CssNode[] = [];
@@ -375,9 +433,11 @@ function processScopedSheet(
           if (child.type === 'PseudoClassSelector') {
             // `:global`
             if (child.name === GLOBAL_SELECTOR) {
-              child.children?.forEach((innerChild) => {
-                children.push(innerChild);
-              });
+              if (child.children) {
+                child.children.forEach((innerChild) => {
+                  children.push(innerChild);
+                });
+              }
             } else {
               if (shouldPush) {
                 children.push(selector);
@@ -393,12 +453,13 @@ function processScopedSheet(
   });
 }
 
-function processTemplate(
+function processCSSTemplate(
   ctx: StateContext,
   sheetID: string,
   templateLiteral: t.TemplateLiteral,
   isScoped: boolean,
 ) {
+  // Replace the template's dynamic parts with CSS variables
   const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
 
   const ast = csstree.parse(sheet);
@@ -454,7 +515,7 @@ function processJSXTemplate(
       for (let i = 0, len = path.node.children.length; i < len; i += 1) {
         const child = path.node.children[i];
         if (t.isJSXExpressionContainer(child) && t.isTemplateLiteral(child.expression)) {
-          const { sheet: compiledSheet, variables } = processTemplate(
+          const { sheet: compiledSheet, variables } = processCSSTemplate(
             ctx,
             sheet.scope,
             child.expression,
@@ -478,7 +539,8 @@ function processJSXTemplate(
               t.callExpression(
                 getHookIdentifier(ctx, path, 'useSolidStyled', SOURCE_MODULE),
                 [
-                  t.binaryExpression('+', sheet.id, t.stringLiteral(`-${current}`)),
+                  sheet.id,
+                  t.numericLiteral(current),
                   cssID,
                 ],
               ),
@@ -506,7 +568,7 @@ function processJSXTemplate(
   }
 }
 
-function processTaggedTemplate(
+function processCSSTaggedTemplate(
   ctx: StateContext,
   programPath: NodePath<t.Program>,
   path: NodePath<t.TaggedTemplateExpression>,
@@ -520,7 +582,7 @@ function processTaggedTemplate(
     );
 
     // Convert template into a CSS sheet
-    const { sheet: compiledSheet, variables } = processTemplate(
+    const { sheet: compiledSheet, variables } = processCSSTemplate(
       ctx,
       sheet.scope,
       path.node.quasi,
@@ -545,7 +607,8 @@ function processTaggedTemplate(
         t.callExpression(
           getHookIdentifier(ctx, path, 'useSolidStyled', SOURCE_MODULE),
           [
-            t.binaryExpression('+', sheet.id, t.stringLiteral(`-${current}`)),
+            sheet.id,
+            t.numericLiteral(current),
             cssID,
           ],
         ),
@@ -616,7 +679,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                 binding
                 && validIdentifiers.has(binding)
               ) {
-                processTaggedTemplate(
+                processCSSTaggedTemplate(
                   ctx,
                   programPath,
                   path,
@@ -633,7 +696,7 @@ export default function solidStyledPlugin(): PluginObj<State> {
                 binding
                 && validNamespaces.has(binding)
               ) {
-                processTaggedTemplate(
+                processCSSTaggedTemplate(
                   ctx,
                   programPath,
                   path,
