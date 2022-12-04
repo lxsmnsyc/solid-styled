@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-solid-styled",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "type": "module",
   "files": [
     "dist",
@@ -21,7 +21,7 @@
     "eslint-config-lxsmnsyc": "^0.4.8",
     "pridepack": "2.3.0",
     "rollup": "^3.5.1",
-    "solid-styled": "0.7.3",
+    "solid-styled": "0.7.4",
     "tslib": "^2.4.1",
     "typescript": "^4.9.3",
     "vitest": "^0.25.3"
