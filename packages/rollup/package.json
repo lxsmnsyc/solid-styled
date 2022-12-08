@@ -46,7 +46,7 @@
     "dev": "pridepack dev",
     "test": "vitest"
   },
-  "description": "Compile-time reactivity for JS",
+  "description": "Rollup plugin for solid-styled",
   "repository": {
     "url": "https://github.com/lxsmnsyc/solid-styled.git",
     "type": "git"

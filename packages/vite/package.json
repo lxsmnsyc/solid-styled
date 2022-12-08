@@ -46,12 +46,12 @@
     "dev": "pridepack dev",
     "test": "vitest"
   },
-  "description": "Compile-time reactivity for JS",
+  "description": "Vite plugin for solid-styled",
   "repository": {
     "url": "https://github.com/lxsmnsyc/solid-styled.git",
     "type": "git"
   },
-  "homepage": "https://github.com/lxsmnsyc/solid-styled/packages/rollup",
+  "homepage": "https://github.com/lxsmnsyc/solid-styled/packages/vite",
   "bugs": {
     "url": "https://github.com/lxsmnsyc/solid-styled/issues"
   },
