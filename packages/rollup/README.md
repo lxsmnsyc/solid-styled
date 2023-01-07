@@ -28,8 +28,8 @@ solidStyled({
   verbose: true, // defaults to false
   prefix: 'my-prefix', // optional
   filter: {
-    include: 'src/**/*.ts',
-    exclude: 'node_modules/**/*.{ts,js}',
+    include: 'src/**/*.{ts,js,tsx,jsx}',
+    exclude: 'node_modules/**/*.{ts,js,tsx,jsx}',
   },
 })
 ```
