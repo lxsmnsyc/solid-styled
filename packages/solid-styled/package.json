@@ -31,16 +31,16 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.20.5",
-    "@types/babel__core": "^7.1.20",
+    "@babel/core": "^7.20.12",
+    "@types/babel__core": "^7.20.0",
     "@types/babel__traverse": "^7.18.3",
-    "@types/node": "^18.11.10",
-    "eslint": "^8.29.0",
+    "@types/node": "^18.11.18",
+    "eslint": "^8.32.0",
     "eslint-config-lxsmnsyc": "^0.4.8",
-    "pridepack": "^2.3.0",
-    "solid-js": "^1.6.2",
+    "pridepack": "^2.4.0",
+    "solid-js": "^1.6.9",
     "tslib": "^2.4.1",
-    "typescript": "^4.9.3"
+    "typescript": "^4.9.4"
   },
   "peerDependencies": {
     "@babel/core": "^7",
@@ -48,10 +48,10 @@
   },
   "dependencies": {
     "@babel/helper-module-imports": "^7.18.6",
-    "@babel/traverse": "^7.20.5",
-    "@babel/types": "^7.20.5",
-    "@types/css-tree": "^2.0.0",
-    "css-tree": "^2.3.0",
+    "@babel/traverse": "^7.20.13",
+    "@babel/types": "^7.20.7",
+    "@types/css-tree": "^2.0.1",
+    "css-tree": "^2.3.1",
     "js-xxhash": "^2.0.0"
   },
   "description": "Reactive stylesheets for SolidJS",
