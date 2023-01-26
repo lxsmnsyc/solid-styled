@@ -268,6 +268,16 @@ renderToString(() => (
 const styles = renderSheets(styles);
 ```
 
+## PostCSS
+
+`solid-styled` uses [PostCSS](https://github.com/postcss/postcs) for processing the CSS templates. You can check the following plugins, that are used by default, for the features that are supported:
+
+- [Autoprefixer](https://autoprefixer.github.io/)
+- [`postcss-nested`](https://github.com/postcss/postcss-nested)
+- [CSSNano](https://cssnano.co/)
+
+In the future, `solid-styled` can possibly allow to load the PostCSS config and to allow other plugins to be used.
+
 ## Limitations
 
 - Scoping `css` can only be called directly on components. This is so that the Babel plugin can find and transform the JSX of the component. Global `css` (i.e. `:global` or `@global`) can be used inside other functions i.e. hooks, utilities.

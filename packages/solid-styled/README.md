@@ -31,45 +31,14 @@ pnpm add solid-styled
 
 ## Usage
 
-For `solid-styled` to make its magic work properly, you need to add the `solid-styled/babel` plugin in the babel configuration:
+### Integrations
 
-### Vite
-
-```js
-import solidStyled from 'solid-styled/babel';
-
-export default {
-  plugins: [
-    solidPlugin({
-      babel: {
-        plugins: [
-          [solidStyled, {}]
-        ],
-      },
-    }),
-  ]
-}
-```
-
-### SolidStart / Astro / any Vite SSR framework
-
-```js
-import solidStyled from 'solid-styled/babel';
-
-export default {
-  plugins: [
-    solidPlugin({
-      babel: (source, id) => ({
-        plugins: [
-          [solidStyled, { source: id }]
-        ],
-      }),
-    }),
-  ]
-}
-```
+- [Rollup](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/rollup)
+- [Vite](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/vite)
 
 ### Babel
+
+For `solid-styled` to make its magic work properly, you need to add the `solid-styled/babel` plugin in the babel configuration:
 
 ```js
 {
@@ -79,7 +48,7 @@ export default {
 }
 ```
 
-### Config options
+#### Config options
 
 ```js
 {
@@ -278,7 +247,6 @@ The main motivation for writing an alternative way of declaring styles with `<st
 
 ## SSR
 
-
 ### `<StyleRegistry>`
 
 For SSR, you can pass an array to the `styles` prop of `<StyleRegistry>`. This array collects all of the "critical" (initial render) stylesheets, that which you can render as a string with `renderSheets`.
@@ -299,6 +267,16 @@ renderToString(() => (
 // it into an HTML template.
 const styles = renderSheets(styles);
 ```
+
+## PostCSS
+
+`solid-styled` uses [PostCSS](https://github.com/postcss/postcs) for processing the CSS templates. You can check the following plugins, that are used by default, for the features that are supported:
+
+- [Autoprefixer](https://autoprefixer.github.io/)
+- [`postcss-nested`](https://github.com/postcss/postcss-nested)
+- [CSSNano](https://cssnano.co/)
+
+In the future, `solid-styled` can possibly allow to load the PostCSS config and to allow other plugins to be used.
 
 ## Limitations
 
