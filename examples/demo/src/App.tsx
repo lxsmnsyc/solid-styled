@@ -29,7 +29,11 @@ function ShowButton(): JSX.Element {
             color: white;
             font-size: 2rem;
             /* border-radius: 0.5rem; */
-            background-color: ${red() ? '#ef4444' : '#3b82f6'};
+            background-image: linear-gradient(
+              to top, 
+              ${red() ? '#ff0844' : '#48c6ef'} 0%, 
+              ${red() ? '#ffb199' : '#6f86d6'} 100%
+            );
           }
         `}
       </style>
@@ -69,7 +73,11 @@ function ToggleButton(): JSX.Element {
       color: white;
       font-size: 2rem;
       border-radius: 0.5rem;
-      background-color: ${show() ? '#ef4444' : '#3b82f6'};
+      background-image: linear-gradient(
+        to top, 
+        ${show() ? '#ff0844' : '#48c6ef'} 0%, 
+        ${show() ? '#ffb199' : '#6f86d6'} 100%
+      );
     }
   `;
 
@@ -110,10 +118,10 @@ function Main(): JSX.Element {
     div {
       display: flex;
       flex-direction: column;
-    }
 
-    div > :global(* + *) {
-      margin-top: 0.5rem;
+      > :global(* + *) {
+        margin-top: 0.5rem;
+      }
     }
   `;
 
