@@ -51,8 +51,12 @@
     "@babel/traverse": "^7.20.13",
     "@babel/types": "^7.20.7",
     "@types/css-tree": "^2.0.1",
+    "autoprefixer": "^10.4.13",
     "css-tree": "^2.3.1",
-    "js-xxhash": "^2.0.0"
+    "cssnano": "^5.1.14",
+    "js-xxhash": "^2.0.0",
+    "postcss": "^8.4.21",
+    "postcss-nested": "^6.0.0"
   },
   "description": "Reactive stylesheets for SolidJS",
   "repository": {

@@ -1,3 +1,7 @@
+import postcss from 'postcss';
+import autoprefixer from 'autoprefixer';
+import cssnano from 'cssnano';
+import postcssNested from 'postcss-nested';
 import { PluginObj } from '@babel/core';
 import { addNamed } from '@babel/helper-module-imports';
 import { NodePath, Scope } from '@babel/traverse';
@@ -284,6 +288,26 @@ function replaceDynamicTemplate(
   };
 }
 
+function processPostCSS(
+  source: string,
+  content: string,
+) {
+  const result = postcss([
+    cssnano({
+      plugins: [
+        autoprefixer,
+        postcssNested,
+      ],
+    }),
+  ]);
+
+  const processed = result.process(content, {
+    from: source,
+  });
+
+  return processed.css;
+}
+
 function processScopedSheet(
   sheetID: string,
   ast: csstree.CssNode,
@@ -461,8 +485,8 @@ function processCSSTemplate(
 ) {
   // Replace the template's dynamic parts with CSS variables
   const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
-
-  const ast = csstree.parse(sheet);
+  const processed = processPostCSS(ctx.ns, sheet);
+  const ast = csstree.parse(processed);
 
   if (isScoped) {
     processScopedSheet(sheetID, ast);
