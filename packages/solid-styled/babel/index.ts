@@ -1,7 +1,5 @@
-import postcss from 'postcss';
-import autoprefixer from 'autoprefixer';
-import cssnano from 'cssnano';
-import postcssNested from 'postcss-nested';
+import * as lightningcss from 'lightningcss';
+import browserslist from 'browserslist';
 import { PluginObj } from '@babel/core';
 import { addNamed } from '@babel/helper-module-imports';
 import { NodePath, Scope } from '@babel/traverse';
@@ -27,6 +25,7 @@ export interface SolidStyledOptions {
   verbose?: boolean;
   prefix?: string;
   source?: string;
+  browserslist?: string;
 }
 
 interface ScopedSheet {
@@ -42,6 +41,7 @@ interface StateContext {
   opts: SolidStyledOptions;
   ids: number;
   ns: string;
+  browserslist?: string;
 }
 
 function getUniqueId(ctx: StateContext) {
@@ -288,24 +288,22 @@ function replaceDynamicTemplate(
   };
 }
 
-function processPostCSS(
-  source: string,
+function preprocessCSS(
+  ctx: StateContext,
   content: string,
 ) {
-  const result = postcss([
-    cssnano({
-      plugins: [
-        autoprefixer,
-        postcssNested,
-      ],
-    }),
-  ]);
-
-  const processed = result.process(content, {
-    from: source,
+  const { code } = lightningcss.transform({
+    code: Buffer.from(content),
+    filename: ctx.ns,
+    minify: true,
+    targets: lightningcss.browserslistToTargets(browserslist(ctx.browserslist ?? 'defaults')),
+    drafts: {
+      nesting: true,
+      customMedia: true,
+    },
   });
 
-  return processed.css;
+  return code.toString('utf-8');
 }
 
 function processScopedSheet(
@@ -485,7 +483,7 @@ function processCSSTemplate(
 ) {
   // Replace the template's dynamic parts with CSS variables
   const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
-  const processed = processPostCSS(ctx.ns, sheet);
+  const processed = preprocessCSS(ctx, sheet);
   const ast = csstree.parse(processed);
 
   if (isScoped) {

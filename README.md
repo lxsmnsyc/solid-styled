@@ -270,13 +270,7 @@ const styles = renderSheets(styles);
 
 ## PostCSS
 
-`solid-styled` uses [PostCSS](https://github.com/postcss/postcs) for processing the CSS templates. You can check the following plugins, that are used by default, for the features that are supported:
-
-- [Autoprefixer](https://autoprefixer.github.io/)
-- [`postcss-nested`](https://github.com/postcss/postcss-nested)
-- [CSSNano](https://cssnano.co/)
-
-In the future, `solid-styled` can possibly allow to load the PostCSS config and to allow other plugins to be used.
+`solid-styled` uses [LightningCSS](https://lightningcss.dev/) in combination with [BrowsersList](https://browserslist.dev/) for processing the CSS templates.
 
 ## Limitations
 
