@@ -306,26 +306,27 @@ function processScopedSheet(
 
   // Flag to indicate that the currently visited
   // node is inside a global block
-  let inGlobal = false;
+  let inGlobal = 0;
+  let inKeyframes = false;
 
   // Check all keyframes first
   csstree.walk(ast, {
     leave(node: csstree.CssNode) {
       // Check if block is `@global`
       if (node.type === 'Atrule' && node.name === 'global' && node.block) {
-        inGlobal = false;
+        inGlobal -= 1;
       }
     },
     enter(node: csstree.CssNode) {
       // No transforms needed if in global
-      if (inGlobal) {
-        return;
-      }
       // Check if block is `@global`
       if (node.type === 'Atrule') {
         if (node.name === 'global' && node.block) {
           // Shift to global mode
-          inGlobal = true;
+          inGlobal += 1;
+          return;
+        }
+        if (inGlobal > 0) {
           return;
         }
         if (node.name === 'keyframes' && node.block && node.prelude && node.prelude.type === 'AtrulePrelude') {
@@ -340,11 +341,19 @@ function processScopedSheet(
     },
   });
 
+
+  inGlobal = 0;
+
   csstree.walk(ast, {
     leave(node: csstree.CssNode) {
       // Check if block is `@global`
-      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
-        inGlobal = false;
+      if (node.type === 'Atrule') {
+        if (node.name === 'global' && node.block) {
+          inGlobal -= 1;
+        }
+        if (node.name === 'keyframes') {
+          inKeyframes = false;
+        }
       }
       if (node.type === 'StyleSheet' || node.type === 'Block') {
         const children: csstree.CssNode[] = [];
@@ -362,93 +371,95 @@ function processScopedSheet(
       }
     },
     enter(node: csstree.CssNode) {
-      // No transforms needed if in global
-      if (inGlobal) {
-        return;
-      }
       // Check if block is `@global`
-      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
-        // Shift to global mode
-        inGlobal = true;
-        return;
-      }
-      // Transform animations
-      if (node.type === 'Declaration') {
-        // animation-name
-        switch (node.property) {
-          case 'animation-name':
-          // For some reason, animation has an arbitrary sequence
-          // so we just have to guess
-          case 'animation':
-            if (node.value.type === 'Value') {
-              node.value.children.forEach((item) => {
-                if (item.type === 'Identifier' && keyframes.has(item.name)) {
-                  item.name = `${sheetID}-${item.name}`;
-                }
-              });
-            }
-            break;
-          default:
-            break;
+      if (node.type === 'Atrule') {
+        if (node.name === 'global' && node.block) {
+          // Shift to global mode
+          inGlobal += 1;
+        }
+        if (inGlobal === 0 && node.name === 'keyframes') {
+          inKeyframes = true;
         }
       }
-      if (node.type === 'Selector') {
-        const children: csstree.CssNode[] = [];
-        let shouldPush = true;
-        node.children.forEach((child) => {
-          // Push the selector after the node
-          if (
-            child.type === 'TypeSelector'
-            || child.type === 'ClassSelector'
-            || child.type === 'IdSelector'
-            || child.type === 'AttributeSelector'
-          ) {
-            children.push(child);
-            if (shouldPush) {
-              children.push(selector);
-              shouldPush = false;
-            }
-            return;
-          }
-          // Push the selector before the node
-          if (
-            child.type === 'PseudoElementSelector'
-          ) {
-            if (shouldPush) {
-              children.push(selector);
-              shouldPush = false;
-            }
-            children.push(child);
-            return;
-          }
-          // Not a selector
-          if (
-            child.type === 'Combinator'
-            || child.type === 'WhiteSpace'
-          ) {
-            children.push(child);
-            shouldPush = true;
-            return;
-          }
-          if (child.type === 'PseudoClassSelector') {
-            // `:global`
-            if (child.name === GLOBAL_SELECTOR) {
-              if (child.children) {
-                child.children.forEach((innerChild) => {
-                  children.push(innerChild);
+      if (inGlobal === 0) {
+        // Transform animations
+        if (node.type === 'Declaration') {
+          // animation-name
+          switch (node.property) {
+            case 'animation-name':
+            // For some reason, animation has an arbitrary sequence
+            // so we just have to guess
+            case 'animation':
+              if (node.value.type === 'Value') {
+                node.value.children.forEach((item) => {
+                  if (item.type === 'Identifier' && keyframes.has(item.name)) {
+                    item.name = `${sheetID}-${item.name}`;
+                  }
                 });
               }
-            } else {
+              break;
+            default:
+              break;
+          }
+        }
+        if (!inKeyframes && node.type === 'Selector') {
+          const children: csstree.CssNode[] = [];
+          let shouldPush = true;
+          node.children.forEach((child) => {
+            // Push the selector after the node
+            if (
+              child.type === 'TypeSelector'
+              || child.type === 'ClassSelector'
+              || child.type === 'IdSelector'
+              || child.type === 'AttributeSelector'
+            ) {
+              children.push(child);
+              if (shouldPush) {
+                children.push(selector);
+                shouldPush = false;
+              }
+              return;
+            }
+            // Push the selector before the node
+            if (
+              child.type === 'PseudoElementSelector'
+            ) {
               if (shouldPush) {
                 children.push(selector);
                 shouldPush = false;
               }
               children.push(child);
+              return;
             }
-          }
-        });
-        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
-      }
+            // Not a selector
+            if (
+              child.type === 'Combinator'
+              || child.type === 'WhiteSpace'
+            ) {
+              children.push(child);
+              shouldPush = true;
+              return;
+            }
+            if (child.type === 'PseudoClassSelector') {
+              // `:global`
+              if (child.name === GLOBAL_SELECTOR) {
+                if (child.children) {
+                  child.children.forEach((innerChild) => {
+                    children.push(innerChild);
+                  });
+                }
+              } else {
+                if (shouldPush) {
+                  children.push(selector);
+                  shouldPush = false;
+                }
+                children.push(child);
+              }
+            }
+          });
+          node.children = new csstree.List<csstree.CssNode>().fromArray(children);
+        }
+      } 
     },
   });
 }
