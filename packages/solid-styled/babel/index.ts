@@ -1,5 +1,8 @@
-import * as lightningcss from 'lightningcss';
-import browserslist from 'browserslist';
+import postcss from 'postcss';
+import autoprefixer from 'autoprefixer';
+import cssnano from 'cssnano';
+import postcssNested from 'postcss-nested';
+import postcssSafeParser from 'postcss-safe-parser';
 import { PluginObj } from '@babel/core';
 import { addNamed } from '@babel/helper-module-imports';
 import { NodePath, Scope } from '@babel/traverse';
@@ -287,23 +290,23 @@ function replaceDynamicTemplate(
     variables,
   };
 }
-
-function preprocessCSS(
-  ctx: StateContext,
+function processPostCSS(
+  source: string,
   content: string,
 ) {
-  const { code } = lightningcss.transform({
-    code: Buffer.from(content),
-    filename: ctx.ns,
-    minify: true,
-    targets: lightningcss.browserslistToTargets(browserslist(ctx.browserslist ?? 'defaults')),
-    drafts: {
-      nesting: true,
-      customMedia: true,
-    },
+  const result = postcss([
+    cssnano({
+      plugins: [
+        autoprefixer,
+        postcssNested,
+      ],
+    }),
+  ]);
+  const processed = result.process(content, {
+    from: source,
+    parser: postcssSafeParser,
   });
-
-  return code.toString('utf-8');
+  return processed.css;
 }
 
 function processScopedSheet(
@@ -483,7 +486,7 @@ function processCSSTemplate(
 ) {
   // Replace the template's dynamic parts with CSS variables
   const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
-  const processed = preprocessCSS(ctx, sheet);
+  const processed = processPostCSS(ctx.ns, sheet);
   const ast = csstree.parse(processed);
 
   if (isScoped) {
