@@ -1,6 +1,6 @@
 {
   "name": "astro-demo",
-  "version": "0.7.5",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "dev": "astro dev",
@@ -13,11 +13,11 @@
     "eslint": "^8.33.0",
     "eslint-config-lxsmnsyc": "^0.4.8",
     "typescript": "^4.9.5",
-    "vite-plugin-solid-styled": "0.7.5"
+    "vite-plugin-solid-styled": "0.8.0"
   },
   "dependencies": {
     "@astrojs/solid-js": "^2.0.0",
     "solid-js": "^1.6.10",
-    "solid-styled": "0.7.5"
+    "solid-styled": "0.8.0"
   }
 }
