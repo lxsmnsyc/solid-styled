@@ -2,7 +2,7 @@
 
 > Reactive stylesheets for SolidJS
 
-[![NPM](https://img.shields.io/npm/v/solid-styled.svg)](https://www.npmjs.com/package/solid-styled) [![JavaScript Style Guide](https://badgen.net/badge/code%20style/airbnb/ff5a5f?icon=airbnb)](https://github.com/airbnb/javascript)[![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox)](https://codesandbox.io/s/github/LXSMNSYC/solid-styled/tree/main/examples/demo)
+[![NPM](https://img.shields.io/npm/v/solid-styled.svg)](https://www.npmjs.com/package/solid-styled) [![JavaScript Style Guide](https://badgen.net/badge/code%20style/airbnb/ff5a5f?icon=airbnb)](https://github.com/airbnb/javascript)
 
 ## Install
 
@@ -28,6 +28,11 @@ pnpm add solid-styled
 - SSR
 - Near zero-runtime
 - `<style jsx>`
+
+## Examples
+
+- Vite - [![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox)](https://codesandbox.io/s/github/LXSMNSYC/solid-styled/tree/main/examples/demo)
+- Astro - [![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox)](https://codesandbox.io/s/github/LXSMNSYC/solid-styled/tree/main/examples/astro-demo)
 
 ## Usage
 
@@ -267,6 +272,15 @@ renderToString(() => (
 // it into an HTML template.
 const styles = renderSheets(styles);
 ```
+
+## PostCSS
+
+`solid-styled` uses [PostCSS](https://github.com/postcss/postcs) for processing the CSS templates. You can check the following plugins, that are used by default, for the features that are supported:
+
+- [Autoprefixer](https://autoprefixer.github.io/)
+- [`postcss-nested`](https://github.com/postcss/postcss-nested)
+- [CSSNano](https://cssnano.co/)
+In the future, `solid-styled` can possibly allow to load the PostCSS config and to allow other plugins to be used.
 
 ## Limitations
 
