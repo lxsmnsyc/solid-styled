@@ -5,6 +5,9 @@ declare module 'solid-js' {
       jsx?: boolean;
       global?: boolean;
     }
+    interface IntrinsicAttributes {
+      'use:solid-styled'?: boolean;
+    }
   }
 }
 
