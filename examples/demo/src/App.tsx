@@ -18,10 +18,6 @@ function ShowButton(): JSX.Element {
             border-radius: 0.5rem;
             background-color: #111827;
           }
-        `}
-      </style>
-      <style jsx>
-        {/* css */`
           div > button {
             width: 50vw;
             padding: 0.5rem;
@@ -37,7 +33,6 @@ function ShowButton(): JSX.Element {
           }
         `}
       </style>
-      <style jsx></style>
       <button class="toggle" type="button" onClick={() => setShow(!show())}>
         {show() ? 'Hide Div' : 'Show Div'}
       </button>
