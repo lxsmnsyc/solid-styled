@@ -37,6 +37,10 @@ solidStyled({
 > **Note**
 > When you are using a SolidJS Rollup plugin, make sure that solid-styled runs first.
 
+## Sponsors
+
+![Sponsors](https://github.com/lxsmnsyc/sponsors/blob/main/sponsors.svg?raw=true)
+
 ## License
 
 MIT © [lxsmnsyc](https://github.com/lxsmnsyc)
