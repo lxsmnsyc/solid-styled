@@ -37,12 +37,15 @@ function repushPlugin(plugins: Plugin[], plugin: Plugin, pluginNames: string[]) 
   }
 }
 
+const DEFAULT_INCLUDE = 'src/**/*.{jsx,tsx,ts,js,mjs,cjs}';
+const DEFAULT_EXCLUDE = 'node_modules/**/*.{jsx,tsx,ts,js,mjs,cjs}';
+
 export default function solidStyledPlugin(
   options: SolidStyledPluginOptions = {},
 ): Plugin {
   const filter = createFilter(
-    options.filter?.include,
-    options.filter?.exclude,
+    options.filter?.include || DEFAULT_INCLUDE,
+    options.filter?.exclude || DEFAULT_EXCLUDE,
   );
   let isDev = false;
   const plugin: Plugin = {
