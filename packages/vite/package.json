@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-solid-styled",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "type": "module",
   "files": [
     "dist",
@@ -20,7 +20,7 @@
     "eslint": "^8.36.0",
     "eslint-config-lxsmnsyc": "^0.5.1",
     "pridepack": "2.4.2",
-    "solid-styled": "0.8.1",
+    "solid-styled": "0.8.2",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5",
     "vite": "^4.0.4"
