@@ -64,7 +64,7 @@ export default function solidStyledPlugin(
     async transform(code, id) {
       if (filter(id)) {
         const plugins: NonNullable<NonNullable<babel.TransformOptions['parserOpts']>['plugins']> = ['jsx'];
-        if (/\.[mc]tsx?$/i.test(id)) {
+        if (/\.[mc]?tsx?$/i.test(id)) {
           plugins.push('typescript');
         }
         const result = await babel.transformAsync(code, {
