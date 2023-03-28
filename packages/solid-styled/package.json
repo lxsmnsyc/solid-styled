@@ -41,7 +41,8 @@
     "pridepack": "^2.4.2",
     "solid-js": "^1.6.15",
     "tslib": "^2.5.0",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "vitest": "^0.29.7"
   },
   "peerDependencies": {
     "@babel/core": "^7",
@@ -60,8 +61,8 @@
     "autoprefixer": "^10.4.14",
     "css-tree": "^2.3.1",
     "cssnano": "^5.1.15",
-    "js-xxhash": "^2.0.0",
     "postcss": "^8.4.21",
+    "postcss-load-config": "^4.0.1",
     "postcss-nested": "^6.0.1",
     "postcss-safe-parser": "^6.0.0"
   },
@@ -84,7 +85,7 @@
     "build": "pridepack build",
     "type-check": "pridepack check",
     "lint": "pridepack lint",
-    "test": "pridepack test --passWithNoTests",
+    "test": "vitest",
     "clean": "pridepack clean",
     "watch": "pridepack watch",
     "start": "pridepack start",
