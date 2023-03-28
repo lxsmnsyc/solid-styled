@@ -9,7 +9,7 @@ export {
   SolidStyledOptions,
 };
 
-export default async function compile(
+export async function compile(
   id: string,
   code: string,
   options: SolidStyledOptions,

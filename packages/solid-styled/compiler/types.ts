@@ -5,7 +5,7 @@ import postcssrc from 'postcss-load-config';
 export interface SolidStyledOptions {
   verbose?: boolean;
   prefix?: string;
-  env: 'development' | 'production';
+  env?: 'development' | 'production';
 }
 
 export interface ScopedSheet {
