@@ -223,6 +223,7 @@ function functionTokenToPseudoClassSelector(
     case 'nth-last-col':
     case 'nth-last-of-type':
     case 'nth-of-type': {
+      // TODO add support for An + B of S
       assert(token.arguments.length > 0, 'Unexpected arguments');
       const [partA, partB] = token.arguments;
       // Parse first part
