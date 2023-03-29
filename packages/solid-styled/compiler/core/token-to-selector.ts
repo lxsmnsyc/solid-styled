@@ -2,12 +2,88 @@
 import * as lightningcss from 'lightningcss';
 import assert from './assert';
 
+/**
+ * NOTICE
+ *
+ * This entire module was only made because LightningCSS refuses to
+ * parse :global if the transform option for CSS modules isn't enabled.
+ *
+ * Since :global is treated as a custom-function token in LightningCSS,
+ * the arguments must be transformed into its AST counterpart. This took
+ * me a while to do, specially since attribute selectors, pseudo-class
+ * selectors and pseudo-element selectors has some quirky syntax.
+ */
+
 type PseudoClassKind = (lightningcss.TSPseudoClass | lightningcss.PseudoClass)['kind'];
+
+interface PseudoClassVendorPrefixData {
+  name: PseudoClassKind;
+  vendorPrefix: lightningcss.Prefix[];
+}
+
+const PSEUDO_CLASS_VENDOR_PREFIX: Record<string, PseudoClassVendorPrefixData> = {
+  '-webkit-full-screen': {
+    name: 'fullscreen',
+    vendorPrefix: ['webkit'],
+  },
+  '-moz-full-screen': {
+    name: 'fullscreen',
+    vendorPrefix: ['moz'],
+  },
+  '-ms-fullscreen': {
+    name: 'fullscreen',
+    vendorPrefix: ['ms'],
+  },
+  '-webkit-any-link': {
+    name: 'any-link',
+    vendorPrefix: ['webkit'],
+  },
+  '-moz-any-link': {
+    name: 'any-link',
+    vendorPrefix: ['moz'],
+  },
+  '-moz-read-only': {
+    name: 'read-only',
+    vendorPrefix: ['moz'],
+  },
+  '-moz-read-write': {
+    name: 'read-write',
+    vendorPrefix: ['moz'],
+  },
+  '-moz-placeholder': {
+    name: 'placeholder-shown',
+    vendorPrefix: ['moz'],
+  },
+  '-ms-input-placeholder': {
+    name: 'placeholder-shown',
+    vendorPrefix: ['ms'],
+  },
+  '-webkit-autofill': {
+    name: 'autofill',
+    vendorPrefix: ['webkit'],
+  },
+  '-webkit-any': {
+    name: 'any',
+    vendorPrefix: ['webkit'],
+  },
+  '-moz-any': {
+    name: 'any',
+    vendorPrefix: ['moz'],
+  },
+};
+
+function getPseudoClassVendorPrefix(value: PseudoClassKind): PseudoClassVendorPrefixData {
+  if (value in PSEUDO_CLASS_VENDOR_PREFIX) {
+    return PSEUDO_CLASS_VENDOR_PREFIX[value];
+  }
+  return { name: value, vendorPrefix: [] };
+}
 
 function identTokenToPseudoClassSelector(
   value: PseudoClassKind,
 ): lightningcss.SelectorComponent {
-  switch (value) {
+  const { name, vendorPrefix } = getPseudoClassVendorPrefix(value);
+  switch (name) {
     case 'first-child':
     case 'last-child':
     case 'only-child':
@@ -35,7 +111,7 @@ function identTokenToPseudoClassSelector(
     case 'defined':
       return {
         type: 'pseudo-class',
-        kind: value,
+        kind: name,
       };
     // For some reason this errors
     case 'link':
@@ -59,9 +135,8 @@ function identTokenToPseudoClassSelector(
     case 'user-invalid':
       return {
         type: 'pseudo-class',
-        kind: value,
+        kind: name,
       };
-    // TODO vendor prefix
     case 'fullscreen':
     case 'any-link':
     case 'read-only':
@@ -70,8 +145,8 @@ function identTokenToPseudoClassSelector(
     case 'autofill':
       return {
         type: 'pseudo-class',
-        kind: value,
-        vendorPrefix: [],
+        kind: name,
+        vendorPrefix,
       };
     // TODO Webkit Scrollbar
     default:
@@ -82,7 +157,10 @@ function identTokenToPseudoClassSelector(
 function functionTokenToPseudoClassSelector(
   token: lightningcss.Function,
 ): lightningcss.SelectorComponent {
-  switch (token.name) {
+  const { name, vendorPrefix } = getPseudoClassVendorPrefix(
+    token.name as PseudoClassKind,
+  );
+  switch (name) {
     case 'dir': {
       assert(token.arguments.length === 1, 'Unexpected arguments');
       const arg = token.arguments[0];
@@ -187,7 +265,7 @@ function functionTokenToPseudoClassSelector(
       }
       return {
         type: 'pseudo-class',
-        kind: token.name,
+        kind: name,
         a,
         b,
       };
@@ -198,6 +276,13 @@ function functionTokenToPseudoClassSelector(
         kind: 'where',
         selectors: tokensToSelectorsList(token.arguments),
       };
+    case 'any':
+      return {
+        type: 'pseudo-class',
+        kind: 'any',
+        selectors: tokensToSelectorsList(token.arguments),
+        vendorPrefix,
+      };
     default:
       throw new Error('Unexpected function');
   }
@@ -205,10 +290,59 @@ function functionTokenToPseudoClassSelector(
 
 type PseudoElementKind = (lightningcss.BuiltinPseudoElement | lightningcss.PseudoElement)['kind'];
 
+interface PseudoElementVendorPrefixData {
+  name: PseudoElementKind;
+  vendorPrefix: lightningcss.Prefix[];
+}
+
+const PSEUDO_ELEMENT_VENDOR_PREFIX: Record<string, PseudoElementVendorPrefixData> = {
+  '-webkit-backdrop': {
+    name: 'backdrop',
+    vendorPrefix: ['webkit'],
+  },
+  '-ms-backdrop': {
+    name: 'backdrop',
+    vendorPrefix: ['ms'],
+  },
+  '-webkit-file-upload-button': {
+    name: 'file-selector-button',
+    vendorPrefix: ['webkit'],
+  },
+  '-ms-browse': {
+    name: 'file-selector-button',
+    vendorPrefix: ['ms'],
+  },
+  // TODO add placeholder to pseudo-class
+  '-webkit-input-placeholder ': {
+    name: 'placeholder',
+    vendorPrefix: ['webkit'],
+  },
+  '-moz-placeholder': {
+    name: 'placeholder',
+    vendorPrefix: ['moz'],
+  },
+  '-ms-input-placeholder': {
+    name: 'placeholder',
+    vendorPrefix: ['ms'],
+  },
+  '-moz-selection': {
+    name: 'selection',
+    vendorPrefix: ['moz'],
+  },
+};
+
+function getPseudoElementVendorPrefix(value: PseudoElementKind): PseudoElementVendorPrefixData {
+  if (value in PSEUDO_ELEMENT_VENDOR_PREFIX) {
+    return PSEUDO_ELEMENT_VENDOR_PREFIX[value];
+  }
+  return { name: value, vendorPrefix: [] };
+}
+
 function identTokenToPseudoElementSelector(
   value: PseudoElementKind,
 ): lightningcss.SelectorComponent {
-  switch (value) {
+  const { name, vendorPrefix } = getPseudoElementVendorPrefix(value);
+  switch (name) {
     case 'after':
     case 'before':
     case 'cue':
@@ -218,17 +352,16 @@ function identTokenToPseudoElementSelector(
     case 'marker':
       return {
         type: 'pseudo-element',
-        kind: value,
+        kind: name,
       };
-    // TODO Vendor Prefix
     case 'backdrop':
     case 'file-selector-button':
     case 'placeholder':
     case 'selection':
       return {
         type: 'pseudo-element',
-        kind: value,
-        vendorPrefix: [],
+        kind: name,
+        vendorPrefix,
       };
     default:
       throw new Error('Unsupported pseudo-element');
