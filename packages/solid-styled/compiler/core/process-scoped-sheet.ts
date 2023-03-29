@@ -67,6 +67,14 @@ export default function processScopedSheet(
 
   inGlobal = 0;
 
+  // This selector is going to be inserted
+  // on every non-global selector
+  // [s\:${sheetID}]
+  const special: lightningcss.SelectorComponent = {
+    type: 'attribute',
+    name: `${SOLID_STYLED_NS}:${sheetID}`,
+  };
+
   const { code } = lightningcss.transform({
     code: keyframe,
     filename: ctx.ns,
@@ -172,14 +180,6 @@ export default function processScopedSheet(
         }
         const selectors: lightningcss.Selector = [];
 
-        // This selector is going to be inserted
-        // on every non-global selector
-        // [s\:${sheetID}]
-        const special: lightningcss.SelectorComponent = {
-          type: 'attribute',
-          name: `${SOLID_STYLED_NS}:${sheetID}`,
-        };
-
         let shouldPush = true;
 
         for (let i = 0, len = rule.length; i < len; i += 1) {
@@ -201,7 +201,7 @@ export default function processScopedSheet(
             // Push the selector before the node
             case 'pseudo-element':
               if (shouldPush) {
-                selectors.push(selector);
+                selectors.push(special);
                 shouldPush = false;
               }
               selectors.push(selector);
