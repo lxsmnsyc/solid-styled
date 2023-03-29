@@ -150,7 +150,11 @@ function identTokenToPseudoClassSelector(
       };
     // TODO Webkit Scrollbar
     default:
-      throw new Error('Unsupported pseudo-class');
+      return {
+        type: 'pseudo-class',
+        kind: 'custom',
+        name,
+      };
   }
 }
 
@@ -285,7 +289,12 @@ function functionTokenToPseudoClassSelector(
         vendorPrefix,
       };
     default:
-      throw new Error('Unexpected function');
+      return {
+        type: 'pseudo-class',
+        kind: 'custom-function',
+        name,
+        arguments: token.arguments,
+      };
   }
 }
 
@@ -365,7 +374,11 @@ function identTokenToPseudoElementSelector(
         vendorPrefix,
       };
     default:
-      throw new Error('Unsupported pseudo-element');
+      return {
+        type: 'pseudo-element',
+        kind: 'custom',
+        name,
+      };
   }
 }
 
@@ -400,7 +413,12 @@ function functionTokenToPseudoElementSelector(
       };
     }
     default:
-      throw new Error('Unsupported pseudo-element');
+      return {
+        type: 'pseudo-element',
+        kind: 'custom-function',
+        name: token.name,
+        arguments: token.arguments,
+      };
   }
 }
 
