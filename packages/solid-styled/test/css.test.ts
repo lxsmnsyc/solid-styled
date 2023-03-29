@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import compile, { SolidStyledOptions } from '../compiler';
+import { compile, SolidStyledOptions } from '../compiler';
 
 const options: SolidStyledOptions = {
-  prefix: 'example',
   verbose: false,
 };
 
@@ -47,6 +46,22 @@ export default function Example() {
       <h2>Hello World</h2>
     </>
   );
+}
+  `;
+    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+  });
+  it('should transform dynamic templates', async () => {
+    const code = `
+import { css } from 'solid-styled';
+
+export default function Example(props) {
+  css\`
+    h1 {
+      color: \${props.color};
+    }
+  \`;
+
+  return <h1>Hello World</h1>;
 }
   `;
     expect((await compile(FILE, code, options)).code).toMatchSnapshot();

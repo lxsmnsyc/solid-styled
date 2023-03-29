@@ -34,10 +34,8 @@
     "@types/babel__core": "^7.20.0",
     "@types/babel__traverse": "^7.18.3",
     "@types/node": "^18.15.3",
-    "@types/postcss-safe-parser": "^5.0.1",
     "eslint": "^8.36.0",
     "eslint-config-lxsmnsyc": "^0.5.1",
-    "postcss": "^8.4.21",
     "pridepack": "^2.4.2",
     "solid-js": "^1.6.15",
     "tslib": "^2.5.0",
@@ -45,7 +43,6 @@
     "vitest": "^0.29.7"
   },
   "peerDependencies": {
-    "postcss": "^8",
     "solid-js": "^1"
   },
   "dependencies": {
@@ -54,9 +51,9 @@
     "@babel/traverse": "^7.21.3",
     "@babel/types": "^7.21.3",
     "@types/css-tree": "^2.3.1",
+    "browserslist": "^4.21.5",
     "css-tree": "^2.3.1",
-    "postcss-load-config": "^4.0.1",
-    "postcss-safe-parser": "^6.0.0"
+    "lightningcss": "^1.19.0"
   },
   "description": "Reactive stylesheets for SolidJS",
   "repository": {

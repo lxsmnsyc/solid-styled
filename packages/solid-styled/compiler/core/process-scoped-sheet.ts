@@ -1,24 +1,15 @@
-import * as csstree from 'css-tree';
+/* eslint-disable object-shorthand */
+import * as lightningcss from 'lightningcss';
+import browserslist from 'browserslist';
+import { StateContext } from '../types';
 import { GLOBAL_SELECTOR, SOLID_STYLED_NS } from './constants';
+import tokensToSelectorsList from './token-to-selector';
 
 export default function processScopedSheet(
+  ctx: StateContext,
   sheetID: string,
-  ast: csstree.CssNode,
+  content: string,
 ) {
-  // This selector is going to be inserted
-  // on every non-global selector
-  // [s\:${sheetID}]
-  const selector: csstree.AttributeSelector = {
-    type: 'AttributeSelector',
-    name: {
-      type: 'Identifier',
-      name: `${SOLID_STYLED_NS}\\:${sheetID}`,
-    },
-    matcher: null,
-    flags: null,
-    value: null,
-  };
-
   const keyframes = new Set();
 
   // Flag to indicate that the currently visited
@@ -26,151 +17,223 @@ export default function processScopedSheet(
   let inGlobal = 0;
   let inKeyframes = false;
 
-  // Check all keyframes first
-  csstree.walk(ast, {
-    leave(node: csstree.CssNode) {
-      // Check if block is `@global`
-      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
-        inGlobal -= 1;
-      }
+  const { code: keyframe } = lightningcss.transform({
+    code: Buffer.from(content),
+    filename: ctx.ns,
+    minify: true,
+    targets: lightningcss.browserslistToTargets(browserslist(ctx.opts.browserslist || 'defaults')),
+    drafts: {
+      nesting: true,
+      customMedia: true,
     },
-    enter(node: csstree.CssNode) {
-      // No transforms needed if in global
-      // Check if block is `@global`
-      if (node.type === 'Atrule') {
-        if (node.name === 'global' && node.block) {
-          // Shift to global mode
-          inGlobal += 1;
-          return;
-        }
-        if (inGlobal > 0) {
-          return;
-        }
-        if (node.name === 'keyframes' && node.block && node.prelude && node.prelude.type === 'AtrulePrelude') {
-          node.prelude.children.forEach((child) => {
-            if (child.type === 'Identifier') {
-              keyframes.add(child.name);
-              child.name = `${sheetID}-${child.name}`;
-            }
-          });
-        }
-      }
+    customAtRules: {
+      global: {
+        body: 'rule-list',
+      },
+    },
+    visitor: {
+      Rule: {
+        custom: {
+          global() {
+            inGlobal += 1;
+          },
+        },
+        keyframes(rule) {
+          if (inGlobal > 0) {
+            keyframes.add(rule.value.name.value);
+            return {
+              type: 'keyframes',
+              value: {
+                ...rule.value,
+                name: {
+                  type: rule.value.name.type,
+                  value: `${sheetID}-${rule.value.name.value}`,
+                },
+              },
+            };
+          }
+          return undefined;
+        },
+      },
+      RuleExit: {
+        custom: {
+          global() {
+            inGlobal -= 1;
+          },
+        },
+      },
     },
   });
 
   inGlobal = 0;
 
-  csstree.walk(ast, {
-    leave(node: csstree.CssNode) {
-      // Check if block is `@global`
-      if (node.type === 'Atrule') {
-        if (node.name === 'global' && node.block) {
-          inGlobal -= 1;
-        }
-        if (node.name === 'keyframes') {
-          inKeyframes = false;
-        }
-      }
-      if (node.type === 'StyleSheet' || node.type === 'Block') {
-        const children: csstree.CssNode[] = [];
-        node.children.forEach((child) => {
-          // This moves all the selectors in `@global`
-          if (child.type === 'Atrule' && child.name === 'global' && child.block) {
-            child.block.children.forEach((innerChild) => {
-              children.push(innerChild);
-            });
-          } else {
-            children.push(child);
-          }
-        });
-        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
-      }
+  const { code } = lightningcss.transform({
+    code: keyframe,
+    filename: ctx.ns,
+    minify: true,
+    targets: lightningcss.browserslistToTargets(browserslist(ctx.opts.browserslist || 'defaults')),
+    customAtRules: {
+      global: {
+        body: 'rule-list',
+      },
     },
-    enter(node: csstree.CssNode) {
-      // Check if block is `@global`
-      if (node.type === 'Atrule') {
-        if (node.name === 'global' && node.block) {
-          // Shift to global mode
-          inGlobal += 1;
-        }
-        if (inGlobal === 0 && node.name === 'keyframes') {
+    visitor: {
+      Rule: {
+        custom: {
+          global() {
+            inGlobal += 1;
+          },
+        },
+        keyframes() {
+          inKeyframes = false;
+        },
+      },
+      RuleExit: {
+        custom: {
+          global(rule) {
+            inGlobal -= 1;
+            return rule.body;
+          },
+        },
+        keyframes() {
           inKeyframes = true;
-        }
-      }
-      if (inGlobal === 0) {
-        // Transform animations
-        if (node.type === 'Declaration') {
-          // animation-name
-          switch (node.property) {
-            // For some reason, animation has an arbitrary sequence
-            // so we just have to guess
-            case 'animation':
-            case 'animation-name':
-              if (node.value.type === 'Value') {
-                node.value.children.forEach((item) => {
-                  if (item.type === 'Identifier' && keyframes.has(item.name)) {
-                    item.name = `${sheetID}-${item.name}`;
+        },
+      },
+      Declaration: {
+        animation(rule) {
+          if (rule.property === 'animation' && inGlobal === 0 && Array.isArray(rule.value)) {
+            const animations: lightningcss.Animation[] = [];
+            for (let i = 0, len = rule.value.length; i < len; i += 1) {
+              const animation = rule.value[i];
+              switch (animation.name.type) {
+                case 'ident':
+                case 'string':
+                  if (keyframes.has(animation.name.value)) {
+                    animations.push({
+                      ...animation,
+                      name: {
+                        ...animation.name,
+                        value: `${sheetID}-${animation.name.value}`,
+                      },
+                    });
+                  } else {
+                    animations.push(animation);
                   }
-                });
+                  break;
+                case 'none':
+                  animations.push(animation);
+                  break;
+                default:
+                  break;
+              }
+            }
+            return {
+              ...rule,
+              value: animations,
+            };
+          }
+          return undefined;
+        },
+        'animation-name'(rule) {
+          if (rule.property === 'animation-name' && inGlobal === 0) {
+            const names: lightningcss.AnimationName[] = [];
+            for (let i = 0, len = rule.value.length; i < len; i += 1) {
+              const name = rule.value[i];
+              switch (name.type) {
+                case 'ident':
+                case 'string':
+                  if (keyframes.has(name.value)) {
+                    names.push({
+                      ...name,
+                      value: `${sheetID}-${name.value}`,
+                    });
+                  } else {
+                    names.push(name);
+                  }
+                  break;
+                case 'none':
+                  names.push(name);
+                  break;
+                default:
+                  break;
+              }
+            }
+            return {
+              ...rule,
+              value: names,
+            };
+          }
+          return undefined;
+        },
+      },
+      Selector(rule) {
+        if (inKeyframes || inGlobal !== 0) {
+          return undefined;
+        }
+        const selectors: lightningcss.Selector = [];
+
+        // This selector is going to be inserted
+        // on every non-global selector
+        // [s\:${sheetID}]
+        const special: lightningcss.SelectorComponent = {
+          type: 'attribute',
+          name: `${SOLID_STYLED_NS}:${sheetID}`,
+        };
+
+        let shouldPush = true;
+
+        for (let i = 0, len = rule.length; i < len; i += 1) {
+          const selector = rule[i];
+
+          switch (selector.type) {
+            // Push the selector after the node
+            case 'universal':
+            case 'type':
+            case 'class':
+            case 'id':
+            case 'attribute':
+              selectors.push(selector);
+              if (shouldPush) {
+                selectors.push(special);
+                shouldPush = false;
+              }
+              break;
+            // Push the selector before the node
+            case 'pseudo-element':
+              if (shouldPush) {
+                selectors.push(selector);
+                shouldPush = false;
+              }
+              selectors.push(selector);
+              break;
+            // Not a selector
+            case 'combinator':
+            case 'namespace':
+            case 'nesting':
+              selectors.push(selector);
+              shouldPush = true;
+              break;
+            case 'pseudo-class':
+              // `:global`
+              if (selector.kind === 'custom-function' && selector.name === GLOBAL_SELECTOR) {
+                selectors.push(...tokensToSelectorsList(selector.arguments)[0]);
+              } else {
+                if (shouldPush) {
+                  selectors.push(special);
+                  shouldPush = false;
+                }
+                selectors.push(selector);
               }
               break;
             default:
               break;
           }
         }
-        if (!inKeyframes && node.type === 'Selector') {
-          const children: csstree.CssNode[] = [];
-          let shouldPush = true;
-          node.children.forEach((child) => {
-            // Push the selector after the node
-            switch (child.type) {
-              case 'TypeSelector':
-              case 'ClassSelector':
-              case 'IdSelector':
-              case 'AttributeSelector':
-                children.push(child);
-                if (shouldPush) {
-                  children.push(selector);
-                  shouldPush = false;
-                }
-                break;
-              // Push the selector before the node
-              case 'PseudoElementSelector':
-                if (shouldPush) {
-                  children.push(selector);
-                  shouldPush = false;
-                }
-                children.push(child);
-                break;
-              // Not a selector
-              case 'Combinator':
-              case 'WhiteSpace':
-                children.push(child);
-                shouldPush = true;
-                break;
-              case 'PseudoClassSelector':
-                // `:global`
-                if (child.name === GLOBAL_SELECTOR) {
-                  if (child.children) {
-                    child.children.forEach((innerChild) => {
-                      children.push(innerChild);
-                    });
-                  }
-                } else {
-                  if (shouldPush) {
-                    children.push(selector);
-                    shouldPush = false;
-                  }
-                  children.push(child);
-                }
-                break;
-              default:
-                break;
-            }
-          });
-          node.children = new csstree.List<csstree.CssNode>().fromArray(children);
-        }
-      }
+
+        return selectors;
+      },
     },
   });
+
+  return code.toString('utf-8');
 }

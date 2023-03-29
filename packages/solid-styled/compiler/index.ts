@@ -1,5 +1,4 @@
 import babel from '@babel/core';
-import postcssrc from 'postcss-load-config';
 import path from 'path';
 import { SolidStyledOptions, StateContext } from './types';
 import xxHash32 from './xxhash32';
@@ -21,9 +20,6 @@ export async function compile(
     opts: options,
     ns: xxHash32(id).toString(16),
     ids: 0,
-    postcss: await postcssrc({
-      env: options.env,
-    }),
   };
   const plugins: NonNullable<NonNullable<babel.TransformOptions['parserOpts']>['plugins']> = ['jsx'];
   if (/\.[mc]?tsx?$/i.test(id)) {
