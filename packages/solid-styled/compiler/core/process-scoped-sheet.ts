@@ -39,7 +39,7 @@ export default function processScopedSheet(
           },
         },
         keyframes(rule) {
-          if (inGlobal > 0) {
+          if (inGlobal === 0) {
             keyframes.add(rule.value.name.value);
             return {
               type: 'keyframes',
