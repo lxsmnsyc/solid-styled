@@ -45,8 +45,7 @@
     "clean": "pridepack clean",
     "watch": "pridepack watch",
     "start": "pridepack start",
-    "dev": "pridepack dev",
-    "test": "vitest"
+    "dev": "pridepack dev"
   },
   "description": "Rollup plugin for solid-styled",
   "repository": {
