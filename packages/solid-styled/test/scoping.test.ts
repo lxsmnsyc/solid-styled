@@ -88,4 +88,33 @@ export default function Example() {
   `;
     expect((await compile(FILE, code, options)).code).toMatchSnapshot();
   });
+  it('should scope for @keyframes', async () => {
+    const code = `
+import { css } from 'solid-styled';
+
+export default function Example() {
+  css\`
+    h1 {
+      animation-name: spin;
+    }
+
+    h2 {
+      animation: spin 1s;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  \`;
+
+  return <h1>Hello World</h1>;
+}
+  `;
+    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+  });
 });

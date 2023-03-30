@@ -1,5 +1,18 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`scoping > should scope for @keyframes 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"h1[s\\\\\\\\:c-f0b3b6fa-0]{animation-name:c-f0b3b6fa-0-spin}h2[s\\\\\\\\:c-f0b3b6fa-0]{animation:1s c-f0b3b6fa-0-spin}@keyframes c-f0b3b6fa-0-spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
 exports[`scoping > should scope for attribute selectors 1`] = `
 "import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
 import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
