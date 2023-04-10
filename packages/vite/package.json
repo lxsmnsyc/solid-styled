@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-solid-styled",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "type": "module",
   "files": [
     "dist",
@@ -19,14 +19,14 @@
     "eslint": "^8.36.0",
     "eslint-config-lxsmnsyc": "^0.5.1",
     "pridepack": "2.4.2",
-    "solid-styled": "0.8.2",
+    "solid-styled": "0.9.0",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5",
     "vite": "^4.2.1"
   },
   "dependencies": {
-    "unplugin-solid-styled": "0.8.2",
-    "@rollup/pluginutils": "^5.0.2"
+    "@rollup/pluginutils": "^5.0.2",
+    "unplugin-solid-styled": "0.9.0"
   },
   "peerDependencies": {
     "solid-styled": "^0.8",
