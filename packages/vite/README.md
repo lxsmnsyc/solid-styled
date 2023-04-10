@@ -39,6 +39,23 @@ export default {
 }
 ```
 
+## Config options
+
+```js
+{
+  // Toggle verbose scope names based
+  // on the owning component's name,
+  // useful for debugging
+  // Default: false
+  "verbose": true,
+
+  // Allows prefixing scope names
+  // useful for package publishing
+  // Default: undefined ('')
+  "prefix": "example",
+}
+```
+
 ## Sponsors
 
 ![Sponsors](https://github.com/lxsmnsyc/sponsors/blob/main/sponsors.svg?raw=true)

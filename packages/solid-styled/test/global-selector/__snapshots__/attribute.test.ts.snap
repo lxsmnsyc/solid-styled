@@ -1,0 +1,1925 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`:global > attribute selectors > with value + i modifier > dash-match > should scope for ident with *|ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident|=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > dash-match > should scope for ident with *|ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident|=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > dash-match > should scope for ident with |ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > dash-match > should scope for ident with |ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > dash-match > should scope for ident with ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > dash-match > should scope for ident with ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > dash-match > should scope for ident with ns|ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident|=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > dash-match > should scope for ident with ns|ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident|=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > equal > should scope for ident with *|ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > equal > should scope for ident with *|ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > equal > should scope for ident with |ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > equal > should scope for ident with |ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > equal > should scope for ident with ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > equal > should scope for ident with ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > equal > should scope for ident with ns|ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > equal > should scope for ident with ns|ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > includes-match > should scope for ident with *|ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident~=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > includes-match > should scope for ident with *|ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident~=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > includes-match > should scope for ident with |ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > includes-match > should scope for ident with |ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > includes-match > should scope for ident with ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > includes-match > should scope for ident with ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > includes-match > should scope for ident with ns|ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident~=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > includes-match > should scope for ident with ns|ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident~=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > prefix-match > should scope for ident with *|ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident^=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > prefix-match > should scope for ident with *|ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident^=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > prefix-match > should scope for ident with |ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > prefix-match > should scope for ident with |ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > prefix-match > should scope for ident with ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > prefix-match > should scope for ident with ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > prefix-match > should scope for ident with ns|ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident^=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > prefix-match > should scope for ident with ns|ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident^=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > substring-match > should scope for ident with *|ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident*=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > substring-match > should scope for ident with *|ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident*=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > substring-match > should scope for ident with |ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > substring-match > should scope for ident with |ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > substring-match > should scope for ident with ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > substring-match > should scope for ident with ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > substring-match > should scope for ident with ns|ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident*=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > substring-match > should scope for ident with ns|ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident*=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > suffix-match > should scope for ident with *|ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident$=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > suffix-match > should scope for ident with *|ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident$=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > suffix-match > should scope for ident with |ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > suffix-match > should scope for ident with |ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > suffix-match > should scope for ident with ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=string i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > suffix-match > should scope for ident with ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=ident i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > suffix-match > should scope for ident with ns|ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident$=\\\\\\"string\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + i modifier > suffix-match > should scope for ident with ns|ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident$=\\\\\\"ident\\\\\\" i]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > dash-match > should scope for ident with *|ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident|=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > dash-match > should scope for ident with *|ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident|=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > dash-match > should scope for ident with |ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > dash-match > should scope for ident with |ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > dash-match > should scope for ident with ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > dash-match > should scope for ident with ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > dash-match > should scope for ident with ns|ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident|=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > dash-match > should scope for ident with ns|ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident|=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > equal > should scope for ident with *|ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > equal > should scope for ident with *|ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > equal > should scope for ident with |ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > equal > should scope for ident with |ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > equal > should scope for ident with ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > equal > should scope for ident with ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > equal > should scope for ident with ns|ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > equal > should scope for ident with ns|ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > includes-match > should scope for ident with *|ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident~=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > includes-match > should scope for ident with *|ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident~=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > includes-match > should scope for ident with |ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > includes-match > should scope for ident with |ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > includes-match > should scope for ident with ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > includes-match > should scope for ident with ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > includes-match > should scope for ident with ns|ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident~=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > includes-match > should scope for ident with ns|ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident~=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > prefix-match > should scope for ident with *|ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident^=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > prefix-match > should scope for ident with *|ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident^=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > prefix-match > should scope for ident with |ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > prefix-match > should scope for ident with |ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > prefix-match > should scope for ident with ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > prefix-match > should scope for ident with ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > prefix-match > should scope for ident with ns|ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident^=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > prefix-match > should scope for ident with ns|ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident^=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > substring-match > should scope for ident with *|ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident*=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > substring-match > should scope for ident with *|ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident*=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > substring-match > should scope for ident with |ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > substring-match > should scope for ident with |ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > substring-match > should scope for ident with ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > substring-match > should scope for ident with ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > substring-match > should scope for ident with ns|ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident*=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > substring-match > should scope for ident with ns|ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident*=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > suffix-match > should scope for ident with *|ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident$=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > suffix-match > should scope for ident with *|ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident$=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > suffix-match > should scope for ident with |ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > suffix-match > should scope for ident with |ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > suffix-match > should scope for ident with ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=string s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > suffix-match > should scope for ident with ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=ident s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > suffix-match > should scope for ident with ns|ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident$=\\\\\\"string\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value + s modifier > suffix-match > should scope for ident with ns|ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident$=\\\\\\"ident\\\\\\" s]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > dash-match > should scope for ident with *|ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident|=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > dash-match > should scope for ident with *|ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident|=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > dash-match > should scope for ident with |ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > dash-match > should scope for ident with |ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > dash-match > should scope for ident with ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > dash-match > should scope for ident with ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident|=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > dash-match > should scope for ident with ns|ident|="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident|=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > dash-match > should scope for ident with ns|ident|=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident|=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > equal > should scope for ident with *|ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > equal > should scope for ident with *|ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > equal > should scope for ident with |ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > equal > should scope for ident with |ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > equal > should scope for ident with ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > equal > should scope for ident with ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > equal > should scope for ident with ns|ident="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > equal > should scope for ident with ns|ident=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > includes-match > should scope for ident with *|ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident~=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > includes-match > should scope for ident with *|ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident~=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > includes-match > should scope for ident with |ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > includes-match > should scope for ident with |ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > includes-match > should scope for ident with ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > includes-match > should scope for ident with ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident~=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > includes-match > should scope for ident with ns|ident~="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident~=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > includes-match > should scope for ident with ns|ident~=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident~=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > prefix-match > should scope for ident with *|ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident^=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > prefix-match > should scope for ident with *|ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident^=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > prefix-match > should scope for ident with |ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > prefix-match > should scope for ident with |ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > prefix-match > should scope for ident with ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > prefix-match > should scope for ident with ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident^=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > prefix-match > should scope for ident with ns|ident^="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident^=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > prefix-match > should scope for ident with ns|ident^=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident^=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > substring-match > should scope for ident with *|ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident*=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > substring-match > should scope for ident with *|ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident*=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > substring-match > should scope for ident with |ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > substring-match > should scope for ident with |ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > substring-match > should scope for ident with ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > substring-match > should scope for ident with ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident*=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > substring-match > should scope for ident with ns|ident*="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident*=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > substring-match > should scope for ident with ns|ident*=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident*=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > suffix-match > should scope for ident with *|ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident$=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > suffix-match > should scope for ident with *|ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident$=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > suffix-match > should scope for ident with |ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > suffix-match > should scope for ident with |ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > suffix-match > should scope for ident with ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=string]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > suffix-match > should scope for ident with ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident$=ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > suffix-match > should scope for ident with ns|ident$="string" 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident$=\\\\\\"string\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > with value > suffix-match > should scope for ident with ns|ident$=ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident$=\\\\\\"ident\\\\\\"]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > without value > should scope for *|ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[*|ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > without value > should scope for |ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > without value > should scope for ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;
+
+exports[`:global > attribute selectors > without value > should scope for ns|ident 1`] = `
+"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { css } from 'solid-styled';
+const _sheet = \\"c-f0b3b6fa-0\\";
+const _css = \\"[ns|ident]{color:red}\\";
+export default function Example() {
+  const _vars = _createCSSVars();
+  _useSolidStyled(_sheet, 1, _css);
+  return <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+}"
+`;

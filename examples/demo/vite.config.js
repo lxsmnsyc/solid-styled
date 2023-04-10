@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
-import solidStyled from 'vite-plugin-solid-styled';
+import solidStyled from 'unplugin-solid-styled';
 
 export default defineConfig({
   plugins: [
     solidPlugin(),
-    solidStyled({
+    solidStyled.vite({
       prefix: 'example',
       filter: {
         include: 'src/**/*.tsx',

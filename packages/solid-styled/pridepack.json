@@ -2,6 +2,6 @@
   "target": "es2018",
   "entrypoints": {
     ".": "src/index.ts",
-    "./babel": "babel/index.ts"
+    "./compiler": "compiler/index.ts"
   }
 }

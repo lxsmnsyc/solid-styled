@@ -8,14 +8,17 @@
 
 ```bash
 npm i solid-styled
+npm i -D postcss
 ```
 
 ```bash
 yarn add solid-styled
+yarn add -D postcss
 ```
 
 ```bash
 pnpm add solid-styled
+pnpm add -D postcss
 ```
 
 ## Features
@@ -40,38 +43,7 @@ pnpm add solid-styled
 
 - [Rollup](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/rollup)
 - [Vite](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/vite)
-
-### Babel
-
-For `solid-styled` to make its magic work properly, you need to add the `solid-styled/babel` plugin in the babel configuration:
-
-```js
-{
-  "plugins": [
-    "solid-styled/babel"
-  ]
-}
-```
-
-#### Config options
-
-```js
-{
-  // Toggle verbose scope names based
-  // on the owning component's name,
-  // useful for debugging
-  // Default: false
-  "verbose": true,
-
-  // Allows prefixing scope names
-  // useful for package publishing
-  // Default: undefined ('')
-  "prefix": "example",
-
-  // Path of the filename, used for hashing
-  "source": "/path/to/file"
-}
-```
+- [Unplugin](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/unplugin)
 
 ### `css`
 
@@ -273,14 +245,9 @@ renderToString(() => (
 const styles = renderSheets(styles);
 ```
 
-## PostCSS
+## CSS Processing
 
-`solid-styled` uses [PostCSS](https://github.com/postcss/postcs) for processing the CSS templates. You can check the following plugins, that are used by default, for the features that are supported:
-
-- [Autoprefixer](https://autoprefixer.github.io/)
-- [`postcss-nested`](https://github.com/postcss/postcss-nested)
-- [CSSNano](https://cssnano.co/)
-In the future, `solid-styled` can possibly allow to load the PostCSS config and to allow other plugins to be used.
+`solid-styled` uses [LightningCSS](https://lightningcss.dev/) to preprocess CSS templates as well as apply CSS scoping and transformations. By default, [CSS Nesting and Custom Media Queries](https://lightningcss.dev/transpilation.html#draft-syntax) are enabled by default.
 
 ## Limitations
 

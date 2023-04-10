@@ -15,7 +15,6 @@
     "pridepack"
   ],
   "devDependencies": {
-    "@types/babel__core": "^7.20.0",
     "@types/node": "^18.15.3",
     "eslint": "^8.36.0",
     "eslint-config-lxsmnsyc": "^0.5.1",
@@ -26,12 +25,12 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@babel/core": "^7.21.3",
+    "unplugin-solid-styled": "0.8.2",
     "@rollup/pluginutils": "^5.0.2"
   },
   "peerDependencies": {
     "rollup": "^3",
-    "solid-styled": ">=0.7"
+    "solid-styled": "^0.8"
   },
   "scripts": {
     "prepublishOnly": "pridepack clean && pridepack build",
@@ -41,8 +40,7 @@
     "clean": "pridepack clean",
     "watch": "pridepack watch",
     "start": "pridepack start",
-    "dev": "pridepack dev",
-    "test": "vitest"
+    "dev": "pridepack dev"
   },
   "description": "Rollup plugin for solid-styled",
   "repository": {
