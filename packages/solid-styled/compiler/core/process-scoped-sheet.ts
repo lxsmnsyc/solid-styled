@@ -1,7 +1,7 @@
 /* eslint-disable object-shorthand */
 import * as lightningcss from 'lightningcss';
 import browserslist from 'browserslist';
-import { StateContext } from '../types';
+import type { StateContext } from '../types';
 import { GLOBAL_SELECTOR, SOLID_STYLED_NS } from './constants';
 import tokensToSelectorsList from './token-to-selector';
 
@@ -9,7 +9,7 @@ export default function processScopedSheet(
   ctx: StateContext,
   sheetID: string,
   content: string,
-) {
+): string {
   const keyframes = new Set();
 
   // Flag to indicate that the currently visited

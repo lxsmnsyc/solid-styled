@@ -1,9 +1,9 @@
-import * as t from '@babel/types';
+import type * as t from '@babel/types';
 
 export function getImportSpecifierKey(
   specifier: t.ImportSpecifier,
-) {
-  if (t.isIdentifier(specifier.imported)) {
+): string {
+  if (specifier.imported.type === 'Identifier') {
     return specifier.imported.name;
   }
   return specifier.imported.value;

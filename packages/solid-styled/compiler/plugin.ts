@@ -1,6 +1,7 @@
-import { NodePath, Scope } from '@babel/traverse';
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+import type { NodePath, Scope } from '@babel/traverse';
 import * as t from '@babel/types';
-import { ScopedSheet, StateContext } from './types';
+import type { ScopedSheet, StateContext } from './types';
 import {
   RUNTIME_IDENTIFIERS,
   SHEET_ID,
@@ -55,7 +56,7 @@ function generateVars(
   ctx: StateContext,
   path: NodePath,
   functionParent: Scope,
-) {
+): t.Identifier {
   const result = ctx.vars.get(functionParent);
   if (result) {
     return result;
@@ -84,7 +85,7 @@ function getFunctionParentName(functionParent: Scope): string {
 function generateSheet(
   ctx: StateContext,
   functionParent: Scope,
-) {
+): ScopedSheet {
   const result = ctx.sheets.get(functionParent);
   if (result) {
     return result;
@@ -120,7 +121,7 @@ function generateSheet(
   return value;
 }
 
-function getStyleAttribute(opening: t.JSXOpeningElement) {
+function getStyleAttribute(opening: t.JSXOpeningElement): t.JSXAttribute | null {
   for (let i = 0, len = opening.attributes.length; i < len; i += 1) {
     const attr = opening.attributes[i];
     if (t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === 'style') {
@@ -133,7 +134,7 @@ function getStyleAttribute(opening: t.JSXOpeningElement) {
 function transformJSX(
   ctx: StateContext,
   functionParent: Scope,
-) {
+): void {
   if (ctx.sheets.has(functionParent)) {
     functionParent.path.traverse({
       JSXElement(path) {
@@ -199,7 +200,7 @@ function transformJSX(
 function processJSXTemplate(
   ctx: StateContext,
   path: NodePath<t.JSXElement>,
-) {
+): void {
   const opening = path.node.openingElement;
   if (!t.isJSXIdentifier(opening.name)) {
     return;
@@ -297,7 +298,7 @@ function processJSXTemplate(
 function processCSSTaggedTemplate(
   ctx: StateContext,
   path: NodePath<t.TaggedTemplateExpression>,
-) {
+): void {
   // Get the function parent first
   const functionParent = path.scope.getFunctionParent();
   if (functionParent) {
@@ -366,7 +367,7 @@ export default function solidStyledPlugin(): babel.PluginObj<State> {
   return {
     name: 'solid-styled',
     visitor: {
-      Program(programPath, state) {
+      Program(programPath, state): void {
         const validIdentifiers = new Set();
         const validNamespaces = new Set();
 

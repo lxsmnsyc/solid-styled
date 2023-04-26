@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import * as lightningcss from 'lightningcss';
+import type * as lightningcss from 'lightningcss';
 import assert from './assert';
 
 /**

@@ -1,23 +1,31 @@
 import * as t from '@babel/types';
-import { StateContext } from '../types';
+import type { StateContext } from '../types';
 import preprocessCSS from './preprocess-css';
 import processScopedSheet from './process-scoped-sheet';
 import { getPrefix, getUniqueId } from './utils';
 
-function replaceDynamicTemplate(
+interface ProcessedCSSTemplate {
+  sheet: string;
+  variables: t.ObjectProperty[];
+}
+
+export default function processCSSTemplate(
   ctx: StateContext,
-  { expressions, quasis }: t.TemplateLiteral,
-) {
+  sheetID: string,
+  template: t.TemplateLiteral,
+  isScoped: boolean,
+): ProcessedCSSTemplate {
+  // Replace the template's dynamic parts with CSS variables
   // Collects all the variables
   const variables: t.ObjectProperty[] = [];
 
   let sheet = '';
   let currentExpr = 0;
 
-  for (let i = 0, len = quasis.length; i < len; i += 1) {
-    sheet = `${sheet}${quasis[i].value.cooked ?? ''}`;
-    if (currentExpr < expressions.length) {
-      const expr = expressions[currentExpr];
+  for (let i = 0, len = template.quasis.length; i < len; i += 1) {
+    sheet = `${sheet}${template.quasis[i].value.cooked ?? ''}`;
+    if (currentExpr < template.expressions.length) {
+      const expr = template.expressions[currentExpr];
       if (t.isExpression(expr)) {
         // Create a new variable
         const id = `--s-${getPrefix(ctx, true)}${getUniqueId(ctx)}`;
@@ -33,20 +41,6 @@ function replaceDynamicTemplate(
     }
   }
 
-  return {
-    sheet,
-    variables,
-  };
-}
-
-export default function processCSSTemplate(
-  ctx: StateContext,
-  sheetID: string,
-  templateLiteral: t.TemplateLiteral,
-  isScoped: boolean,
-) {
-  // Replace the template's dynamic parts with CSS variables
-  const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
   return {
     sheet: isScoped
       ? processScopedSheet(ctx, sheetID, sheet)

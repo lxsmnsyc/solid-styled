@@ -1,7 +1,7 @@
-import * as babel from '@babel/core';
+import type * as babel from '@babel/core';
 import { addNamed } from '@babel/helper-module-imports';
-import * as t from '@babel/types';
-import { StateContext } from '../types';
+import type * as t from '@babel/types';
+import type { StateContext } from '../types';
 
 export default function getImportIdentifier(
   ctx: StateContext,

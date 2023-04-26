@@ -1,11 +1,11 @@
 import browserslist from 'browserslist';
 import * as lightningcss from 'lightningcss';
-import { StateContext } from '../types';
+import type { StateContext } from '../types';
 
 export default function preprocessCSS(
   ctx: StateContext,
   content: string,
-) {
+): string {
   const { code } = lightningcss.transform({
     code: Buffer.from(content),
     filename: ctx.ns,

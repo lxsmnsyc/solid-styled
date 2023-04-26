@@ -1,18 +1,32 @@
 import babel from '@babel/core';
 import path from 'path';
-import { SolidStyledOptions, StateContext } from './types';
+import type { SolidStyledOptions, StateContext } from './types';
 import xxHash32 from './xxhash32';
 import solidStyledPlugin from './plugin';
 
-export {
+export type {
   SolidStyledOptions,
 };
+
+export interface CompileResult {
+  code: string;
+  ignored?: boolean | undefined;
+  map?: {
+    version: number;
+    sources: string[];
+    names: string[];
+    sourceRoot?: string | undefined;
+    sourcesContent?: string[] | undefined;
+    mappings: string;
+    file: string;
+  };
+}
 
 export async function compile(
   id: string,
   code: string,
   options: SolidStyledOptions,
-) {
+): Promise<CompileResult> {
   const ctx: StateContext = {
     hooks: new Map(),
     sheets: new WeakMap(),
@@ -43,7 +57,7 @@ export async function compile(
   if (result) {
     return {
       code: result.code || '',
-      map: result.map,
+      map: result.map || undefined,
     };
   }
   throw new Error('invariant');
