@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "eslint": "^8.39.0",
-    "eslint-config-lxsmnsyc": "^0.6.3",
+    "eslint-config-lxsmnsyc": "^0.6.4",
     "typescript": "^4.9.5",
     "unplugin-solid-styled": "0.9.0",
     "vite": "^4.2.1",

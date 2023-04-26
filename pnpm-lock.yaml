@@ -8,8 +8,8 @@ importers:
         specifier: ^8.39.0
         version: 8.39.0
       eslint-config-lxsmnsyc:
-        specifier: ^0.6.3
-        version: 0.6.3(eslint@8.39.0)(typescript@4.9.5)
+        specifier: ^0.6.4
+        version: 0.6.4(eslint@8.39.0)(typescript@4.9.5)
       lerna:
         specifier: ^6.5.1
         version: 6.5.1
@@ -36,8 +36,8 @@ importers:
         specifier: ^8.39.0
         version: 8.39.0
       eslint-config-lxsmnsyc:
-        specifier: ^0.6.3
-        version: 0.6.3(eslint@8.39.0)(typescript@4.9.5)
+        specifier: ^0.6.4
+        version: 0.6.4(eslint@8.39.0)(typescript@4.9.5)
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
@@ -58,8 +58,8 @@ importers:
         specifier: ^8.39.0
         version: 8.39.0
       eslint-config-lxsmnsyc:
-        specifier: ^0.6.3
-        version: 0.6.3(eslint@8.39.0)(typescript@4.9.5)
+        specifier: ^0.6.4
+        version: 0.6.4(eslint@8.39.0)(typescript@4.9.5)
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
@@ -89,8 +89,8 @@ importers:
         specifier: ^8.39.0
         version: 8.39.0
       eslint-config-lxsmnsyc:
-        specifier: ^0.6.3
-        version: 0.6.3(eslint@8.39.0)(typescript@4.9.5)
+        specifier: ^0.6.4
+        version: 0.6.4(eslint@8.39.0)(typescript@4.9.5)
       pridepack:
         specifier: 2.4.2
         version: 2.4.2(eslint@8.39.0)(tslib@2.5.0)(typescript@4.9.5)
@@ -147,8 +147,8 @@ importers:
         specifier: ^8.39.0
         version: 8.39.0
       eslint-config-lxsmnsyc:
-        specifier: ^0.6.3
-        version: 0.6.3(eslint@8.39.0)(typescript@4.9.5)
+        specifier: ^0.6.4
+        version: 0.6.4(eslint@8.39.0)(typescript@4.9.5)
       pridepack:
         specifier: ^2.4.2
         version: 2.4.2(eslint@8.39.0)(tslib@2.5.0)(typescript@4.9.5)
@@ -181,8 +181,8 @@ importers:
         specifier: ^8.39.0
         version: 8.39.0
       eslint-config-lxsmnsyc:
-        specifier: ^0.6.3
-        version: 0.6.3(eslint@8.39.0)(typescript@4.9.5)
+        specifier: ^0.6.4
+        version: 0.6.4(eslint@8.39.0)(typescript@4.9.5)
       pridepack:
         specifier: 2.4.2
         version: 2.4.2(eslint@8.39.0)(tslib@2.5.0)(typescript@4.9.5)
@@ -215,8 +215,8 @@ importers:
         specifier: ^8.39.0
         version: 8.39.0
       eslint-config-lxsmnsyc:
-        specifier: ^0.6.3
-        version: 0.6.3(eslint@8.39.0)(typescript@4.9.5)
+        specifier: ^0.6.4
+        version: 0.6.4(eslint@8.39.0)(typescript@4.9.5)
       pridepack:
         specifier: 2.4.2
         version: 2.4.2(eslint@8.39.0)(tslib@2.5.0)(typescript@4.9.5)
@@ -3895,8 +3895,8 @@ packages:
       object.entries: 1.1.6
     dev: true
 
-  /eslint-config-lxsmnsyc@0.6.3(eslint@8.39.0)(typescript@4.9.5):
-    resolution: {integrity: sha512-79z5/c/pYbgDeN9D/5NS3bc+9bY3oNiRe8u6+MT1vcgBVvHdplqLYNDqtEvQ1/dT8xBHcXxOpu7FTAeujiy4Zg==}
+  /eslint-config-lxsmnsyc@0.6.4(eslint@8.39.0)(typescript@4.9.5):
+    resolution: {integrity: sha512-PxZWyvlJA25CH4MreDCOQZxMcNf6Fwo6xrn1G1/7eDV4Wjv7YVyb96KVc/0QURCJ12jEA9Q9TAYVWpciWoGhSg==}
     peerDependencies:
       eslint: ^8.0
       typescript: ^4.0 || ^5.0

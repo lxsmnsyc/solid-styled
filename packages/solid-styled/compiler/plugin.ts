@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import type { NodePath, Scope } from '@babel/traverse';
 import * as t from '@babel/types';
 import type { ScopedSheet, StateContext } from './types';
