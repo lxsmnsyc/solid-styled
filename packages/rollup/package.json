@@ -16,8 +16,8 @@
   ],
   "devDependencies": {
     "@types/node": "^18.15.3",
-    "eslint": "^8.36.0",
-    "eslint-config-lxsmnsyc": "^0.5.1",
+    "eslint": "^8.39.0",
+    "eslint-config-lxsmnsyc": "^0.6.3",
     "pridepack": "2.4.2",
     "rollup": "^3.5.1",
     "solid-styled": "0.8.2",

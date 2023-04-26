@@ -1,20 +1,20 @@
+import type { JSX } from 'solid-js';
 import {
   createComponent,
   createContext,
   createMemo,
   createRoot,
-  JSX,
   onCleanup,
   useContext,
 } from 'solid-js';
 import { isServer } from 'solid-js/web';
 
-interface StyleRegistryContext {
+interface StyleRegistryContextData {
   insert(id: string, sheet: string): void;
   remove(id: string): void;
 }
 
-const StyleRegistryContext = createContext<StyleRegistryContext>();
+const StyleRegistryContext = createContext<StyleRegistryContextData>();
 
 const SOLID_SHEET_ATTR = 's:id';
 const SOLID_SHEET_ATTR_ESCAPED = 's\\:id';
@@ -24,12 +24,13 @@ const references = new Map<string, number>();
 
 // Hydrate the sheets
 if (!isServer) {
-  document.head.querySelectorAll(`style[${SOLID_SHEET_ATTR_ESCAPED}]`).forEach((node) => {
-    tracked.add(node.getAttribute(SOLID_SHEET_ATTR));
-  });
+  const styles = document.head.querySelectorAll(`style[${SOLID_SHEET_ATTR_ESCAPED}]`);
+  for (let i = 0, len = styles.length; i < len; i++) {
+    tracked.add(styles[i].getAttribute(SOLID_SHEET_ATTR));
+  }
 }
 
-function insert(id: string, sheet: string) {
+function insert(id: string, sheet: string): void {
   if (!tracked.has(id)) {
     tracked.add(id);
 
@@ -43,7 +44,7 @@ function insert(id: string, sheet: string) {
   references.set(id, (references.get(id) ?? 0) + 1);
 }
 
-function remove(id: string) {
+function remove(id: string): void {
   const count = references.get(id) ?? 0;
   if (count > 1) {
     references.set(id, count - 1);
@@ -72,7 +73,7 @@ export interface StyleRegistryProps {
 export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
   const sheets = new Set<string>();
 
-  function wrappedInsert(id: string, sheet: string) {
+  function wrappedInsert(id: string, sheet: string): void {
     if (!sheets.has(id)) {
       sheets.add(id);
       if (isServer && props.styles) {
@@ -102,7 +103,9 @@ export function useSolidStyled(
   const index = `${id}-${offset}`;
   const ctx = useContext(StyleRegistryContext) ?? { insert, remove };
   ctx.insert(index, sheet);
-  onCleanup(() => ctx.remove(index));
+  onCleanup(() => {
+    ctx.remove(index);
+  });
 }
 
 type CSSVarsMerge = () => Record<string, string>;
@@ -112,7 +115,7 @@ interface CSSVars {
 }
 
 function createLazyMemo<T>(fn: () => T): () => T {
-  let s: () => T;
+  let s: (() => T) | undefined;
   let dispose: (() => void) | undefined;
   onCleanup(() => {
     if (dispose) {
@@ -185,8 +188,12 @@ export function renderSheets(sheets: StyleData[]): string {
 
 // }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CSSConstructorNS {
-  // style<Args extends any[]>(template: TemplateStringsArray, ...spans: CSSStyleSpan<Args>[]): CSSStyleFunction<Args>;
+  // style<Args extends any[]>(
+  //   template: TemplateStringsArray,
+  //   ...spans: CSSStyleSpan<Args>[]
+  // ): CSSStyleFunction<Args>;
   // class(template: TemplateStringsArray): string;
 }
 
@@ -196,11 +203,10 @@ export interface CSSBaseConstructor {
 
 export type CSSConstructor = CSSBaseConstructor & CSSConstructorNS;
 
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
-function invariant(methodName: string) {
-  return new Error(`Unexpected use of \`${methodName}\`. Make sure that solid-styled\'s plugin is setup correctly.`);
+function invariant(methodName: string): Error {
+  return new Error(`Unexpected use of \`${methodName}\`. Make sure that solid-styled's plugin is setup correctly.`);
 }
 
 // const cssNamespace: CSSConstructorNS = {
