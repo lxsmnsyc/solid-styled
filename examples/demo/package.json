@@ -1,6 +1,6 @@
 {
   "name": "demo",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -10,7 +10,7 @@
     "eslint": "^8.36.0",
     "eslint-config-lxsmnsyc": "^0.5.1",
     "typescript": "^4.9.5",
-    "unplugin-solid-styled": "0.9.0",
+    "unplugin-solid-styled": "0.9.1",
     "vite": "^4.2.1",
     "vite-plugin-solid": "^2.6.1"
   },
