@@ -1,6 +1,9 @@
-import { compile, SolidStyledOptions } from 'solid-styled/compiler';
-import { Plugin } from 'vite';
-import { createFilter, FilterPattern } from '@rollup/pluginutils';
+import type { SolidStyledOptions } from 'solid-styled/compiler';
+import { compile } from 'solid-styled/compiler';
+import type { Plugin } from 'vite';
+import type { FilterPattern } from '@rollup/pluginutils';
+import { createFilter } from '@rollup/pluginutils';
+import type { TransformResult } from 'unplugin';
 import { createUnplugin } from 'unplugin';
 
 export interface SolidStyledPluginFilter {
@@ -13,7 +16,7 @@ export interface SolidStyledPluginOptions extends SolidStyledOptions {
 }
 
 // From: https://github.com/bluwy/whyframe/blob/master/packages/jsx/src/index.js#L27-L37
-function repushPlugin(plugins: Plugin[], pluginName: string, pluginNames: string[]) {
+function repushPlugin(plugins: Plugin[], pluginName: string, pluginNames: string[]): void {
   const namesSet = new Set(pluginNames);
 
   let baseIndex = -1;
@@ -48,10 +51,10 @@ const solidStyledPlugin = createUnplugin((options: SolidStyledPluginOptions = {}
 
   return {
     name: 'solid-styled',
-    transformInclude(id) {
+    transformInclude(id): boolean {
       return filter(id);
     },
-    transform(code, id) {
+    async transform(code, id): Promise<TransformResult> {
       return compile(id, code, {
         ...options,
         env,
@@ -59,7 +62,7 @@ const solidStyledPlugin = createUnplugin((options: SolidStyledPluginOptions = {}
     },
     vite: {
       enforce: 'pre',
-      configResolved(config) {
+      configResolved(config): void {
         env = config.mode !== 'production' ? 'development' : 'production';
 
         // run our plugin before the following plugins:
@@ -68,6 +71,8 @@ const solidStyledPlugin = createUnplugin((options: SolidStyledPluginOptions = {}
           'astro:jsx',
           // https://github.com/solidjs/vite-plugin-solid/blob/master/src/index.ts#L305
           'solid',
+          // https://github.com/solidjs/solid-start/blob/main/packages/start/vite/plugin.js#L118
+          'solid-start-file-system-router',
         ]);
       },
     },
