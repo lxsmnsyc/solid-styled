@@ -4,7 +4,7 @@ import { GLOBAL_SELECTOR, SOLID_STYLED_NS } from './constants';
 export default function processScopedSheet(
   sheetID: string,
   ast: csstree.CssNode,
-) {
+): void {
   // This selector is going to be inserted
   // on every non-global selector
   // [s\:${sheetID}]

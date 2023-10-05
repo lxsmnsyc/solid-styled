@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import * as lightningcss from 'lightningcss';
+import type * as lightningcss from 'lightningcss';
 import assert from './assert';
 
 /**
@@ -585,6 +585,86 @@ function tokensToAttributeSelector(
   };
 }
 
+const DESCENDANT: lightningcss.SelectorComponent = { type: 'combinator', value: 'descendant' };
+
+function normalizeCombinators(selectors: lightningcss.Selector): lightningcss.Selector {
+  const temp: lightningcss.Selector = [];
+  // Remove all descendant combinators
+  for (let i = 0, len = selectors.length; i < len; i += 1) {
+    const current = selectors[i];
+    if (current.type === 'combinator' && current.value !== 'descendant') {
+      temp.push(current);
+    }
+  }
+  const temp2: lightningcss.Selector = [];
+  // Insert descendant combinators in between
+  for (let i = 0, len = temp.length; i < len; i += 1) {
+    temp2.push(DESCENDANT);
+    temp2.push(temp[i]);
+  }
+  return temp2;
+}
+
+function cleanSelector(selectors: lightningcss.Selector): lightningcss.Selector {
+  // scan for combinator sequences
+  let start: number | undefined;
+  let isCombinator: boolean | undefined;
+
+  const sequences: [combinator: boolean, start: number, end: number][] = [];
+
+  for (let i = 0, len = selectors.length; i < len; i += 1) {
+    const current = selectors[i];
+
+    if (start == null || isCombinator == null) {
+      isCombinator = current.type === 'combinator';
+      start = i;
+    } else if (current.type === 'combinator') {
+      if (!isCombinator) {
+        sequences.push([false, start, i - 1]);
+        isCombinator = true;
+        start = i;
+      }
+    } else if (isCombinator) {
+      sequences.push([true, start, i - 1]);
+      isCombinator = false;
+      start = i;
+    }
+  }
+
+  if (start != null) {
+    sequences.push([isCombinator === true, start, selectors.length - 1]);
+  }
+
+  const newSelectors: lightningcss.Selector = [];
+
+  for (let i = 0, len = sequences.length; i < len; i += 1) {
+    const [flag, min, max] = sequences[i];
+
+    if (flag) {
+      const temp: lightningcss.Selector = [];
+      for (let k = min; k <= max; k += 1) {
+        temp.push(selectors[k]);
+      }
+      const normalized = normalizeCombinators(temp);
+      if (temp.length > 1) {
+        for (let k = 0; k < temp.length; k += 1) {
+          if (k % 2 === 1) {
+            newSelectors.push(normalized[k]);
+          }
+        }
+      } else {
+        newSelectors.push(DESCENDANT);
+      }
+    } else {
+      for (let k = min; k <= max; k += 1) {
+        newSelectors.push(selectors[k]);
+      }
+    }
+  }
+
+  return newSelectors;
+}
+
 export default function tokensToSelectorsList(
   tokens: lightningcss.TokenOrValue[],
 ): lightningcss.SelectorList {
@@ -738,6 +818,7 @@ export default function tokensToSelectorsList(
             }
             break;
           // Matches id selector
+          case 'id-hash':
           case 'hash':
             selectors.push({
               type: 'id',
@@ -809,7 +890,7 @@ export default function tokensToSelectorsList(
   }
 
   if (selectors.length) {
-    list.push(selectors);
+    list.push(cleanSelector(selectors));
   }
 
   return list;
