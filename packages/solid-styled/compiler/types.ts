@@ -1,5 +1,5 @@
-import { Scope } from '@babel/traverse';
-import * as t from '@babel/types';
+import type { Scope } from '@babel/traverse';
+import type * as t from '@babel/types';
 
 export interface SolidStyledOptions {
   verbose?: boolean;

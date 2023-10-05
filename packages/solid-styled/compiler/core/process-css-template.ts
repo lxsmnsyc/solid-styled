@@ -1,13 +1,18 @@
 import * as t from '@babel/types';
-import { StateContext } from '../types';
+import type { StateContext } from '../types';
 import preprocessCSS from './preprocess-css';
 import processScopedSheet from './process-scoped-sheet';
 import { getPrefix, getUniqueId } from './utils';
 
+interface DynamicTemplateResult {
+  sheet: string;
+  variables: t.ObjectProperty[];
+}
+
 function replaceDynamicTemplate(
   ctx: StateContext,
   { expressions, quasis }: t.TemplateLiteral,
-) {
+): DynamicTemplateResult {
   // Collects all the variables
   const variables: t.ObjectProperty[] = [];
 
@@ -44,7 +49,7 @@ export default function processCSSTemplate(
   sheetID: string,
   templateLiteral: t.TemplateLiteral,
   isScoped: boolean,
-) {
+): DynamicTemplateResult {
   // Replace the template's dynamic parts with CSS variables
   const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
   return {

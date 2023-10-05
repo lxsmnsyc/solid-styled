@@ -1,18 +1,23 @@
 import babel from '@babel/core';
 import path from 'path';
-import { SolidStyledOptions, StateContext } from './types';
+import type { StateContext, SolidStyledOptions } from './types';
 import xxHash32 from './xxhash32';
 import solidStyledPlugin from './plugin';
 
-export {
+export type {
   SolidStyledOptions,
 };
+
+export interface CompileOutput {
+  code: string;
+  map: babel.BabelFileResult['map'];
+}
 
 export async function compile(
   id: string,
   code: string,
   options: SolidStyledOptions,
-) {
+): Promise<CompileOutput> {
   const ctx: StateContext = {
     hooks: new Map(),
     sheets: new WeakMap(),
