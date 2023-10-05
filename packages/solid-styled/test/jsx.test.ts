@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { compile, SolidStyledOptions } from '../compiler';
+import type { SolidStyledOptions } from '../compiler';
+import { compile } from '../compiler';
 
 const options: SolidStyledOptions = {
   verbose: false,
