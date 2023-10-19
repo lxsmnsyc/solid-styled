@@ -7,15 +7,15 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "eslint": "^8.50.0",
+    "eslint": "^8.51.0",
     "eslint-config-lxsmnsyc": "^0.6.5",
-    "typescript": "^4.9.5",
+    "typescript": "^5.2.2",
     "unplugin-solid-styled": "0.9.1",
-    "vite": "^4.4.10",
-    "vite-plugin-solid": "^2.6.1"
+    "vite": "^4.5.0",
+    "vite-plugin-solid": "^2.7.2"
   },
   "dependencies": {
-    "solid-js": "^1.6.16",
+    "solid-js": "^1.8.1",
     "solid-styled": "0.9.0"
   },
   "private": true,

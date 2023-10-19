@@ -6,9 +6,9 @@
     "examples/*"
   ],
   "devDependencies": {
-    "eslint": "^8.50.0",
+    "eslint": "^8.51.0",
     "eslint-config-lxsmnsyc": "^0.6.5",
-    "lerna": "^7.3.0",
-    "typescript": "^4.9.5"
+    "lerna": "^7.4.1",
+    "typescript": "^5.2.2"
   }
 }

@@ -9,15 +9,15 @@
     "preview": "astro preview"
   },
   "devDependencies": {
-    "astro": "^2.0.1",
-    "eslint": "^8.50.0",
+    "astro": "^3.3.2",
+    "eslint": "^8.51.0",
     "eslint-config-lxsmnsyc": "^0.6.5",
-    "typescript": "^4.9.5",
+    "typescript": "^5.2.2",
     "unplugin-solid-styled": "0.9.1"
   },
   "dependencies": {
-    "@astrojs/solid-js": "^2.0.0",
-    "solid-js": "^1.6.16",
+    "@astrojs/solid-js": "^3.0.2",
+    "solid-js": "^1.8.1",
     "solid-styled": "0.9.0"
   }
 }
