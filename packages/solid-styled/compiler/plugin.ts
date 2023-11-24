@@ -259,11 +259,9 @@ function processJSXTemplate(
           const current = sheet.count + 1;
           sheet.count = current;
 
-          const vars = generateVars(ctx, path, functionParent);
-
           const computedVars = variables.length
             ? t.callExpression(
-              vars,
+              generateVars(ctx, path, functionParent),
               [t.arrowFunctionExpression([], t.objectExpression(variables))],
             )
             : undefined;
