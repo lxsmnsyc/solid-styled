@@ -14,8 +14,8 @@ export default function Example() {
 `;
 
 exports[`jsx > should transform dynamic templates 1`] = `
-"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
-import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+"import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
+import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
 const _sheet = \\"c-f0b3b6fa-0\\";
 const _css = \\"h1[s\\\\\\\\:c-f0b3b6fa-0]{color:var(--s-v-f0b3b6fa-1)}\\";
 export default function Example() {
@@ -62,17 +62,15 @@ export default function Example() {
 
 exports[`jsx.global > should transform dynamic templates 1`] = `
 "import { useSolidStyledGlobal as _useSolidStyledGlobal } from \\"solid-styled\\";
-import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
 const _sheet = \\"c-f0b3b6fa-0\\";
 const _css = \\"h1{color:var(--s-v-f0b3b6fa-1)}\\";
 export default function Example() {
-  const _vars = _createCSSVars();
-  _useSolidStyledGlobal(_sheet, 1, _css, _vars(() => ({
+  _useSolidStyledGlobal(_sheet, 1, _css, () => ({
     \\"--s-v-f0b3b6fa-1\\": props.color
-  })));
+  }));
   return <>
           
-          <h1 s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>
+          <h1 s:c-f0b3b6fa-0>Hello World</h1>
         </>;
 }"
 `;

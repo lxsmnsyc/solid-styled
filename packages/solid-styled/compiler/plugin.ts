@@ -260,10 +260,7 @@ function processJSXTemplate(
           sheet.count = current;
 
           const computedVars = variables.length
-            ? t.callExpression(
-              generateVars(ctx, path, functionParent),
-              [t.arrowFunctionExpression([], t.objectExpression(variables))],
-            )
+            ? t.arrowFunctionExpression([], t.objectExpression(variables))
             : undefined;
           if (isGlobal) {
             const args: t.Expression[] = [
@@ -293,7 +290,10 @@ function processJSXTemplate(
             );
             statement.insertBefore(t.expressionStatement(
               computedVars
-                ? t.sequenceExpression([setup, computedVars])
+                ? t.sequenceExpression([setup, t.callExpression(
+                  generateVars(ctx, path, functionParent),
+                  [computedVars],
+                )])
                 : setup,
             ));
           }
