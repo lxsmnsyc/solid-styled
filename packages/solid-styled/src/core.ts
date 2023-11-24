@@ -2,9 +2,11 @@ import type { JSX } from 'solid-js';
 import {
   createComponent,
   createContext,
+  createEffect,
   createMemo,
   createRoot,
   onCleanup,
+  untrack,
   useContext,
 } from 'solid-js';
 import { isServer } from 'solid-js/web';
@@ -107,6 +109,40 @@ export function useSolidStyled(
   });
 }
 
+function serializeStyle(source: JSX.CSSProperties): string {
+  let result = '';
+  for (const key in source) {
+    result = `${result}${key}:${String(source[key as keyof JSX.CSSProperties])};`;
+  }
+  return result;
+}
+
+function serializeRootStyle(vars?: () => Record<string, string>): string {
+  return vars ? ':root{' + serializeStyle(untrack(vars)) + '}' : '';
+}
+
+export function useSolidStyledGlobal(
+  id: string,
+  offset: string,
+  sheet: string,
+  vars?: () => Record<string, string>,
+): void {
+  const index = `${id}-${offset}`;
+  const ctx = useContext(StyleRegistryContext) ?? { insert, remove };
+  ctx.insert(index, serializeRootStyle(vars) + sheet);
+  createEffect(() => {
+    if (vars) {
+      const current = vars();
+      for (const key in current) {
+        document.documentElement.style.setProperty(key, current[key]);
+      }
+    }
+  });
+  onCleanup(() => {
+    ctx.remove(index);
+  });
+}
+
 type CSSVarsMerge = () => Record<string, string>;
 
 interface CSSVars {
@@ -149,14 +185,6 @@ export function createCSSVars(): CSSVars {
     }
     return signal();
   };
-}
-
-function serializeStyle(source: JSX.CSSProperties): string {
-  let result = '';
-  for (const key of Object.keys(source)) {
-    result = `${result}${key}:${String(source[key as keyof JSX.CSSProperties])};`;
-  }
-  return result;
 }
 
 export function mergeStyles(

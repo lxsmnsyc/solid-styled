@@ -12,4 +12,5 @@ export const RUNTIME_IDENTIFIERS = {
   createCSSVars: 'createCSSVars',
   mergeStyles: 'mergeStyles',
   useSolidStyled: 'useSolidStyled',
+  useSolidStyledGlobal: 'useSolidStyledGlobal',
 };
