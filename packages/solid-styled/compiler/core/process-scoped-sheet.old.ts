@@ -173,6 +173,37 @@ export default function processScopedSheet(
           });
           node.children = new csstree.List<csstree.CssNode>().fromArray(children);
         }
+      } else if (!inKeyframes && node.type === 'Selector') {
+        const children: csstree.CssNode[] = [];
+        node.children.forEach((child) => {
+          // Push the selector after the node
+          switch (child.type) {
+            case 'TypeSelector':
+            case 'ClassSelector':
+            case 'IdSelector':
+            case 'AttributeSelector':
+            case 'PseudoElementSelector':
+            case 'Combinator':
+            case 'WhiteSpace':
+              children.push(child);
+              break;
+            case 'PseudoClassSelector':
+              // `:global`
+              if (child.name === GLOBAL_SELECTOR) {
+                if (child.children) {
+                  child.children.forEach((innerChild) => {
+                    children.push(innerChild);
+                  });
+                }
+              } else {
+                children.push(child);
+              }
+              break;
+            default:
+              break;
+          }
+        });
+        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
       }
     },
   });
