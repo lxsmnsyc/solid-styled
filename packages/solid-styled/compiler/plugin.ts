@@ -259,27 +259,44 @@ function processJSXTemplate(
           const current = sheet.count + 1;
           sheet.count = current;
 
-          const vars = generateVars(ctx, path, functionParent);
-          statement.insertBefore(t.expressionStatement(
-            t.sequenceExpression([
-              t.callExpression(
-                getImportIdentifier(ctx, path, SOURCE_MODULE, RUNTIME_IDENTIFIERS.useSolidStyled),
-                [
-                  sheet.id,
-                  t.numericLiteral(current),
-                  cssID,
-                ],
+          const computedVars = variables.length
+            ? t.arrowFunctionExpression([], t.objectExpression(variables))
+            : undefined;
+          if (isGlobal) {
+            const args: t.Expression[] = [
+              sheet.id,
+              t.numericLiteral(current),
+              cssID,
+            ];
+            if (computedVars) {
+              args.push(computedVars);
+            }
+            statement.insertBefore(
+              t.expressionStatement(
+                t.callExpression(
+                  getImportIdentifier(ctx, path, SOURCE_MODULE, RUNTIME_IDENTIFIERS.useSolidStyledGlobal),
+                  args,
+                )
               ),
-              ...(
-                variables.length
-                  ? [t.callExpression(
-                    vars,
-                    [t.arrowFunctionExpression([], t.objectExpression(variables))],
-                  )]
-                  : []
-              ),
-            ]),
-          ));
+            );
+          } else {
+            const setup = t.callExpression(
+              getImportIdentifier(ctx, path, SOURCE_MODULE, RUNTIME_IDENTIFIERS.useSolidStyled),
+              [
+                sheet.id,
+                t.numericLiteral(current),
+                cssID,
+              ],
+            );
+            statement.insertBefore(t.expressionStatement(
+              computedVars
+                ? t.sequenceExpression([setup, t.callExpression(
+                  generateVars(ctx, path, functionParent),
+                  [computedVars],
+                )])
+                : setup,
+            ));
+          }
 
           transformJSX(ctx, functionParent);
         }

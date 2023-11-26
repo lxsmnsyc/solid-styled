@@ -75,3 +75,70 @@ export default function Example() {
     expect((await compile(FILE, code, options)).code).toMatchSnapshot();
   });
 });
+describe('jsx.global', () => {
+  it('should transform', async () => {
+    const code = `
+export default function Example() {
+  return (
+    <>
+      <style jsx global>
+        {\`
+          h1 {
+            color: red;
+          }
+        \`}
+      </style>
+      <h1>Hello World</h1>
+    </>
+  );
+}
+  `;
+    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+  });
+  it('should work with multiple templates', async () => {
+    const code = `
+export default function Example() {
+  return (
+    <>
+      <style jsx global>
+        {\`
+          h1 {
+            color: red;
+          }
+        \`}
+      </style>
+      <h1>Hello World</h1>
+      <style jsx global>
+        {\`
+          h2 {
+            color: blue;
+          }
+        \`}
+      </style>
+      <h2>Hello World</h2>
+    </>
+  );
+}
+  `;
+    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+  });
+  it('should transform dynamic templates', async () => {
+    const code = `
+    export default function Example() {
+      return (
+        <>
+          <style jsx global>
+            {\`
+              h1 {
+                color: \${props.color};
+              }
+            \`}
+          </style>
+          <h1>Hello World</h1>
+        </>
+      );
+    }
+  `;
+    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+  });
+});

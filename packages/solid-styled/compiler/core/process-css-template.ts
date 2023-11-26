@@ -1,7 +1,7 @@
 import * as t from '@babel/types';
 import type { StateContext } from '../types';
 import preprocessCSS from './preprocess-css';
-import processScopedSheet from './process-scoped-sheet';
+import processScopedSheet from './process-scoped-sheet.old';
 import { getPrefix, getUniqueId } from './utils';
 
 interface DynamicTemplateResult {
@@ -52,10 +52,11 @@ export default function processCSSTemplate(
 ): DynamicTemplateResult {
   // Replace the template's dynamic parts with CSS variables
   const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
+  const preprocessed = preprocessCSS(ctx, sheet);
   return {
     sheet: isScoped
-      ? processScopedSheet(ctx, sheetID, sheet)
-      : preprocessCSS(ctx, sheet),
+      ? preprocessCSS(ctx, processScopedSheet(ctx, sheetID, preprocessed))
+      : preprocessed,
     variables,
   };
 }

@@ -1,10 +1,14 @@
 import * as csstree from 'css-tree';
 import { GLOBAL_SELECTOR, SOLID_STYLED_NS } from './constants';
+import type { StateContext } from '../types';
 
 export default function processScopedSheet(
+  ctx: StateContext,
   sheetID: string,
-  ast: csstree.CssNode,
-): void {
+  content: string,
+): string {
+  console.log(content);
+  const ast = csstree.parse(content);
   // This selector is going to be inserted
   // on every non-global selector
   // [s\:${sheetID}]
@@ -173,4 +177,6 @@ export default function processScopedSheet(
       }
     },
   });
+
+  return csstree.generate(ast);
 }
