@@ -30,7 +30,7 @@
   },
   "peerDependencies": {
     "rollup": "^3",
-    "solid-styled": "^0.8"
+    "solid-styled": ">=0.9"
   },
   "scripts": {
     "prepublishOnly": "pridepack clean && pridepack build",
