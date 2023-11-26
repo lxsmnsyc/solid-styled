@@ -1,6 +1,6 @@
 {
   "name": "unplugin-solid-styled",
-  "version": "0.9.2",
+  "version": "0.10.0",
   "type": "module",
   "files": [
     "dist",
@@ -19,7 +19,7 @@
     "eslint": "^8.54.0",
     "eslint-config-lxsmnsyc": "^0.6.5",
     "pridepack": "2.5.1",
-    "solid-styled": "0.9.2",
+    "solid-styled": "0.10.0",
     "tslib": "^2.6.2",
     "typescript": "^5.3.2",
     "vite": "^5.0.2"
