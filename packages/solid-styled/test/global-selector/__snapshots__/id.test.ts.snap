@@ -2,13 +2,11 @@
 
 exports[`:global > id selectors > should scope for id selectors 1`] = `
 "import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
-import { createCSSVars as _createCSSVars } from \\"solid-styled\\";
 import { css } from 'solid-styled';
 const _sheet = \\"c-f0b3b6fa-0\\";
 const _css = \\"#example{color:red}\\";
 export default function Example() {
-  const _vars = _createCSSVars();
   _useSolidStyled(_sheet, 1, _css);
-  return <h1 id=\\"example\\" s:c-f0b3b6fa-0 style={_vars()}>Hello World</h1>;
+  return <h1 id=\\"example\\" s:c-f0b3b6fa-0>Hello World</h1>;
 }"
 `;
