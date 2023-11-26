@@ -7,7 +7,6 @@ export default function processScopedSheet(
   sheetID: string,
   content: string,
 ): string {
-  console.log(content);
   const ast = csstree.parse(content);
   // This selector is going to be inserted
   // on every non-global selector
