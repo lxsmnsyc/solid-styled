@@ -1,6 +1,6 @@
 {
   "name": "demo",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -8,13 +8,13 @@
   },
   "devDependencies": {
     "typescript": "^5.3.3",
-    "unplugin-solid-styled": "0.10.0",
+    "unplugin-solid-styled": "0.11.0",
     "vite": "^5.0.11",
     "vite-plugin-solid": "^2.8.0"
   },
   "dependencies": {
     "solid-js": "^1.8.11",
-    "solid-styled": "0.10.0"
+    "solid-styled": "0.11.0"
   },
   "private": true,
   "publishConfig": {

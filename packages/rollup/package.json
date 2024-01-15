@@ -1,24 +1,30 @@
 {
   "name": "rollup-plugin-solid-styled",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "type": "module",
-  "files": ["dist", "babel", "core"],
+  "files": [
+    "dist",
+    "babel",
+    "core"
+  ],
   "engines": {
     "node": ">=10"
   },
   "license": "MIT",
-  "keywords": ["pridepack"],
+  "keywords": [
+    "pridepack"
+  ],
   "devDependencies": {
     "@types/node": "^20.11.1",
     "pridepack": "2.6.0",
     "rollup": "^4.9.5",
-    "solid-styled": "0.10.0",
+    "solid-styled": "0.11.0",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "@rollup/pluginutils": "^5.0.2",
-    "unplugin-solid-styled": "0.10.0"
+    "unplugin-solid-styled": "0.11.0"
   },
   "peerDependencies": {
     "rollup": "^3 || ^4",
