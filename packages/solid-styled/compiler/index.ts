@@ -4,9 +4,7 @@ import type { StateContext, SolidStyledOptions } from './types';
 import xxHash32 from './xxhash32';
 import solidStyledPlugin from './plugin';
 
-export type {
-  SolidStyledOptions,
-};
+export type { SolidStyledOptions };
 
 export interface CompileOutput {
   code: string;
@@ -26,14 +24,14 @@ export async function compile(
     ns: xxHash32(id).toString(16),
     ids: 0,
   };
-  const plugins: NonNullable<NonNullable<babel.TransformOptions['parserOpts']>['plugins']> = ['jsx'];
+  const plugins: NonNullable<
+    NonNullable<babel.TransformOptions['parserOpts']>['plugins']
+  > = ['jsx'];
   if (/\.[mc]?tsx?$/i.test(id)) {
     plugins.push('typescript');
   }
   const result = await babel.transformAsync(code, {
-    plugins: [
-      [solidStyledPlugin, ctx],
-    ],
+    plugins: [[solidStyledPlugin, ctx]],
     parserOpts: {
       plugins,
     },

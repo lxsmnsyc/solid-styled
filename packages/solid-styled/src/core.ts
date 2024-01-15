@@ -26,9 +26,13 @@ const references = new Map<string, number>();
 
 // Hydrate the sheets
 if (!isServer) {
-  document.head.querySelectorAll(`style[${SOLID_SHEET_ATTR_ESCAPED}]`).forEach((node) => {
-    tracked.add(node.getAttribute(SOLID_SHEET_ATTR));
-  });
+  const nodes = document.head.querySelectorAll(
+    `style[${SOLID_SHEET_ATTR_ESCAPED}]`,
+  );
+
+  for (let i = 0, len = nodes.length; i < len; i++) {
+    tracked.add(nodes[i].getAttribute(SOLID_SHEET_ATTR));
+  }
 }
 
 function insert(id: string, sheet: string): void {
@@ -52,7 +56,9 @@ function remove(id: string): void {
   } else {
     references.set(id, 0);
     if (!isServer) {
-      const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`);
+      const node = document.head.querySelector(
+        `style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`,
+      );
       if (node) {
         document.head.removeChild(node);
       }
@@ -84,14 +90,12 @@ export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
     insert(id, sheet);
   }
 
-  return (
-    createComponent(StyleRegistryContext.Provider, {
-      value: { insert: wrappedInsert, remove },
-      get children() {
-        return props.children;
-      },
-    })
-  );
+  return createComponent(StyleRegistryContext.Provider, {
+    value: { insert: wrappedInsert, remove },
+    get children() {
+      return props.children;
+    },
+  });
 }
 
 export type SolidStyledVariables = Record<string, string>;
@@ -112,7 +116,9 @@ export function useSolidStyled(
 function serializeStyle(source: JSX.CSSProperties): string {
   let result = '';
   for (const key in source) {
-    result = `${result}${key}:${String(source[key as keyof JSX.CSSProperties])};`;
+    result = `${result}${key}:${String(
+      source[key as keyof JSX.CSSProperties],
+    )};`;
   }
   return result;
 }
@@ -159,7 +165,7 @@ function createLazyMemo<T>(fn: () => T): () => T {
   });
   return () => {
     if (!s) {
-      s = createRoot((d) => {
+      s = createRoot(d => {
         dispose = d;
         return createMemo(fn);
       });
@@ -193,7 +199,8 @@ export function mergeStyles(
 ): string {
   const otherString = serializeStyle(other);
   if (source) {
-    const sourceString = typeof source === 'string' ? source : serializeStyle(source);
+    const sourceString =
+      typeof source === 'string' ? source : serializeStyle(source);
     return `${sourceString};${otherString}`;
   }
   return otherString;
@@ -212,10 +219,10 @@ export interface CSSConstructor {
   (template: TemplateStringsArray, ...spans: (string | boolean)[]): void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-
 function invariant(methodName: string): Error {
-  return new Error(`Unexpected use of \`${methodName}\`. Make sure that solid-styled's plugin is setup correctly.`);
+  return new Error(
+    `Unexpected use of \`${methodName}\`. Make sure that solid-styled's plugin is setup correctly.`,
+  );
 }
 
 export const css: CSSConstructor = () => {

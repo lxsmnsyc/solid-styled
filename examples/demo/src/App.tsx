@@ -1,5 +1,6 @@
-import { createSignal, JSX, Show } from 'solid-js';
+import { createSignal, Show } from 'solid-js';
 import { css, StyleRegistry } from 'solid-styled';
+import type { JSX } from 'solid-js';
 
 function ShowButton(): JSX.Element {
   const [show, setShow] = createSignal(false);

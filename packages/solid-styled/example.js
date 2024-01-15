@@ -1,7 +1,10 @@
 import { compile } from './dist/esm/development/compiler.mjs';
 
 console.log(
-  (await compile('example.ts', `
+  (
+    await compile(
+      'example.ts',
+      `
 import { css } from 'solid-styled';
 
 function Example() {
@@ -17,5 +20,8 @@ function Example() {
   
   return <h1>Hello World</h1>;
 }
-  `, { verbose: true })).code
+  `,
+      { verbose: true },
+    )
+  ).code,
 );

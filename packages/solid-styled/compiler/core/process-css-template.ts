@@ -29,10 +29,7 @@ function replaceDynamicTemplate(
         // Push the variable access
         sheet = `${sheet}var(${id})`;
         // Register the variable and its expression
-        variables.push(t.objectProperty(
-          t.stringLiteral(id),
-          expr,
-        ));
+        variables.push(t.objectProperty(t.stringLiteral(id), expr));
         currentExpr += 1;
       }
     }

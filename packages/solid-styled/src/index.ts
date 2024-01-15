@@ -1,5 +1,5 @@
 declare module 'solid-js' {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
+  // biome-ignore lint/style/noNamespace: <explanation>
   namespace JSX {
     interface StyleHTMLAttributes<T> {
       jsx?: boolean;

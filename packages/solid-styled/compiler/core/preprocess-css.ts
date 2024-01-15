@@ -10,10 +10,13 @@ export default function preprocessCSS(
     code: Buffer.from(content),
     filename: ctx.ns,
     minify: true,
-    targets: lightningcss.browserslistToTargets(browserslist(ctx.opts.browserslist || 'defaults')),
-    include: lightningcss.Features.Nesting
-      | lightningcss.Features.Colors
-      | lightningcss.Features.CustomMediaQueries,
+    targets: lightningcss.browserslistToTargets(
+      browserslist(ctx.opts.browserslist || 'defaults'),
+    ),
+    include:
+      lightningcss.Features.Nesting |
+      lightningcss.Features.Colors |
+      lightningcss.Features.CustomMediaQueries,
   });
 
   return new TextDecoder().decode(code);

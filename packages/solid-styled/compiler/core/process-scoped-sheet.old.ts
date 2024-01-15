@@ -49,13 +49,18 @@ export default function processScopedSheet(
         if (inGlobal > 0) {
           return;
         }
-        if (node.name === 'keyframes' && node.block && node.prelude && node.prelude.type === 'AtrulePrelude') {
-          node.prelude.children.forEach((child) => {
+        if (
+          node.name === 'keyframes' &&
+          node.block &&
+          node.prelude &&
+          node.prelude.type === 'AtrulePrelude'
+        ) {
+          for (const child of node.prelude.children) {
             if (child.type === 'Identifier') {
               keyframes.add(child.name);
               child.name = `${sheetID}-${child.name}`;
             }
-          });
+          }
         }
       }
     },
@@ -76,16 +81,20 @@ export default function processScopedSheet(
       }
       if (node.type === 'StyleSheet' || node.type === 'Block') {
         const children: csstree.CssNode[] = [];
-        node.children.forEach((child) => {
+        for (const child of node.children) {
           // This moves all the selectors in `@global`
-          if (child.type === 'Atrule' && child.name === 'global' && child.block) {
-            child.block.children.forEach((innerChild) => {
+          if (
+            child.type === 'Atrule' &&
+            child.name === 'global' &&
+            child.block
+          ) {
+            for (const innerChild of child.block.children) {
               children.push(innerChild);
-            });
+            }
           } else {
             children.push(child);
           }
-        });
+        }
         node.children = new csstree.List<csstree.CssNode>().fromArray(children);
       }
     },
@@ -108,15 +117,16 @@ export default function processScopedSheet(
             // For some reason, animation has an arbitrary sequence
             // so we just have to guess
             case 'animation':
-            case 'animation-name':
+            case 'animation-name': {
               if (node.value.type === 'Value') {
-                node.value.children.forEach((item) => {
+                for (const item of node.value.children) {
                   if (item.type === 'Identifier' && keyframes.has(item.name)) {
                     item.name = `${sheetID}-${item.name}`;
                   }
-                });
+                }
               }
               break;
+            }
             default:
               break;
           }
@@ -124,40 +134,43 @@ export default function processScopedSheet(
         if (!inKeyframes && node.type === 'Selector') {
           const children: csstree.CssNode[] = [];
           let shouldPush = true;
-          node.children.forEach((child) => {
+          for (const child of node.children) {
             // Push the selector after the node
             switch (child.type) {
               case 'TypeSelector':
               case 'ClassSelector':
               case 'IdSelector':
-              case 'AttributeSelector':
+              case 'AttributeSelector': {
                 children.push(child);
                 if (shouldPush) {
                   children.push(selector);
                   shouldPush = false;
                 }
                 break;
+              }
               // Push the selector before the node
-              case 'PseudoElementSelector':
+              case 'PseudoElementSelector': {
                 if (shouldPush) {
                   children.push(selector);
                   shouldPush = false;
                 }
                 children.push(child);
                 break;
+              }
               // Not a selector
               case 'Combinator':
-              case 'WhiteSpace':
+              case 'WhiteSpace': {
                 children.push(child);
                 shouldPush = true;
                 break;
-              case 'PseudoClassSelector':
+              }
+              case 'PseudoClassSelector': {
                 // `:global`
                 if (child.name === GLOBAL_SELECTOR) {
                   if (child.children) {
-                    child.children.forEach((innerChild) => {
+                    for (const innerChild of child.children) {
                       children.push(innerChild);
-                    });
+                    }
                   }
                 } else {
                   if (shouldPush) {
@@ -167,15 +180,18 @@ export default function processScopedSheet(
                   children.push(child);
                 }
                 break;
+              }
               default:
                 break;
             }
-          });
-          node.children = new csstree.List<csstree.CssNode>().fromArray(children);
+          }
+          node.children = new csstree.List<csstree.CssNode>().fromArray(
+            children,
+          );
         }
       } else if (!inKeyframes && node.type === 'Selector') {
         const children: csstree.CssNode[] = [];
-        node.children.forEach((child) => {
+        for (const child of node.children) {
           // Push the selector after the node
           switch (child.type) {
             case 'TypeSelector':
@@ -184,25 +200,27 @@ export default function processScopedSheet(
             case 'AttributeSelector':
             case 'PseudoElementSelector':
             case 'Combinator':
-            case 'WhiteSpace':
+            case 'WhiteSpace': {
               children.push(child);
               break;
-            case 'PseudoClassSelector':
+            }
+            case 'PseudoClassSelector': {
               // `:global`
               if (child.name === GLOBAL_SELECTOR) {
                 if (child.children) {
-                  child.children.forEach((innerChild) => {
+                  for (const innerChild of child.children) {
                     children.push(innerChild);
-                  });
+                  }
                 }
               } else {
                 children.push(child);
               }
               break;
+            }
             default:
               break;
           }
-        });
+        }
         node.children = new csstree.List<csstree.CssNode>().fromArray(children);
       }
     },

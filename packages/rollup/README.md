@@ -34,7 +34,7 @@ solidStyled({
 })
 ```
 
-> **Note**
+> [!NOTE]
 > When you are using a SolidJS Rollup plugin, make sure that solid-styled runs first.
 
 ## Config options

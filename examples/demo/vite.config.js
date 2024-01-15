@@ -10,7 +10,7 @@ export default defineConfig({
       filter: {
         include: 'src/**/*.tsx',
         exclude: 'node_modules/**/*.{ts,js}',
-      }
+      },
     }),
   ],
 });

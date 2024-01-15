@@ -1,4 +1,3 @@
-/* eslint-disable object-shorthand */
 import * as lightningcss from 'lightningcss';
 import browserslist from 'browserslist';
 import type { StateContext } from '../types';
@@ -21,10 +20,13 @@ export default function processScopedSheet(
     code: Buffer.from(content),
     filename: ctx.ns,
     minify: true,
-    targets: lightningcss.browserslistToTargets(browserslist(ctx.opts.browserslist || 'defaults')),
-    include: lightningcss.Features.Nesting
-      | lightningcss.Features.Colors
-      | lightningcss.Features.CustomMediaQueries,
+    targets: lightningcss.browserslistToTargets(
+      browserslist(ctx.opts.browserslist || 'defaults'),
+    ),
+    include:
+      lightningcss.Features.Nesting |
+      lightningcss.Features.Colors |
+      lightningcss.Features.CustomMediaQueries,
     customAtRules: {
       global: {
         body: 'rule-list',
@@ -78,10 +80,13 @@ export default function processScopedSheet(
     code: keyframe,
     filename: ctx.ns,
     minify: true,
-    targets: lightningcss.browserslistToTargets(browserslist(ctx.opts.browserslist || 'defaults')),
-    include: lightningcss.Features.Nesting
-      | lightningcss.Features.Colors
-      | lightningcss.Features.CustomMediaQueries,
+    targets: lightningcss.browserslistToTargets(
+      browserslist(ctx.opts.browserslist || 'defaults'),
+    ),
+    include:
+      lightningcss.Features.Nesting |
+      lightningcss.Features.Colors |
+      lightningcss.Features.CustomMediaQueries,
     customAtRules: {
       global: {
         body: 'rule-list',
@@ -111,7 +116,11 @@ export default function processScopedSheet(
       },
       Declaration: {
         animation(rule) {
-          if (rule.property === 'animation' && inGlobal === 0 && Array.isArray(rule.value)) {
+          if (
+            rule.property === 'animation' &&
+            inGlobal === 0 &&
+            Array.isArray(rule.value)
+          ) {
             const animations: lightningcss.Animation[] = [];
             for (let i = 0, len = rule.value.length; i < len; i += 1) {
               const animation = rule.value[i];
@@ -217,7 +226,10 @@ export default function processScopedSheet(
               break;
             case 'pseudo-class':
               // `:global`
-              if (selector.kind === 'custom-function' && selector.name === GLOBAL_SELECTOR) {
+              if (
+                selector.kind === 'custom-function' &&
+                selector.name === GLOBAL_SELECTOR
+              ) {
                 selectors.push(...tokensToSelectorsList(selector.arguments)[0]);
               } else {
                 if (shouldPush) {
