@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import type * as lightningcss from 'lightningcss';
 import assert from './assert';
 
@@ -14,65 +13,71 @@ import assert from './assert';
  * selectors and pseudo-element selectors has some quirky syntax.
  */
 
-type PseudoClassKind = (lightningcss.TSPseudoClass | lightningcss.PseudoClass)['kind'];
+type PseudoClassKind = (
+  | lightningcss.TSPseudoClass
+  | lightningcss.PseudoClass
+)['kind'];
 
 interface PseudoClassVendorPrefixData {
   name: PseudoClassKind;
   vendorPrefix: lightningcss.Prefix[];
 }
 
-const PSEUDO_CLASS_VENDOR_PREFIX: Record<string, PseudoClassVendorPrefixData> = {
-  '-webkit-full-screen': {
-    name: 'fullscreen',
-    vendorPrefix: ['webkit'],
-  },
-  '-moz-full-screen': {
-    name: 'fullscreen',
-    vendorPrefix: ['moz'],
-  },
-  '-ms-fullscreen': {
-    name: 'fullscreen',
-    vendorPrefix: ['ms'],
-  },
-  '-webkit-any-link': {
-    name: 'any-link',
-    vendorPrefix: ['webkit'],
-  },
-  '-moz-any-link': {
-    name: 'any-link',
-    vendorPrefix: ['moz'],
-  },
-  '-moz-read-only': {
-    name: 'read-only',
-    vendorPrefix: ['moz'],
-  },
-  '-moz-read-write': {
-    name: 'read-write',
-    vendorPrefix: ['moz'],
-  },
-  '-moz-placeholder': {
-    name: 'placeholder-shown',
-    vendorPrefix: ['moz'],
-  },
-  '-ms-input-placeholder': {
-    name: 'placeholder-shown',
-    vendorPrefix: ['ms'],
-  },
-  '-webkit-autofill': {
-    name: 'autofill',
-    vendorPrefix: ['webkit'],
-  },
-  '-webkit-any': {
-    name: 'any',
-    vendorPrefix: ['webkit'],
-  },
-  '-moz-any': {
-    name: 'any',
-    vendorPrefix: ['moz'],
-  },
-};
+const PSEUDO_CLASS_VENDOR_PREFIX: Record<string, PseudoClassVendorPrefixData> =
+  {
+    '-webkit-full-screen': {
+      name: 'fullscreen',
+      vendorPrefix: ['webkit'],
+    },
+    '-moz-full-screen': {
+      name: 'fullscreen',
+      vendorPrefix: ['moz'],
+    },
+    '-ms-fullscreen': {
+      name: 'fullscreen',
+      vendorPrefix: ['ms'],
+    },
+    '-webkit-any-link': {
+      name: 'any-link',
+      vendorPrefix: ['webkit'],
+    },
+    '-moz-any-link': {
+      name: 'any-link',
+      vendorPrefix: ['moz'],
+    },
+    '-moz-read-only': {
+      name: 'read-only',
+      vendorPrefix: ['moz'],
+    },
+    '-moz-read-write': {
+      name: 'read-write',
+      vendorPrefix: ['moz'],
+    },
+    '-moz-placeholder': {
+      name: 'placeholder-shown',
+      vendorPrefix: ['moz'],
+    },
+    '-ms-input-placeholder': {
+      name: 'placeholder-shown',
+      vendorPrefix: ['ms'],
+    },
+    '-webkit-autofill': {
+      name: 'autofill',
+      vendorPrefix: ['webkit'],
+    },
+    '-webkit-any': {
+      name: 'any',
+      vendorPrefix: ['webkit'],
+    },
+    '-moz-any': {
+      name: 'any',
+      vendorPrefix: ['moz'],
+    },
+  };
 
-function getPseudoClassVendorPrefix(value: PseudoClassKind): PseudoClassVendorPrefixData {
+function getPseudoClassVendorPrefix(
+  value: PseudoClassKind,
+): PseudoClassVendorPrefixData {
   if (value in PSEUDO_CLASS_VENDOR_PREFIX) {
     return PSEUDO_CLASS_VENDOR_PREFIX[value];
   }
@@ -170,7 +175,10 @@ function functionTokenToPseudoClassSelector(
       const arg = token.arguments[0];
       assert(arg.type === 'token', 'Unexpected value type');
       assert(arg.value.type === 'ident', 'Unexpected token type');
-      assert(arg.value.value === 'rtl' || arg.value.value === 'ltr', 'Unexpected ident value');
+      assert(
+        arg.value.value === 'rtl' || arg.value.value === 'ltr',
+        'Unexpected ident value',
+      );
       return {
         type: 'pseudo-class',
         kind: 'dir',
@@ -237,29 +245,35 @@ function functionTokenToPseudoClassSelector(
 
       switch (partA.value.type) {
         case 'number':
-        case 'dimension':
+        case 'dimension': {
           a = partA.value.value;
           break;
-        case 'ident':
+        }
+        case 'ident': {
           switch (partA.value.value) {
-            case 'even':
+            case 'even': {
               a = 2;
               b = 0;
               break;
-            case 'odd':
+            }
+            case 'odd': {
               a = 2;
               b = 1;
               break;
-            case 'n':
+            }
+            case 'n': {
               a = 1;
               break;
-            case '-n':
+            }
+            case '-n': {
               a = -1;
               break;
+            }
             default:
               throw new Error('Unexpected ident');
           }
           break;
+        }
         default:
           throw new Error('Unexpected argument');
       }
@@ -298,14 +312,20 @@ function functionTokenToPseudoClassSelector(
   }
 }
 
-type PseudoElementKind = (lightningcss.BuiltinPseudoElement | lightningcss.PseudoElement)['kind'];
+type PseudoElementKind = (
+  | lightningcss.BuiltinPseudoElement
+  | lightningcss.PseudoElement
+)['kind'];
 
 interface PseudoElementVendorPrefixData {
   name: PseudoElementKind;
   vendorPrefix: lightningcss.Prefix[];
 }
 
-const PSEUDO_ELEMENT_VENDOR_PREFIX: Record<string, PseudoElementVendorPrefixData> = {
+const PSEUDO_ELEMENT_VENDOR_PREFIX: Record<
+  string,
+  PseudoElementVendorPrefixData
+> = {
   '-webkit-backdrop': {
     name: 'backdrop',
     vendorPrefix: ['webkit'],
@@ -341,7 +361,9 @@ const PSEUDO_ELEMENT_VENDOR_PREFIX: Record<string, PseudoElementVendorPrefixData
   },
 };
 
-function getPseudoElementVendorPrefix(value: PseudoElementKind): PseudoElementVendorPrefixData {
+function getPseudoElementVendorPrefix(
+  value: PseudoElementKind,
+): PseudoElementVendorPrefixData {
   if (value in PSEUDO_ELEMENT_VENDOR_PREFIX) {
     return PSEUDO_ELEMENT_VENDOR_PREFIX[value];
   }
@@ -388,13 +410,14 @@ function functionTokenToPseudoElementSelector(
   switch (token.name) {
     case 'slotted':
     case 'cue-function':
-    case 'cue-region-function':
+    case 'cue-region-function': {
       assert(token.arguments.length === 1, 'Unexpected arguments');
       return {
         type: 'pseudo-element',
         kind: token.name,
         selector: tokensToSelectorsList(token.arguments)[0],
       };
+    }
     case 'part': {
       const names: string[] = [];
       for (let i = 0, len = token.arguments.length; i < len; i += 1) {
@@ -429,7 +452,9 @@ type OperatorToken =
   | 'include-match'
   | 'dash-match';
 
-function tokenToOperation(operator: OperatorToken): lightningcss.AttrSelectorOperator {
+function tokenToOperation(
+  operator: OperatorToken,
+): lightningcss.AttrSelectorOperator {
   switch (operator) {
     case 'prefix-match':
       return 'prefix';
@@ -451,7 +476,10 @@ function tokenToCaseSensitivity(
 ): lightningcss.ParsedCaseSensitivity {
   assert(token.type === 'token', 'Unexpected token/value');
   assert(token.value.type === 'ident', 'Unexpected token');
-  assert(token.value.value === 'i' || token.value.value === 's', 'Unexpected token');
+  assert(
+    token.value.value === 'i' || token.value.value === 's',
+    'Unexpected token',
+  );
 
   switch (token.value.value) {
     case 's':
@@ -506,7 +534,11 @@ function tokensToAttributeSelector(
         const next = tokens[2];
         assert(next.type === 'token', 'Unexpected token/value');
         assert(next.value.type === 'ident', 'Unexpected token');
-        namespace = { type: 'specific', prefix: first.value.value, url: first.value.value };
+        namespace = {
+          type: 'specific',
+          prefix: first.value.value,
+          url: first.value.value,
+        };
         name = next.value.value;
         cursor = 3;
       } else {
@@ -531,24 +563,29 @@ function tokensToAttributeSelector(
   assert(operand.type === 'token', 'Unexpected token/value');
   let operation: lightningcss.AttrSelectorOperator;
   switch (operand.value.type) {
-    case 'delim':
+    case 'delim': {
       assert(operand.value.value === '=', 'Unexpected delim');
       operation = 'equal';
       break;
+    }
     case 'dash-match':
     case 'prefix-match':
     case 'suffix-match':
     case 'include-match':
-    case 'substring-match':
+    case 'substring-match': {
       operation = tokenToOperation(operand.value.type);
       break;
+    }
     default:
       throw new Error('Unexpected token');
   }
   const value = tokens[cursor];
   cursor += 1;
   assert(value.type === 'token', 'Unexpected token/value');
-  assert(value.value.type === 'string' || value.value.type === 'ident', 'Unexpected token');
+  assert(
+    value.value.type === 'string' || value.value.type === 'ident',
+    'Unexpected token',
+  );
   const attrValue = value.value.value;
   let nextToken = tokens[cursor];
   cursor += 1;
@@ -558,9 +595,10 @@ function tokensToAttributeSelector(
       name,
       namespace,
       operation: {
-        caseSensitivity: namespace?.type === 'specific'
-          ? 'case-sensitive'
-          : 'ascii-case-insensitive-if-in-html-element-in-html-document',
+        caseSensitivity:
+          namespace?.type === 'specific'
+            ? 'case-sensitive'
+            : 'ascii-case-insensitive-if-in-html-element-in-html-document',
         value: attrValue,
         operator: operation,
       },
@@ -585,9 +623,14 @@ function tokensToAttributeSelector(
   };
 }
 
-const DESCENDANT: lightningcss.SelectorComponent = { type: 'combinator', value: 'descendant' };
+const DESCENDANT: lightningcss.SelectorComponent = {
+  type: 'combinator',
+  value: 'descendant',
+};
 
-function normalizeCombinators(selectors: lightningcss.Selector): lightningcss.Selector {
+function normalizeCombinators(
+  selectors: lightningcss.Selector,
+): lightningcss.Selector {
   const temp: lightningcss.Selector = [];
   // Remove all descendant combinators
   for (let i = 0, len = selectors.length; i < len; i += 1) {
@@ -605,7 +648,9 @@ function normalizeCombinators(selectors: lightningcss.Selector): lightningcss.Se
   return temp2;
 }
 
-function cleanSelector(selectors: lightningcss.Selector): lightningcss.Selector {
+function cleanSelector(
+  selectors: lightningcss.Selector,
+): lightningcss.Selector {
   // scan for combinator sequences
   let start: number | undefined;
   let isCombinator: boolean | undefined;
@@ -675,29 +720,35 @@ export default function tokensToSelectorsList(
     const token = tokens[i];
 
     switch (token.type) {
-      case 'token':
+      case 'token': {
         switch (token.value.type) {
-          case 'delim':
+          case 'delim': {
             switch (token.value.value) {
               // Matches for both universal selector
               // and namespace selector with universal prefix
-              case '*':
+              case '*': {
                 // Peek
                 if (i + 1 < len) {
                   const next = tokens[i + 1];
                   // Check if next token is a namespace selector
                   if (
-                    next.type === 'token'
-                    && next.value.type === 'delim'
-                    && next.value.value === '|'
+                    next.type === 'token' &&
+                    next.value.type === 'delim' &&
+                    next.value.value === '|'
                   ) {
                     // Move for the next token
                     i += 2;
                     // Make sure that the next token is an <ident>
                     assert(i < len, 'Unexpected end of selector');
                     const id = tokens[i];
-                    assert(id.type === 'token', 'Unexpected namespace selector.');
-                    assert(id.value.type === 'ident', 'Unexpected namespace selector');
+                    assert(
+                      id.type === 'token',
+                      'Unexpected namespace selector.',
+                    );
+                    assert(
+                      id.value.type === 'ident',
+                      'Unexpected namespace selector',
+                    );
                     selectors.push({
                       type: 'namespace',
                       kind: 'any',
@@ -717,13 +768,17 @@ export default function tokensToSelectorsList(
                   });
                 }
                 break;
+              }
               // Matches `|<ident>`
               case '|': {
                 i += 1;
                 assert(i < len, 'Unexpected end of selector');
                 const next = tokens[i];
                 assert(next.type === 'token', 'Unexpected class selector.');
-                assert(next.value.type === 'ident', 'Unexpected class selector');
+                assert(
+                  next.value.type === 'ident',
+                  'Unexpected class selector',
+                );
                 selectors.push({
                   type: 'namespace',
                   kind: 'none',
@@ -732,29 +787,32 @@ export default function tokensToSelectorsList(
                   type: 'type',
                   name: next.value.value,
                 });
-              }
                 break;
+              }
               // Matches <selector> + <selector>
-              case '+':
+              case '+': {
                 selectors.push({
                   type: 'combinator',
                   value: 'next-sibling',
                 });
                 break;
+              }
               // Matches <selector> > <selector>
-              case '>':
+              case '>': {
                 selectors.push({
                   type: 'combinator',
                   value: 'child',
                 });
                 break;
+              }
               // Matches <selector> ~ <selector>
-              case '~':
+              case '~': {
                 selectors.push({
                   type: 'combinator',
                   value: 'later-sibling',
                 });
                 break;
+              }
               // Matches .<ident> (class selector)
               case '.': {
                 // Parse ahead
@@ -762,39 +820,47 @@ export default function tokensToSelectorsList(
                 assert(i < len, 'Unexpected end of selector');
                 const next = tokens[i];
                 assert(next.type === 'token', 'Unexpected class selector.');
-                assert(next.value.type === 'ident', 'Unexpected class selector');
+                assert(
+                  next.value.type === 'ident',
+                  'Unexpected class selector',
+                );
                 selectors.push({
                   type: 'class',
                   name: next.value.value,
                 });
-              }
                 break;
+              }
               // A :global cannot have a comma
-              case ',':
+              case ',': {
                 list.push(selectors);
                 selectors = [];
                 break;
+              }
               default:
                 break;
             }
             break;
+          }
           // Matches both type selector and
           // namespace selector with prefix (<ident>|<ident>)
-          case 'ident':
+          case 'ident': {
             // Peek
             if (i + 1 < len) {
               const next = tokens[i + 1];
               if (
-                next.type === 'token'
-                && next.value.type === 'delim'
-                && next.value.value === '|'
+                next.type === 'token' &&
+                next.value.type === 'delim' &&
+                next.value.value === '|'
               ) {
                 // Move for the next token
                 i += 2;
                 assert(i < len, 'Unexpected end of selector');
                 const id = tokens[i];
                 assert(id.type === 'token', 'Unexpected namespace selector.');
-                assert(id.value.type === 'ident', 'Unexpected namespace selector');
+                assert(
+                  id.value.type === 'ident',
+                  'Unexpected namespace selector',
+                );
                 selectors.push({
                   type: 'namespace',
                   kind: 'named',
@@ -817,21 +883,24 @@ export default function tokensToSelectorsList(
               });
             }
             break;
+          }
           // Matches id selector
           case 'id-hash':
-          case 'hash':
+          case 'hash': {
             selectors.push({
               type: 'id',
               name: token.value.value,
             });
             break;
+          }
           // Matches descendant combinator
-          case 'white-space':
+          case 'white-space': {
             selectors.push({
               type: 'combinator',
               value: 'descendant',
             });
             break;
+          }
           // Matches pseudo-class and pseudo-element
           case 'colon': {
             i += 1;
@@ -846,31 +915,40 @@ export default function tokensToSelectorsList(
                 if (pseudoEl.type === 'token') {
                   assert(pseudoEl.value.type === 'ident', 'Unexpected token');
                   selectors.push(
-                    identTokenToPseudoElementSelector(pseudoEl.value.value as PseudoElementKind),
+                    identTokenToPseudoElementSelector(
+                      pseudoEl.value.value as PseudoElementKind,
+                    ),
                   );
                 } else {
                   assert(pseudoEl.type === 'function', 'Unexpected value');
-                  selectors.push(functionTokenToPseudoElementSelector(pseudoEl.value));
+                  selectors.push(
+                    functionTokenToPseudoElementSelector(pseudoEl.value),
+                  );
                 }
               } else {
                 assert(next.value.type === 'ident', 'Unexpected token');
                 selectors.push(
-                  identTokenToPseudoClassSelector(next.value.value as PseudoClassKind),
+                  identTokenToPseudoClassSelector(
+                    next.value.value as PseudoClassKind,
+                  ),
                 );
               }
             } else {
               assert(next.type === 'function', 'Unexpected value');
               selectors.push(functionTokenToPseudoClassSelector(next.value));
             }
-          }
             break;
+          }
           case 'square-bracket-block': {
             const inner: lightningcss.TokenOrValue[] = [];
             let closed = false;
             while (i < len) {
               i += 1;
               const next = tokens[i];
-              if (next.type === 'token' && next.value.type === 'close-square-bracket') {
+              if (
+                next.type === 'token' &&
+                next.value.type === 'close-square-bracket'
+              ) {
                 closed = true;
                 break;
               }
@@ -878,12 +956,13 @@ export default function tokensToSelectorsList(
             }
             assert(closed, 'Missing close-square-bracket');
             selectors.push(tokensToAttributeSelector(inner));
-          }
             break;
+          }
           default:
             break;
         }
         break;
+      }
       default:
         break;
     }
