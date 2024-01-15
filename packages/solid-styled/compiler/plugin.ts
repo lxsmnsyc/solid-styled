@@ -16,6 +16,7 @@ import processCSSTemplate from './core/process-css-template';
 import { getUniqueId, getPrefix } from './core/utils';
 import getRootStatementPath from './core/get-root-statement-path';
 import { getDescriptiveName } from './core/get-descriptive-name';
+import unwrapNode from './core/unwrap-node';
 
 function isUseAttribute(name: t.JSXNamespacedName | t.JSXIdentifier): boolean {
   return (
@@ -198,6 +199,111 @@ function transformJSX(ctx: StateContext, functionParent: Scope): void {
   }
 }
 
+function processTemplateInJSX(
+  ctx: StateContext,
+  path: NodePath<t.JSXElement>,
+  sheet: ScopedSheet,
+  isGlobal: boolean,
+  parent: {
+    root: babel.NodePath;
+    statement: babel.NodePath;
+    function: Scope;
+  },
+  expression: t.Expression,
+): void {
+  const tmpl = unwrapNode(expression, t.isTemplateLiteral);
+  if (!tmpl) {
+    return;
+  }
+  const { sheet: compiledSheet, variables } = processCSSTemplate(
+    ctx,
+    sheet.scope,
+    tmpl,
+    !isGlobal,
+  );
+
+  const cssID = parent.root.scope.generateUidIdentifier('css');
+
+  parent.root.insertBefore(
+    t.variableDeclaration('const', [
+      t.variableDeclarator(cssID, t.stringLiteral(compiledSheet)),
+    ]),
+  );
+
+  const current = sheet.count + 1;
+  sheet.count = current;
+
+  const computedVars = variables.length
+    ? t.arrowFunctionExpression([], t.objectExpression(variables))
+    : undefined;
+  if (isGlobal) {
+    const args: t.Expression[] = [sheet.id, t.numericLiteral(current), cssID];
+    if (computedVars) {
+      args.push(computedVars);
+    }
+    parent.statement.insertBefore(
+      t.expressionStatement(
+        t.callExpression(
+          getImportIdentifier(
+            ctx,
+            path,
+            SOURCE_MODULE,
+            RUNTIME_IDENTIFIERS.useSolidStyledGlobal,
+          ),
+          args,
+        ),
+      ),
+    );
+  } else {
+    const setup = t.callExpression(
+      getImportIdentifier(
+        ctx,
+        path,
+        SOURCE_MODULE,
+        RUNTIME_IDENTIFIERS.useSolidStyled,
+      ),
+      [sheet.id, t.numericLiteral(current), cssID],
+    );
+    parent.statement.insertBefore(
+      t.expressionStatement(
+        computedVars
+          ? t.sequenceExpression([
+              setup,
+              t.callExpression(generateVars(ctx, path, parent.function), [
+                computedVars,
+              ]),
+            ])
+          : setup,
+      ),
+    );
+  }
+
+  transformJSX(ctx, parent.function);
+}
+
+function getStyleJSXMode(
+  attributes: (t.JSXAttribute | t.JSXSpreadAttribute)[],
+): {
+  isJSX: boolean;
+  isGlobal: boolean;
+} {
+  let isGlobal = false;
+  let isJSX = false;
+  for (let i = 0, len = attributes.length; i < len; i += 1) {
+    const attr = attributes[i];
+    if (t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name)) {
+      if (attr.name.name === 'jsx') {
+        isJSX = true;
+      }
+      if (attr.name.name === 'global') {
+        isGlobal = true;
+      }
+    }
+  }
+
+  return { isJSX, isGlobal };
+}
+
 function processJSXTemplate(
   ctx: StateContext,
   path: NodePath<t.JSXElement>,
@@ -209,19 +315,7 @@ function processJSXTemplate(
   if (opening.name.name !== 'style') {
     return;
   }
-  let isGlobal = false;
-  let isJSX = false;
-  for (let i = 0, len = opening.attributes.length; i < len; i += 1) {
-    const attr = opening.attributes[i];
-    if (t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name)) {
-      if (attr.name.name === 'jsx') {
-        isJSX = true;
-      }
-      if (attr.name.name === 'global') {
-        isGlobal = true;
-      }
-    }
-  }
+  const { isJSX, isGlobal } = getStyleJSXMode(opening.attributes);
   if (!isJSX) {
     return;
   }
@@ -235,77 +329,20 @@ function processJSXTemplate(
         const child = path.node.children[i];
         if (
           t.isJSXExpressionContainer(child) &&
-          t.isTemplateLiteral(child.expression)
+          t.isExpression(child.expression)
         ) {
-          const { sheet: compiledSheet, variables } = processCSSTemplate(
+          processTemplateInJSX(
             ctx,
-            sheet.scope,
+            path,
+            sheet,
+            isGlobal,
+            {
+              root,
+              statement,
+              function: functionParent,
+            },
             child.expression,
-            !isGlobal,
           );
-
-          const cssID = root.scope.generateUidIdentifier('css');
-
-          root.insertBefore(
-            t.variableDeclaration('const', [
-              t.variableDeclarator(cssID, t.stringLiteral(compiledSheet)),
-            ]),
-          );
-
-          const current = sheet.count + 1;
-          sheet.count = current;
-
-          const computedVars = variables.length
-            ? t.arrowFunctionExpression([], t.objectExpression(variables))
-            : undefined;
-          if (isGlobal) {
-            const args: t.Expression[] = [
-              sheet.id,
-              t.numericLiteral(current),
-              cssID,
-            ];
-            if (computedVars) {
-              args.push(computedVars);
-            }
-            statement.insertBefore(
-              t.expressionStatement(
-                t.callExpression(
-                  getImportIdentifier(
-                    ctx,
-                    path,
-                    SOURCE_MODULE,
-                    RUNTIME_IDENTIFIERS.useSolidStyledGlobal,
-                  ),
-                  args,
-                ),
-              ),
-            );
-          } else {
-            const setup = t.callExpression(
-              getImportIdentifier(
-                ctx,
-                path,
-                SOURCE_MODULE,
-                RUNTIME_IDENTIFIERS.useSolidStyled,
-              ),
-              [sheet.id, t.numericLiteral(current), cssID],
-            );
-            statement.insertBefore(
-              t.expressionStatement(
-                computedVars
-                  ? t.sequenceExpression([
-                      setup,
-                      t.callExpression(
-                        generateVars(ctx, path, functionParent),
-                        [computedVars],
-                      ),
-                    ])
-                  : setup,
-              ),
-            );
-          }
-
-          transformJSX(ctx, functionParent);
         }
       }
     }
@@ -414,21 +451,28 @@ export default function solidStyledPlugin(): babel.PluginObj<State> {
             if (!t.isStatement(path.parent)) {
               return;
             }
-            const { tag } = path.node;
-            if (t.isIdentifier(tag)) {
-              const binding = path.scope.getBindingIdentifier(tag.name);
+            const trueID = unwrapNode(path.node.tag, t.isIdentifier);
+            if (trueID) {
+              const binding = path.scope.getBindingIdentifier(trueID.name);
               if (binding && validIdentifiers.has(binding)) {
                 processCSSTaggedTemplate(state.opts, path);
               }
-            } else if (
-              t.isMemberExpression(tag) &&
-              t.isIdentifier(tag.object) &&
-              t.isIdentifier(tag.property) &&
-              !tag.computed
+              return;
+            }
+            const trueMember = unwrapNode(path.node.tag, t.isMemberExpression);
+            if (
+              trueMember &&
+              t.isIdentifier(trueMember.property) &&
+              !trueMember.computed
             ) {
-              const binding = path.scope.getBindingIdentifier(tag.object.name);
-              if (binding && validNamespaces.has(binding)) {
-                processCSSTaggedTemplate(state.opts, path);
+              const trueObject = unwrapNode(trueMember.object, t.isIdentifier);
+              if (trueObject) {
+                const binding = path.scope.getBindingIdentifier(
+                  trueObject.name,
+                );
+                if (binding && validNamespaces.has(binding)) {
+                  processCSSTaggedTemplate(state.opts, path);
+                }
               }
             }
           },
