@@ -27,7 +27,7 @@ importers:
         specifier: ^1.8.11
         version: 1.8.11
       solid-styled:
-        specifier: 0.11.0
+        specifier: 0.11.1
         version: link:../../packages/solid-styled
     devDependencies:
       astro:
@@ -37,7 +37,7 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       unplugin-solid-styled:
-        specifier: 0.11.0
+        specifier: 0.11.1
         version: link:../../packages/unplugin
 
   examples/demo:
@@ -46,14 +46,14 @@ importers:
         specifier: ^1.8.11
         version: 1.8.11
       solid-styled:
-        specifier: 0.11.0
+        specifier: 0.11.1
         version: link:../../packages/solid-styled
     devDependencies:
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
       unplugin-solid-styled:
-        specifier: 0.11.0
+        specifier: 0.11.1
         version: link:../../packages/unplugin
       vite:
         specifier: ^5.0.11
@@ -68,7 +68,7 @@ importers:
         specifier: ^5.0.2
         version: 5.0.2(rollup@4.9.5)
       unplugin-solid-styled:
-        specifier: 0.11.0
+        specifier: 0.11.1
         version: link:../unplugin
     devDependencies:
       '@types/node':
@@ -81,7 +81,7 @@ importers:
         specifier: ^4.9.5
         version: 4.9.5
       solid-styled:
-        specifier: 0.11.0
+        specifier: 0.11.1
         version: link:../solid-styled
       tslib:
         specifier: ^2.6.2
@@ -155,7 +155,7 @@ importers:
         specifier: 2.6.0
         version: 2.6.0(tslib@2.6.2)(typescript@5.3.3)
       solid-styled:
-        specifier: 0.11.0
+        specifier: 0.11.1
         version: link:../solid-styled
       tslib:
         specifier: ^2.6.2
@@ -170,7 +170,7 @@ importers:
   packages/vite:
     dependencies:
       unplugin-solid-styled:
-        specifier: 0.11.0
+        specifier: 0.11.1
         version: link:../unplugin
     devDependencies:
       '@types/node':
@@ -180,7 +180,7 @@ importers:
         specifier: 2.6.0
         version: 2.6.0(tslib@2.6.2)(typescript@5.3.3)
       solid-styled:
-        specifier: 0.11.0
+        specifier: 0.11.1
         version: link:../solid-styled
       tslib:
         specifier: ^2.6.2
