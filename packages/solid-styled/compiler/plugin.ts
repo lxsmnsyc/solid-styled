@@ -10,7 +10,7 @@ import {
   TAGGED_TEMPLATE,
   VARS_ID,
 } from './core/constants';
-import getImportIdentifier from './core/get-import-identifier';
+import { getImportIdentifier } from './core/get-import-identifier';
 import { getImportSpecifierKey } from './core/checks';
 import processCSSTemplate from './core/process-css-template';
 import { getUniqueId, getPrefix } from './core/utils';
