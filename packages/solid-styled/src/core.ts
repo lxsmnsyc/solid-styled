@@ -9,7 +9,7 @@ import {
   untrack,
   useContext,
 } from 'solid-js';
-import { isServer } from 'solid-js/web';
+import { isServer, useAssets } from 'solid-js/web';
 
 interface StyleRegistryContextValue {
   insert(id: string, sheet: string): void;
@@ -213,6 +213,15 @@ export function renderSheets(sheets: StyleData[]): string {
     sheet = `${sheet}<style ${SOLID_SHEET_ATTR}="${data.id}">${data.sheet}</style>`;
   }
   return sheet;
+}
+
+export function useSheets(sheets: StyleData[]): void {
+  useAssets(
+    () =>
+      ({
+        t: renderSheets(sheets),
+      }) as unknown as JSX.Element,
+  );
 }
 
 export interface CSSConstructor {

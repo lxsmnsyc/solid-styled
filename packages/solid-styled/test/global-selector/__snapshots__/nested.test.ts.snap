@@ -1,12 +1,12 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`:global > should scope for nested selectors 1`] = `
-"import { useSolidStyled as _useSolidStyled } from \\"solid-styled\\";
+"import { useSolidStyled as useSolidStyled_1 } from "solid-styled";
 import { css } from 'solid-styled';
-const _sheet = \\"c-f0b3b6fa-0\\";
-const _css = \\"div[s\\\\\\\\:c-f0b3b6fa-0]{flex-direction:column;display:flex}div[s\\\\\\\\:c-f0b3b6fa-0]>*+*{margin-top:.5rem}\\";
+const sheet_1 = "c-f0b3b6fa-0";
+const css_1 = "div[s\\\\:c-f0b3b6fa-0]{flex-direction:column;display:flex}div[s\\\\:c-f0b3b6fa-0]>*+*{margin-top:.5rem}";
 export default function Example() {
-  _useSolidStyled(_sheet, 1, _css);
+  useSolidStyled_1(sheet_1, 1, css_1);
   return <h1 s:c-f0b3b6fa-0>Hello World</h1>;
 }"
 `;

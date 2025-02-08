@@ -1,5 +1,3 @@
-// The identifier for the tagged template
-export const TAGGED_TEMPLATE = 'css';
 // The module
 export const SOURCE_MODULE = 'solid-styled';
 // The namespace used for scoping

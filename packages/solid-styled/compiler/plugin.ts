@@ -1,22 +1,22 @@
-import type { NodePath, Scope } from '@babel/traverse';
 import type * as babel from '@babel/core';
+import type { NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
-import type { ScopedSheet, StateContext } from './types';
 import {
   RUNTIME_IDENTIFIERS,
   SHEET_ID,
   SOLID_STYLED_NS,
   SOURCE_MODULE,
-  TAGGED_TEMPLATE,
   VARS_ID,
 } from './core/constants';
-import { getImportIdentifier } from './core/get-import-identifier';
-import { getImportSpecifierKey } from './core/checks';
-import processCSSTemplate from './core/process-css-template';
-import { getUniqueId, getPrefix } from './core/utils';
-import getRootStatementPath from './core/get-root-statement-path';
+import { generateUniqueName } from './core/generate-unique-name';
 import { getDescriptiveName } from './core/get-descriptive-name';
+import { getImportIdentifier } from './core/get-import-identifier';
+import getRootStatementPath from './core/get-root-statement-path';
+import { pathReferencesImport } from './core/path-references-import';
+import processCSSTemplate from './core/process-css-template';
 import unwrapNode from './core/unwrap-node';
+import { getPrefix, getUniqueId } from './core/utils';
+import type { ScopedSheet, StateContext } from './types';
 
 function isUseAttribute(name: t.JSXNamespacedName | t.JSXIdentifier): boolean {
   return (
@@ -57,14 +57,14 @@ function checkUseAttribute(opening: t.JSXOpeningElement): boolean {
 function generateVars(
   ctx: StateContext,
   path: NodePath,
-  functionParent: Scope,
+  functionParent: NodePath,
 ): t.Identifier {
   const result = ctx.vars.get(functionParent);
   if (result) {
     return result;
   }
-  const vars = functionParent.generateUidIdentifier(VARS_ID);
-  functionParent.push({
+  const vars = generateUniqueName(path, VARS_ID);
+  functionParent.scope.push({
     id: vars,
     init: t.callExpression(
       getImportIdentifier(
@@ -81,7 +81,10 @@ function generateVars(
   return vars;
 }
 
-function generateSheet(ctx: StateContext, functionParent: Scope): ScopedSheet {
+function generateSheet(
+  ctx: StateContext,
+  functionParent: NodePath,
+): ScopedSheet {
   const result = ctx.sheets.get(functionParent);
   if (result) {
     return result;
@@ -89,14 +92,14 @@ function generateSheet(ctx: StateContext, functionParent: Scope): ScopedSheet {
   // Generate an id
   const baseID = getUniqueId(ctx);
   const verboseId = ctx.opts.verbose
-    ? `${getDescriptiveName(functionParent.path, 'Anonymous')}-${baseID}`
+    ? `${getDescriptiveName(functionParent, 'Anonymous')}-${baseID}`
     : baseID;
   // Finalize ID generation
   const scope = `${getPrefix(ctx)}${verboseId}`;
 
   // Create a unique identifier for the scope
-  const root = getRootStatementPath(functionParent.path);
-  const id = root.scope.generateUidIdentifier(SHEET_ID);
+  const root = getRootStatementPath(functionParent);
+  const id = generateUniqueName(root, SHEET_ID);
   root.insertBefore(
     t.variableDeclaration('const', [
       t.variableDeclarator(id, t.stringLiteral(scope)),
@@ -127,76 +130,74 @@ function getStyleAttribute(
   return null;
 }
 
-function transformJSX(ctx: StateContext, functionParent: Scope): void {
-  if (ctx.sheets.has(functionParent)) {
-    functionParent.path.traverse({
-      JSXElement(path) {
-        const opening = path.node.openingElement;
-        if (
-          (t.isJSXIdentifier(opening.name) &&
-            /^[a-z]/.test(opening.name.name)) ||
-          checkUseAttribute(opening)
-        ) {
-          const sheet = generateSheet(ctx, functionParent);
-          if (checkScopedAttribute(opening, sheet.scope)) {
-            return;
-          }
-          opening.attributes.push(
-            t.jsxAttribute(
-              t.jsxNamespacedName(
-                t.jsxIdentifier(SOLID_STYLED_NS),
-                t.jsxIdentifier(sheet.scope),
-              ),
+function transformJSX(ctx: StateContext, functionParent: NodePath): void {
+  const sheet = ctx.sheets.get(functionParent);
+  if (!sheet) {
+    return;
+  }
+  const vars = ctx.vars.get(functionParent);
+  functionParent.traverse({
+    JSXElement(path) {
+      const opening = path.node.openingElement;
+      if (
+        (t.isJSXIdentifier(opening.name) && /^[a-z]/.test(opening.name.name)) ||
+        checkUseAttribute(opening)
+      ) {
+        if (checkScopedAttribute(opening, sheet.scope)) {
+          return;
+        }
+        opening.attributes.push(
+          t.jsxAttribute(
+            t.jsxNamespacedName(
+              t.jsxIdentifier(SOLID_STYLED_NS),
+              t.jsxIdentifier(sheet.scope),
             ),
-          );
-          // Check if there's any dynamic vars call
-          if (!ctx.vars.has(functionParent)) {
-            return;
-          }
-          const vars = generateVars(ctx, path, functionParent);
-          // Find style
-          const style = getStyleAttribute(opening);
-          if (style) {
-            if (style.value) {
-              let expr: t.Expression;
-              if (
-                t.isJSXExpressionContainer(style.value) &&
-                t.isExpression(style.value.expression)
-              ) {
-                expr = style.value.expression;
-              } else if (t.isStringLiteral(style.value)) {
-                expr = style.value;
-              } else {
-                throw new Error('Invalid style value');
-              }
-              style.value = t.jsxExpressionContainer(
-                t.callExpression(
-                  getImportIdentifier(
-                    ctx,
-                    path,
-                    SOURCE_MODULE,
-                    RUNTIME_IDENTIFIERS.mergeStyles,
-                  ),
-                  [expr, t.callExpression(vars, [])],
-                ),
-              );
+          ),
+        );
+        // Check if there's any dynamic vars call
+        if (!vars) {
+          return;
+        }
+        // Find style
+        const style = getStyleAttribute(opening);
+        if (style) {
+          if (style.value) {
+            let expr: t.Expression;
+            if (
+              t.isJSXExpressionContainer(style.value) &&
+              t.isExpression(style.value.expression)
+            ) {
+              expr = style.value.expression;
+            } else if (t.isStringLiteral(style.value)) {
+              expr = style.value;
             } else {
-              style.value = t.jsxExpressionContainer(
-                t.callExpression(vars, []),
-              );
+              throw new Error('Invalid style value');
             }
-          } else {
-            opening.attributes.push(
-              t.jsxAttribute(
-                t.jsxIdentifier('style'),
-                t.jsxExpressionContainer(t.callExpression(vars, [])),
+            style.value = t.jsxExpressionContainer(
+              t.callExpression(
+                getImportIdentifier(
+                  ctx,
+                  path,
+                  SOURCE_MODULE,
+                  RUNTIME_IDENTIFIERS.mergeStyles,
+                ),
+                [expr, t.callExpression(vars, [])],
               ),
             );
+          } else {
+            style.value = t.jsxExpressionContainer(t.callExpression(vars, []));
           }
+        } else {
+          opening.attributes.push(
+            t.jsxAttribute(
+              t.jsxIdentifier('style'),
+              t.jsxExpressionContainer(t.callExpression(vars, [])),
+            ),
+          );
         }
-      },
-    });
-  }
+      }
+    },
+  });
 }
 
 function processTemplateInJSX(
@@ -205,9 +206,9 @@ function processTemplateInJSX(
   sheet: ScopedSheet,
   isGlobal: boolean,
   parent: {
-    root: babel.NodePath;
-    statement: babel.NodePath;
-    function: Scope;
+    root: NodePath;
+    statement: NodePath;
+    function: NodePath;
   },
   expression: t.Expression,
 ): void {
@@ -222,7 +223,7 @@ function processTemplateInJSX(
     !isGlobal,
   );
 
-  const cssID = parent.root.scope.generateUidIdentifier('css');
+  const cssID = generateUniqueName(parent.root, 'css');
 
   parent.root.insertBefore(
     t.variableDeclaration('const', [
@@ -277,8 +278,6 @@ function processTemplateInJSX(
       ),
     );
   }
-
-  transformJSX(ctx, parent.function);
 }
 
 function getStyleJSXMode(
@@ -319,40 +318,42 @@ function processJSXTemplate(
   if (!isJSX) {
     return;
   }
-  const functionParent = path.scope.getFunctionParent();
-  if (functionParent) {
-    const sheet = generateSheet(ctx, functionParent);
-    const statement = path.getStatementParent();
-    if (statement) {
-      const root = getRootStatementPath(path);
-      for (let i = 0, len = path.node.children.length; i < len; i += 1) {
-        const child = path.node.children[i];
-        if (
-          t.isJSXExpressionContainer(child) &&
-          t.isExpression(child.expression)
-        ) {
-          processTemplateInJSX(
-            ctx,
-            path,
-            sheet,
-            isGlobal,
-            {
-              root,
-              statement,
-              function: functionParent,
-            },
-            child.expression,
-          );
-        }
+  const scope = path.scope.getFunctionParent();
+  if (!scope) {
+    return;
+  }
+  const functionParent = scope.path;
+  const sheet = generateSheet(ctx, functionParent);
+  const statement = path.getStatementParent();
+  if (statement) {
+    const root = getRootStatementPath(path);
+    for (let i = 0, len = path.node.children.length; i < len; i += 1) {
+      const child = path.node.children[i];
+      if (
+        t.isJSXExpressionContainer(child) &&
+        t.isExpression(child.expression)
+      ) {
+        processTemplateInJSX(
+          ctx,
+          path,
+          sheet,
+          isGlobal,
+          {
+            root,
+            statement,
+            function: functionParent,
+          },
+          child.expression,
+        );
       }
     }
-    const empty = t.jsxText('');
-    // softfix
-    empty.extra = {
-      raw: '',
-    };
-    path.replaceWith(empty);
   }
+  const empty = t.jsxText('');
+  // softfix
+  empty.extra = {
+    raw: '',
+  };
+  path.replaceWith(empty);
 }
 
 function processCSSTaggedTemplate(
@@ -360,58 +361,59 @@ function processCSSTaggedTemplate(
   path: NodePath<t.TaggedTemplateExpression>,
 ): void {
   // Get the function parent first
-  const functionParent = path.scope.getFunctionParent();
-  if (functionParent) {
-    const sheet = generateSheet(ctx, functionParent);
-
-    // Convert template into a CSS sheet
-    const { sheet: compiledSheet, variables } = processCSSTemplate(
-      ctx,
-      sheet.scope,
-      path.node.quasi,
-      true,
-    );
-
-    const root = getRootStatementPath(path);
-
-    const cssID = root.scope.generateUidIdentifier('css');
-
-    root.insertBefore(
-      t.variableDeclaration('const', [
-        t.variableDeclarator(cssID, t.stringLiteral(compiledSheet)),
-      ]),
-    );
-
-    const current = sheet.count + 1;
-    sheet.count = current;
-
-    const computedVars = variables.length
-      ? t.arrowFunctionExpression([], t.objectExpression(variables))
-      : undefined;
-    const setup = t.callExpression(
-      getImportIdentifier(
-        ctx,
-        path,
-        SOURCE_MODULE,
-        RUNTIME_IDENTIFIERS.useSolidStyled,
-      ),
-      [sheet.id, t.numericLiteral(current), cssID],
-    );
-    path.replaceWith(
-      t.expressionStatement(
-        computedVars
-          ? t.sequenceExpression([
-              setup,
-              t.callExpression(generateVars(ctx, path, functionParent), [
-                computedVars,
-              ]),
-            ])
-          : setup,
-      ),
-    );
-
-    transformJSX(ctx, functionParent);
+  const scope = path.scope.getFunctionParent();
+  if (!scope) {
+    return;
   }
+  const functionParent = scope.path;
+  const sheet = generateSheet(ctx, functionParent);
+
+  // Convert template into a CSS sheet
+  const { sheet: compiledSheet, variables } = processCSSTemplate(
+    ctx,
+    sheet.scope,
+    path.node.quasi,
+    true,
+  );
+
+  const root = getRootStatementPath(path);
+
+  const cssID = generateUniqueName(root, 'css');
+
+  root.insertBefore(
+    t.variableDeclaration('const', [
+      t.variableDeclarator(cssID, t.stringLiteral(compiledSheet)),
+    ]),
+  );
+
+  const current = sheet.count + 1;
+  sheet.count = current;
+
+  const computedVars = variables.length
+    ? t.arrowFunctionExpression([], t.objectExpression(variables))
+    : undefined;
+  const setup = t.callExpression(
+    getImportIdentifier(
+      ctx,
+      path,
+      SOURCE_MODULE,
+      RUNTIME_IDENTIFIERS.useSolidStyled,
+    ),
+    [sheet.id, t.numericLiteral(current), cssID],
+  );
+
+  path.replaceWith(
+    t.expressionStatement(
+      computedVars
+        ? t.sequenceExpression([
+            setup,
+            t.callExpression(generateVars(ctx, path, functionParent), [
+              computedVars,
+            ]),
+          ])
+        : setup,
+    ),
+  );
 }
 
 type State = babel.PluginPass & { opts: StateContext };
@@ -421,29 +423,8 @@ export default function solidStyledPlugin(): babel.PluginObj<State> {
     name: 'solid-styled',
     visitor: {
       Program(programPath, state): void {
-        const validIdentifiers = new Set();
-        const validNamespaces = new Set();
-
+        // Process templates
         programPath.traverse({
-          ImportDeclaration(path) {
-            if (path.node.source.value === SOURCE_MODULE) {
-              for (
-                let i = 0, len = path.node.specifiers.length;
-                i < len;
-                i += 1
-              ) {
-                const specifier = path.node.specifiers[i];
-                if (
-                  t.isImportSpecifier(specifier) &&
-                  getImportSpecifierKey(specifier) === TAGGED_TEMPLATE
-                ) {
-                  validIdentifiers.add(specifier.local);
-                } else if (t.isImportNamespaceSpecifier(specifier)) {
-                  validNamespaces.add(specifier.local);
-                }
-              }
-            }
-          },
           JSXElement(path) {
             processJSXTemplate(state.opts, path);
           },
@@ -451,30 +432,14 @@ export default function solidStyledPlugin(): babel.PluginObj<State> {
             if (!t.isStatement(path.parent)) {
               return;
             }
-            const trueID = unwrapNode(path.node.tag, t.isIdentifier);
-            if (trueID) {
-              const binding = path.scope.getBindingIdentifier(trueID.name);
-              if (binding && validIdentifiers.has(binding)) {
-                processCSSTaggedTemplate(state.opts, path);
-              }
-              return;
+            if (pathReferencesImport(path.get('tag'), 'solid-styled', 'css')) {
+              processCSSTaggedTemplate(state.opts, path);
             }
-            const trueMember = unwrapNode(path.node.tag, t.isMemberExpression);
-            if (
-              trueMember &&
-              t.isIdentifier(trueMember.property) &&
-              !trueMember.computed
-            ) {
-              const trueObject = unwrapNode(trueMember.object, t.isIdentifier);
-              if (trueObject) {
-                const binding = path.scope.getBindingIdentifier(
-                  trueObject.name,
-                );
-                if (binding && validNamespaces.has(binding)) {
-                  processCSSTaggedTemplate(state.opts, path);
-                }
-              }
-            }
+          },
+        });
+        programPath.traverse({
+          Function(path) {
+            transformJSX(state.opts, path);
           },
           JSXAttribute(path) {
             if (isUseAttribute(path.node.name)) {

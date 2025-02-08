@@ -1,37 +1,54 @@
-import { createSignal, Show } from 'solid-js';
 import type { JSX } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
 import { css } from 'solid-styled';
 
 function ShowButton(): JSX.Element {
   const [show, setShow] = createSignal(false);
-  const [red, setRed] = createSignal(false);
 
   css`
     .toggle {
       width: 50vw;
       padding: 0.5rem;
       border: none;
-      color: white;
+      color: ${show() ? 'red' : 'blue'};
       font-size: 2rem;
       border-radius: 0.5rem;
       background-color: #111827;
     }
   `;
-  css`
-    div > button {
-      width: 50vw;
-      padding: 0.5rem;
-      border: none;
-      color: white;
-      font-size: 2rem;
-      /* border-radius: 0.5rem; */
-      background-image: linear-gradient(
-        to top, 
-        ${red() ? '#ff0844' : '#48c6ef'} 0%, 
-        ${red() ? '#ffb199' : '#6f86d6'} 100%
-      );
-    }
-  `;
+
+  function Foo() {
+    const [red, setRed] = createSignal(false);
+    css`
+      div > button {
+        width: 50vw;
+        padding: 0.5rem;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        /* border-radius: 0.5rem; */
+        background-image: linear-gradient(
+          to top, 
+          ${red() ? '#ff0844' : '#48c6ef'} 0%, 
+          ${red() ? '#ffb199' : '#6f86d6'} 100%
+        );
+      }
+    `;
+
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setRed(!red())}
+          style={{
+            'border-radius': '0.5rem',
+          }}
+        >
+          {red() ? 'Red' : 'Blue'}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -39,17 +56,7 @@ function ShowButton(): JSX.Element {
         {show() ? 'Hide Div' : 'Show Div'}
       </button>
       <Show when={show()}>
-        <div>
-          <button
-            type="button"
-            onClick={() => setRed(!red())}
-            style={{
-              'border-radius': '0.5rem',
-            }}
-          >
-            {red() ? 'Red' : 'Blue'}
-          </button>
-        </div>
+        <Foo />
       </Show>
     </>
   );

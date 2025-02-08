@@ -8,13 +8,14 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
+    "typescript": "^5.7.3",
     "unplugin-solid-styled": "0.11.1",
-    "vite": "^5.0.11",
-    "vite-plugin-solid": "2.8.0"
+    "vite": "^6.1.0",
+    "vite-plugin-inspect": "^10.1.1",
+    "vite-plugin-solid": "2.11.1"
   },
   "dependencies": {
-    "solid-js": "^1.8.11",
+    "solid-js": "^1.9.4",
     "solid-styled": "0.11.1"
   },
   "private": true,
