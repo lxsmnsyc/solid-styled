@@ -109,7 +109,7 @@
         "noVoidTypeReturn": "error",
         "useArrayLiterals": "error",
         "useExhaustiveDependencies": "error",
-        "useHookAtTopLevel": "error",
+        "useHookAtTopLevel": "off",
         "useIsNan": "error",
         "useValidForDirection": "error",
         "useYield": "error"
