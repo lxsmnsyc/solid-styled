@@ -245,6 +245,16 @@ renderToString(() => (
 const styles = renderSheets(styles);
 ```
 
+Alternatively, for automatic sheet rendering (assuming that you are server-rendering the entire document), you can do
+
+```jsx
+renderToString(() => (
+  <StyleRegistry auto>
+    <App />
+  </StyleRegistry>
+));
+```
+
 ## CSS Processing
 
 `solid-styled` uses [LightningCSS](https://lightningcss.dev/) to preprocess CSS templates as well as apply CSS scoping and transformations. By default, [CSS Nesting and Custom Media Queries](https://lightningcss.dev/transpilation.html#draft-syntax) are enabled by default.

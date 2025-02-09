@@ -1,4 +1,4 @@
-import type { Scope } from '@babel/traverse';
+import type { NodePath } from '@babel/traverse';
 import type * as t from '@babel/types';
 
 export interface SolidStyledOptions {
@@ -16,8 +16,8 @@ export interface ScopedSheet {
 
 export interface StateContext {
   hooks: Map<string, t.Identifier>;
-  vars: WeakMap<Scope, t.Identifier>;
-  sheets: WeakMap<Scope, ScopedSheet>;
+  vars: WeakMap<NodePath, t.Identifier>;
+  sheets: WeakMap<NodePath, ScopedSheet>;
   opts: SolidStyledOptions;
   ids: number;
   ns: string;

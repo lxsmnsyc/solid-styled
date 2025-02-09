@@ -1,8 +1,8 @@
 import babel from '@babel/core';
-import path from 'path';
-import type { StateContext, SolidStyledOptions } from './types';
-import xxHash32 from './xxhash32';
+import path from 'node:path';
 import solidStyledPlugin from './plugin';
+import type { SolidStyledOptions, StateContext } from './types';
+import xxHash32 from './xxhash32';
 
 export type { SolidStyledOptions };
 
