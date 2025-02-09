@@ -28,7 +28,15 @@ if (!isServer) {
   }
 }
 
-function insert(id: string, sheet: string): void {
+function noopInsert(_id: string, _sheet: string): void {
+  // no-op
+}
+
+function noopRemove(_id: string): void {
+  // no-op
+}
+
+function clientInsert(id: string, sheet: string): void {
   if (!tracked.has(id)) {
     tracked.add(id);
 
@@ -40,7 +48,7 @@ function insert(id: string, sheet: string): void {
   references.set(id, (references.get(id) ?? 0) + 1);
 }
 
-function remove(id: string): void {
+function clientRemove(id: string): void {
   const count = references.get(id) ?? 0;
   if (count > 1) {
     references.set(id, count - 1);
@@ -55,6 +63,9 @@ function remove(id: string): void {
     tracked.delete(id);
   }
 }
+
+const insert = isServer ? noopInsert : clientInsert;
+const remove = isServer ? noopRemove : clientRemove;
 
 interface StyleRegistryContextValue {
   insert(id: string, sheet: string): void;
@@ -72,10 +83,6 @@ export interface StyleRegistryProps {
   auto?: boolean;
   styles?: StyleData[];
   children?: JSX.Element;
-}
-
-function noopRemove(_id: string): void {
-  // no-op
 }
 
 function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {

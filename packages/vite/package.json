@@ -2,12 +2,18 @@
   "name": "vite-plugin-solid-styled",
   "version": "0.11.1",
   "type": "module",
-  "files": ["dist", "babel", "core"],
+  "files": [
+    "dist",
+    "babel",
+    "core"
+  ],
   "engines": {
     "node": ">=10"
   },
   "license": "MIT",
-  "keywords": ["pridepack"],
+  "keywords": [
+    "pridepack"
+  ],
   "devDependencies": {
     "@types/node": "^22.13.1",
     "pridepack": "2.6.4",
@@ -52,13 +58,13 @@
   "module": "./dist/esm/production/index.mjs",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "development": {
         "require": "./dist/cjs/development/index.cjs",
         "import": "./dist/esm/development/index.mjs"
       },
       "require": "./dist/cjs/production/index.cjs",
-      "import": "./dist/esm/production/index.mjs",
-      "types": "./dist/types/index.d.ts"
+      "import": "./dist/esm/production/index.mjs"
     }
   },
   "typesVersions": {
