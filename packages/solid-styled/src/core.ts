@@ -11,13 +11,6 @@ import {
 } from 'solid-js';
 import { isServer, useAssets } from 'solid-js/web';
 
-interface StyleRegistryContextValue {
-  insert(id: string, sheet: string): void;
-  remove(id: string): void;
-}
-
-const StyleRegistryContext = createContext<StyleRegistryContextValue>();
-
 const SOLID_SHEET_ATTR = 's:id';
 const SOLID_SHEET_ATTR_ESCAPED = 's\\:id';
 
@@ -39,12 +32,10 @@ function insert(id: string, sheet: string): void {
   if (!tracked.has(id)) {
     tracked.add(id);
 
-    if (!isServer) {
-      const node = document.createElement('style');
-      node.setAttribute(SOLID_SHEET_ATTR, id);
-      node.innerHTML = sheet;
-      document.head.appendChild(node);
-    }
+    const node = document.createElement('style');
+    node.setAttribute(SOLID_SHEET_ATTR, id);
+    node.innerHTML = sheet;
+    document.head.appendChild(node);
   }
   references.set(id, (references.get(id) ?? 0) + 1);
 }
@@ -55,17 +46,22 @@ function remove(id: string): void {
     references.set(id, count - 1);
   } else {
     references.set(id, 0);
-    if (!isServer) {
-      const node = document.head.querySelector(
-        `style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`,
-      );
-      if (node) {
-        document.head.removeChild(node);
-      }
+    const node = document.head.querySelector(
+      `style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`,
+    );
+    if (node) {
+      document.head.removeChild(node);
     }
     tracked.delete(id);
   }
 }
+
+interface StyleRegistryContextValue {
+  insert(id: string, sheet: string): void;
+  remove(id: string): void;
+}
+
+const StyleRegistryContext = createContext<StyleRegistryContextValue>();
 
 export interface StyleData {
   id: string;
@@ -73,45 +69,83 @@ export interface StyleData {
 }
 
 export interface StyleRegistryProps {
+  auto?: boolean;
   styles?: StyleData[];
   children?: JSX.Element;
 }
 
-export function StyleRegistry(props: StyleRegistryProps): JSX.Element {
+function noopRemove(_id: string): void {
+  // no-op
+}
+
+function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {
+  let styles = props.styles;
+
+  if (props.auto) {
+    const current = styles || [];
+    styles = current;
+    useAssets(
+      () =>
+        ({
+          t: renderSheets(current),
+        }) as unknown as JSX.Element,
+    );
+  }
+
   const sheets = new Set<string>();
 
-  function wrappedInsert(id: string, sheet: string): void {
+  function serverInsert(id: string, sheet: string): void {
     if (!sheets.has(id)) {
       sheets.add(id);
-      if (isServer && props.styles) {
-        props.styles.push({ id, sheet });
+
+      if (styles) {
+        styles.push({ id, sheet });
       }
     }
-    insert(id, sheet);
   }
 
   return createComponent(StyleRegistryContext.Provider, {
-    value: { insert: wrappedInsert, remove },
+    value: { insert: serverInsert, remove: noopRemove },
     get children() {
       return props.children;
     },
   });
 }
 
+function ClientStyleRegistry(props: StyleRegistryProps): JSX.Element {
+  return createComponent(StyleRegistryContext.Provider, {
+    value: { insert, remove },
+    get children() {
+      return props.children;
+    },
+  });
+}
+
+export const StyleRegistry = isServer
+  ? ServerStyleRegistry
+  : ClientStyleRegistry;
+
 export type SolidStyledVariables = Record<string, string>;
 
-export function useSolidStyled(
-  id: string,
-  offset: string,
-  sheet: string,
-): void {
-  const index = `${id}-${offset}`;
+function serverUseSolidStyled(id: string, offset: string, sheet: string): void {
+  const ctx = useContext(StyleRegistryContext);
+  if (ctx) {
+    ctx.insert(`${id}-${offset}`, sheet);
+  }
+}
+
+function clientUseSolidStyled(id: string, offset: string, sheet: string): void {
   const ctx = useContext(StyleRegistryContext) ?? { insert, remove };
+  const index = `${id}-${offset}`;
   ctx.insert(index, sheet);
   onCleanup(() => {
     ctx.remove(index);
   });
 }
+
+export const useSolidStyled = isServer
+  ? serverUseSolidStyled
+  : clientUseSolidStyled;
 
 function serializeStyle(source: JSX.CSSProperties): string {
   let result = '';
@@ -127,7 +161,19 @@ function serializeRootStyle(vars?: () => Record<string, string>): string {
   return vars ? ':root{' + serializeStyle(untrack(vars)) + '}' : '';
 }
 
-export function useSolidStyledGlobal(
+function serverUseSolidStyledGlobal(
+  id: string,
+  offset: string,
+  sheet: string,
+  vars?: () => Record<string, string>,
+): void {
+  const ctx = useContext(StyleRegistryContext);
+  if (ctx) {
+    ctx.insert(`${id}-${offset}`, serializeRootStyle(vars) + sheet);
+  }
+}
+
+function clientUseSolidStyledGlobal(
   id: string,
   offset: string,
   sheet: string,
@@ -148,6 +194,10 @@ export function useSolidStyledGlobal(
     ctx.remove(index);
   });
 }
+
+export const useSolidStyledGlobal = isServer
+  ? serverUseSolidStyledGlobal
+  : clientUseSolidStyledGlobal;
 
 type CSSVarsMerge = () => Record<string, string>;
 
@@ -213,15 +263,6 @@ export function renderSheets(sheets: StyleData[]): string {
     sheet = `${sheet}<style ${SOLID_SHEET_ATTR}="${data.id}">${data.sheet}</style>`;
   }
   return sheet;
-}
-
-export function useSheets(sheets: StyleData[]): void {
-  useAssets(
-    () =>
-      ({
-        t: renderSheets(sheets),
-      }) as unknown as JSX.Element,
-  );
 }
 
 export interface CSSConstructor {
