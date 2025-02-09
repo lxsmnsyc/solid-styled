@@ -4,8 +4,7 @@
   "type": "module",
   "files": [
     "dist",
-    "babel",
-    "core"
+    "src"
   ],
   "engines": {
     "node": ">=10"
