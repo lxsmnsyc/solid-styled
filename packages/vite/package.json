@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-solid-styled",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "type": "module",
   "files": [
     "dist",
@@ -16,13 +16,13 @@
   "devDependencies": {
     "@types/node": "^22.13.1",
     "pridepack": "2.6.4",
-    "solid-styled": "0.11.1",
+    "solid-styled": "0.12.0",
     "tslib": "^2.8.1",
     "typescript": "^5.7.3",
     "vite": "^6.1.0"
   },
   "dependencies": {
-    "unplugin-solid-styled": "0.11.1"
+    "unplugin-solid-styled": "0.12.0"
   },
   "peerDependencies": {
     "solid-styled": ">=0.9",
