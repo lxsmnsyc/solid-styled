@@ -22,11 +22,7 @@
       "import": "./dist/esm/production/compiler.mjs"
     }
   },
-  "files": [
-    "dist",
-    "src",
-    "compiler"
-  ],
+  "files": ["dist", "src", "compiler"],
   "engines": {
     "node": ">=12"
   },
@@ -38,7 +34,7 @@
     "pridepack": "2.6.4",
     "solid-js": "^1.8.11",
     "tslib": "^2.8.1",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.2",
     "vitest": "^3.0.5"
   },
   "peerDependencies": {
@@ -80,9 +76,7 @@
   },
   "typesVersions": {
     "*": {
-      "compiler": [
-        "./dist/types/compiler/index.d.ts"
-      ]
+      "compiler": ["./dist/types/compiler/index.d.ts"]
     }
   },
   "types": "./dist/types/src/index.d.ts",
