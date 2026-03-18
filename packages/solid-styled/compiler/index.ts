@@ -27,7 +27,7 @@ export async function compile(
   const plugins: NonNullable<
     NonNullable<babel.TransformOptions['parserOpts']>['plugins']
   > = ['jsx'];
-  if (/\.[mc]?tsx?$/i.test(id)) {
+  if (/\.[mc]?tsx?$/i.test(id.split('?')[0])) {
     plugins.push('typescript');
   }
   const result = await babel.transformAsync(code, {

@@ -57,7 +57,7 @@ const solidStyledPlugin = createUnplugin(
     return {
       name: 'solid-styled',
       transformInclude(id): boolean {
-        return filter(id);
+        return filter(id.split('?')[0]);
       },
       async transform(code, id): Promise<TransformResult> {
         return compile(id, code, {
