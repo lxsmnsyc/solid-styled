@@ -10,24 +10,22 @@
     "node": ">=10"
   },
   "license": "MIT",
-  "keywords": [
-    "pridepack"
-  ],
+  "keywords": [],
   "devDependencies": {
     "@types/node": "^22.13.1",
-    "pridepack": "2.6.4",
     "solid-styled": "0.12.1",
+    "tsdown": "^0.21.9",
     "tslib": "^2.8.1",
-    "typescript": "^5.7.3",
-    "vite": "^6.1.0"
+    "typescript": "^6.0.3",
+    "vite": "^8.0.8"
   },
   "dependencies": {
     "@rollup/pluginutils": "^5.1.4",
-    "unplugin": "^2.1.2"
+    "unplugin": "^3.0.0"
   },
   "peerDependencies": {
     "solid-styled": ">=0.9",
-    "vite": ">=3"
+    "vite": ">=8"
   },
   "peerDependenciesMeta": {
     "vite": {
@@ -35,14 +33,10 @@
     }
   },
   "scripts": {
-    "prepublishOnly": "pridepack clean && pridepack build",
-    "build": "pridepack build",
-    "type-check": "pridepack check",
-    "lint": "pridepack lint",
-    "clean": "pridepack clean",
-    "watch": "pridepack watch",
-    "start": "pridepack start",
-    "dev": "pridepack dev"
+    "prepublishOnly": "tsdown",
+    "build": "tsdown",
+    "watch": "tsdown --watch",
+    "test": "vitest"
   },
   "description": "Rollup plugin for solid-styled",
   "repository": {
@@ -59,18 +53,9 @@
   "author": "Alexis Munsayac",
   "private": false,
   "types": "./dist/types/index.d.ts",
-  "main": "./dist/cjs/production/index.cjs",
-  "module": "./dist/esm/production/index.mjs",
   "exports": {
-    ".": {
-      "types": "./dist/types/index.d.ts",
-      "development": {
-        "require": "./dist/cjs/development/index.cjs",
-        "import": "./dist/esm/development/index.mjs"
-      },
-      "require": "./dist/cjs/production/index.cjs",
-      "import": "./dist/esm/production/index.mjs"
-    }
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {}

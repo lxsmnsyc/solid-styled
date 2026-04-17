@@ -1,0 +1,13 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "astro-demo": "0.12.1",
+    "demo": "0.12.1",
+    "rollup-plugin-solid-styled": "0.12.1",
+    "solid-styled": "0.12.1",
+    "unplugin-solid-styled": "0.12.1",
+    "vite-plugin-solid-styled": "0.12.1"
+  },
+  "changesets": []
+}

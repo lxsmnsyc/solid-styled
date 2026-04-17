@@ -4,12 +4,11 @@ import {
   createContext,
   createEffect,
   createMemo,
-  createRoot,
   onCleanup,
   untrack,
   useContext,
 } from 'solid-js';
-import { isServer, useAssets } from 'solid-js/web';
+import { isServer, useAssets } from '@solidjs/web';
 
 const SOLID_SHEET_ATTR = 's:id';
 const SOLID_SHEET_ATTR_ESCAPED = 's\\:id';
@@ -111,7 +110,7 @@ function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {
     }
   }
 
-  return createComponent(StyleRegistryContext.Provider, {
+  return createComponent(StyleRegistryContext, {
     value: { insert: serverInsert, remove: noopRemove },
     get children() {
       return props.children;
@@ -120,7 +119,7 @@ function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {
 }
 
 function ClientStyleRegistry(props: StyleRegistryProps): JSX.Element {
-  return createComponent(StyleRegistryContext.Provider, {
+  return createComponent(StyleRegistryContext, {
     value: { insert, remove },
     get children() {
       return props.children;
@@ -189,9 +188,8 @@ function clientUseSolidStyledGlobal(
   const index = `${id}-${offset}`;
   const ctx = useContext(StyleRegistryContext) ?? { insert, remove };
   ctx.insert(index, serializeRootStyle(vars) + sheet);
-  createEffect(() => {
-    if (vars) {
-      const current = vars();
+  createEffect(() => vars?.(), (current) => {
+    if (current) {
       for (const key in current) {
         document.documentElement.style.setProperty(key, current[key]);
       }
@@ -212,37 +210,20 @@ interface CSSVars {
   (vars?: CSSVarsMerge): JSX.CSSProperties | undefined;
 }
 
-function createLazyMemo<T>(fn: () => T): () => T {
-  let s: () => T;
-  let dispose: (() => void) | undefined;
-  onCleanup(() => {
-    if (dispose) {
-      dispose();
-    }
-  });
-  return () => {
-    if (!s) {
-      s = createRoot(d => {
-        dispose = d;
-        return createMemo(fn);
-      });
-    }
-    return s();
-  };
-}
-
 export function createCSSVars(): CSSVars {
   const patches: CSSVarsMerge[] = [];
-  const signal = createLazyMemo(() => {
+  const signal = createMemo(() => {
     let source: JSX.CSSProperties = {};
     for (let i = 0, len = patches.length; i < len; i += 1) {
       source = Object.assign(source, patches[i]());
     }
     return source;
+  }, {
+    lazy: true
   });
 
   return (vars?: CSSVarsMerge) => {
-    if (vars) {
+    if (typeof vars === 'function') {
       patches.push(vars);
       return undefined;
     }
