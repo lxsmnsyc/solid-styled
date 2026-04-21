@@ -29,8 +29,7 @@
   "scripts": {
     "prepublishOnly": "tsdown",
     "build": "tsdown",
-    "watch": "tsdown --watch",
-    "test": "vitest"
+    "watch": "tsdown --watch"
   },
   "description": "Vite plugin for solid-styled",
   "repository": {

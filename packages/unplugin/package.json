@@ -35,8 +35,7 @@
   "scripts": {
     "prepublishOnly": "tsdown",
     "build": "tsdown",
-    "watch": "tsdown --watch",
-    "test": "vitest"
+    "watch": "tsdown --watch"
   },
   "description": "Rollup plugin for solid-styled",
   "repository": {
