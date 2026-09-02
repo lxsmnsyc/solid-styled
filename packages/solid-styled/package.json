@@ -1,67 +1,70 @@
 {
   "name": "solid-styled",
   "version": "0.12.1",
-  "type": "module",
-  "exports": {
-    ".": "./dist/index.js",
-    "./compiler": "./dist/compiler.js",
-    "./package.json": "./package.json"
+  "private": false,
+  "description": "Reactive stylesheets for SolidJS",
+  "keywords": [
+    "compiler",
+    "css",
+    "oxc",
+    "solid-js",
+    "styled"
+  ],
+  "homepage": "https://github.com/lxsmnsyc/solid-styled/tree/main/packages/solid-styled",
+  "bugs": {
+    "url": "https://github.com/lxsmnsyc/solid-styled/issues"
+  },
+  "license": "MIT",
+  "author": "Alexis Munsayac",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lxsmnsyc/solid-styled.git"
   },
   "files": [
     "dist",
     "src",
     "compiler"
   ],
-  "engines": {
-    "node": ">=12"
-  },
-  "license": "MIT",
-  "devDependencies": {
-    "@solidjs/web": "2.0.0-beta.7",
-    "@types/babel__core": "^7.20.5",
-    "@types/babel__traverse": "^7.28.0",
-    "@types/node": "^25.6.0",
-    "solid-js": "2.0.0-beta.7",
-    "tsdown": "^0.21.9",
-    "tslib": "^2.8.1",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.4"
-  },
-  "peerDependencies": {
-    "solid-js": "^2.0.0-beta.7",
-    "@solidjs/web": "^2.0.0-beta.7"
-  },
-  "dependencies": {
-    "@babel/core": "^7.29.0",
-    "@babel/traverse": "^7.29.0",
-    "@babel/types": "^7.29.0",
-    "@types/css-tree": "^2.3.11",
-    "browserslist": "^4.28.2",
-    "css-tree": "^3.2.1",
-    "lightningcss": "^1.32.0"
-  },
-  "description": "Reactive stylesheets for SolidJS",
-  "repository": {
-    "url": "https://github.com/lxsmnsyc/solid-styled.git",
-    "type": "git"
-  },
-  "homepage": "https://github.com/lxsmnsyc/solid-styled/tree/main/packages/solid-styled",
-  "bugs": {
-    "url": "https://github.com/lxsmnsyc/solid-styled/issues"
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./compiler": "./dist/compiler.js",
+    "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public"
   },
-  "author": "Alexis Munsayac",
-  "private": false,
   "scripts": {
     "prepublishOnly": "tsdown",
     "build": "tsdown",
     "watch": "tsdown --watch",
-    "test": "vitest"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
   },
-  "typesVersions": {
-    "*": {}
+  "dependencies": {
+    "browserslist": "^4.28.8",
+    "css-tree": "^3.2.1",
+    "lightningcss": "^1.33.0",
+    "magic-string": "^1.2.3",
+    "oxc-parser": "^0.148.0"
   },
-  "types": "./dist/types/src/index.d.ts"
+  "devDependencies": {
+    "@solidjs/web": "2.0.0-rc.5",
+    "@types/css-tree": "^3.2.0",
+    "@types/node": "^26.4.1",
+    "solid-js": "2.0.0-rc.5",
+    "tsdown": "^0.22.14",
+    "tslib": "^2.8.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  },
+  "peerDependencies": {
+    "@solidjs/web": "^2.0.0-rc.5",
+    "solid-js": "^2.0.0-rc.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
 }

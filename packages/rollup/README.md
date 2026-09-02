@@ -2,12 +2,12 @@
 
 > Rollup plugin for [`solid-styled`](https://github.com/lxsmnsyc/solid-styled)
 
-[![NPM](https://img.shields.io/npm/v/rollup-plugin-solid-styled.svg)](https://www.npmjs.com/package/rollup-plugin-solid-styled) [![JavaScript Style Guide](https://badgen.net/badge/code%20style/airbnb/ff5a5f?icon=airbnb)](https://github.com/airbnb/javascript)
+[![NPM](https://img.shields.io/npm/v/rollup-plugin-solid-styled.svg)](https://www.npmjs.com/package/rollup-plugin-solid-styled)
 
 ## Install
 
 ```bash
-npm install --D rollup-plugin-solid-styled
+npm i -D rollup-plugin-solid-styled
 ```
 
 ```bash
@@ -23,36 +23,30 @@ pnpm add -D rollup-plugin-solid-styled
 ```js
 import solidStyled from 'rollup-plugin-solid-styled';
 
-///...
-solidStyled({
-  verbose: true, // defaults to false
-  prefix: 'my-prefix', // optional
-  filter: {
-    include: 'src/**/*.{ts,js,tsx,jsx}',
-    exclude: 'node_modules/**/*.{ts,js,tsx,jsx}',
-  },
-})
+export default {
+  plugins: [
+    solidStyled({
+      prefix: 'my-app',
+      filter: {
+        include: 'src/**/*.tsx',
+        exclude: 'node_modules/**/*',
+      },
+    }),
+  ],
+};
 ```
 
 > [!NOTE]
-> When you are using a SolidJS Rollup plugin, make sure that solid-styled runs first.
+> Rollup has no plugin ordering hook, so put `solid-styled` before your SolidJS plugin yourself.
 
-## Config options
+## Options
 
-```js
-{
-  // Toggle verbose scope names based
-  // on the owning component's name,
-  // useful for debugging
-  // Default: false
-  "verbose": true,
+- `verbose` puts the component name into the generated scope, which helps while debugging. Defaults to `false`.
+- `prefix` replaces the default `c-` and `v-` prefixes of generated names. Useful when publishing a component library.
+- `browserslist` sets the browser targets LightningCSS lowers the sheet for. Defaults to `'defaults'`.
+- `filter.include` and `filter.exclude` choose the files to compile.
 
-  // Allows prefixing scope names
-  // useful for package publishing
-  // Default: undefined ('')
-  "prefix": "example",
-}
-```
+See [the docs](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/setup.md) for the full list.
 
 ## Sponsors
 

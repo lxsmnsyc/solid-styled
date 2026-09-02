@@ -1,56 +1,59 @@
 {
   "name": "vite-plugin-solid-styled",
   "version": "0.12.1",
-  "type": "module",
+  "private": false,
+  "description": "Vite plugin for solid-styled",
+  "keywords": [
+    "solid-js",
+    "styled",
+    "vite",
+    "vite-plugin"
+  ],
+  "homepage": "https://github.com/lxsmnsyc/solid-styled/tree/main/packages/vite",
+  "bugs": {
+    "url": "https://github.com/lxsmnsyc/solid-styled/issues"
+  },
+  "license": "MIT",
+  "author": "Alexis Munsayac",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lxsmnsyc/solid-styled.git"
+  },
   "files": [
     "dist",
     "src"
   ],
-  "engines": {
-    "node": ">=10"
-  },
-  "license": "MIT",
-  "keywords": [],
-  "devDependencies": {
-    "@types/node": "^22.13.1",
-    "solid-styled": "0.12.1",
-    "tsdown": "^0.21.9",
-    "tslib": "^2.8.1",
-    "typescript": "^6.0.3",
-    "vite": "^8.0.8"
-  },
-  "dependencies": {
-    "unplugin-solid-styled": "0.12.1"
-  },
-  "peerDependencies": {
-    "solid-styled": ">=0.9",
-    "vite": ">=8"
-  },
-  "scripts": {
-    "prepublishOnly": "tsdown",
-    "build": "tsdown",
-    "watch": "tsdown --watch"
-  },
-  "description": "Vite plugin for solid-styled",
-  "repository": {
-    "url": "https://github.com/lxsmnsyc/solid-styled.git",
-    "type": "git"
-  },
-  "homepage": "https://github.com/lxsmnsyc/solid-styled/packages/vite",
-  "bugs": {
-    "url": "https://github.com/lxsmnsyc/solid-styled/issues"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "author": "Alexis Munsayac",
-  "private": false,
-  "types": "./dist/types/index.d.ts",
+  "type": "module",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
     "./package.json": "./package.json"
   },
-  "typesVersions": {
-    "*": {}
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepublishOnly": "tsdown",
+    "build": "tsdown",
+    "watch": "tsdown --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "unplugin-solid-styled": "0.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "solid-styled": "0.12.1",
+    "tsdown": "^0.22.14",
+    "tslib": "^2.8.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2"
+  },
+  "peerDependencies": {
+    "solid-styled": ">=1",
+    "vite": ">=8"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

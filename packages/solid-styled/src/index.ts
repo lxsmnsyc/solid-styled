@@ -1,5 +1,5 @@
-declare module 'solid-js' {
-  // biome-ignore lint/style/noNamespace: <explanation>
+declare module '@solidjs/web' {
+  // JSX namespace augmentation
   namespace JSX {
     interface StyleHTMLAttributes<T> {
       jsx?: boolean;

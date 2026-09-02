@@ -2,12 +2,12 @@
 
 > Vite plugin for [`solid-styled`](https://github.com/lxsmnsyc/solid-styled)
 
-[![NPM](https://img.shields.io/npm/v/vite-plugin-solid-styled.svg)](https://www.npmjs.com/package/vite-plugin-solid-styled) [![JavaScript Style Guide](https://badgen.net/badge/code%20style/airbnb/ff5a5f?icon=airbnb)](https://github.com/airbnb/javascript)
+[![NPM](https://img.shields.io/npm/v/vite-plugin-solid-styled.svg)](https://www.npmjs.com/package/vite-plugin-solid-styled)
 
 ## Install
 
 ```bash
-npm install --D vite-plugin-solid-styled
+npm i -D vite-plugin-solid-styled
 ```
 
 ```bash
@@ -21,40 +21,34 @@ pnpm add -D vite-plugin-solid-styled
 ## Usage
 
 ```js
+import solid from '@solidjs/vite-plugin';
 import solidStyled from 'vite-plugin-solid-styled';
-import solid from 'vite-plugin-solid';
+import { defineConfig } from 'vite';
 
-///...
-export default {
+export default defineConfig({
   plugins: [
     solid(),
     solidStyled({
-      prefix: 'my-prefix', // optional
+      prefix: 'my-app',
       filter: {
-        include: 'src/**/*.{ts,js,tsx,jsx}',
-        exclude: 'node_modules/**/*.{ts,js,tsx,jsx}',
+        include: 'src/**/*.tsx',
+        exclude: 'node_modules/**/*',
       },
     }),
-  ]
-}
+  ],
+});
 ```
 
-## Config options
+The plugin sets `enforce: 'pre'` and moves itself ahead of the `solid` plugin, so the order you write them in does not matter.
 
-```js
-{
-  // Toggle verbose scope names based
-  // on the owning component's name,
-  // useful for debugging
-  // Default: false
-  "verbose": true,
+## Options
 
-  // Allows prefixing scope names
-  // useful for package publishing
-  // Default: undefined ('')
-  "prefix": "example",
-}
-```
+- `verbose` puts the component name into the generated scope, which helps while debugging. Defaults to `false`.
+- `prefix` replaces the default `c-` and `v-` prefixes of generated names. Useful when publishing a component library.
+- `browserslist` sets the browser targets LightningCSS lowers the sheet for. Defaults to `'defaults'`.
+- `filter.include` and `filter.exclude` choose the files to compile.
+
+See [the docs](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/setup.md) for the full list.
 
 ## Sponsors
 
