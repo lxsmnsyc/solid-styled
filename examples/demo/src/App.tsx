@@ -1,6 +1,6 @@
-import { createSignal, Show } from 'solid-js';
-import { css, StyleRegistry } from 'solid-styled';
-import type { JSX } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
+import { StyleRegistry, css } from 'solid-styled';
+import type { JSX } from '@solidjs/web';
 
 function ShowButton(): JSX.Element {
   const [show, setShow] = createSignal(false);
@@ -27,21 +27,29 @@ function ShowButton(): JSX.Element {
             font-size: 2rem;
             /* border-radius: 0.5rem; */
             background-image: linear-gradient(
-              to top, 
-              ${red() ? '#ff0844' : '#48c6ef'} 0%, 
+              to top,
+              ${red() ? '#ff0844' : '#48c6ef'} 0%,
               ${red() ? '#ffb199' : '#6f86d6'} 100%
             );
           }
         `}
       </style>
-      <button class="toggle" type="button" onClick={() => setShow(!show())}>
+      <button
+        class="toggle"
+        type="button"
+        onClick={() => {
+          setShow(!show());
+        }}
+      >
         {show() ? 'Hide Div' : 'Show Div'}
       </button>
       <Show when={show()}>
         <div>
           <button
             type="button"
-            onClick={() => setRed(!red())}
+            onClick={() => {
+              setRed(!red());
+            }}
             style={{
               'border-radius': '0.5rem',
             }}
@@ -57,7 +65,7 @@ function ShowButton(): JSX.Element {
 function ToggleButton(): JSX.Element {
   const [show, setShow] = createSignal(false);
 
-  function onClick() {
+  function onClick(): void {
     setShow(!show());
   }
 
@@ -70,8 +78,8 @@ function ToggleButton(): JSX.Element {
       font-size: 2rem;
       border-radius: 0.5rem;
       background-image: linear-gradient(
-        to top, 
-        ${show() ? '#ff0844' : '#48c6ef'} 0%, 
+        to top,
+        ${show() ? '#ff0844' : '#48c6ef'} 0%,
         ${show() ? '#ffb199' : '#6f86d6'} 100%
       );
     }

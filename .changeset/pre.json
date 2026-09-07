@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "demo": "0.12.1",
+    "solid-styled": "0.12.1",
+    "unplugin-solid-styled": "0.12.1"
+  },
+  "changesets": []
+}

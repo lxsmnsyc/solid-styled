@@ -1,25 +1,29 @@
 {
   "name": "demo",
-  "type": "module",
   "version": "0.12.1",
+  "private": true,
+  "type": "module",
+  "publishConfig": {
+    "access": "restricted"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
-  },
-  "devDependencies": {
-    "typescript": "^5.7.3",
-    "unplugin-solid-styled": "0.12.1",
-    "vite": "^6.1.0",
-    "vite-plugin-inspect": "^10.1.1",
-    "vite-plugin-solid": "2.11.1"
+    "serve": "vite preview",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "solid-js": "^1.9.4",
+    "@solidjs/web": "2.0.0-rc.5",
+    "solid-js": "2.0.0-rc.5",
     "solid-styled": "0.12.1"
   },
-  "private": true,
-  "publishConfig": {
-    "access": "restricted"
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@solidjs/vite-plugin": "3.0.0-next.37",
+    "@types/node": "^26.4.1",
+    "typescript": "^7.0.2",
+    "unplugin-solid-styled": "0.12.1",
+    "vite": "^8.2.2"
   }
 }
