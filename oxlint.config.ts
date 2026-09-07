@@ -32,7 +32,7 @@ export default defineConfig({
     {
       // Bridging unplugin's generic plugin shape onto each bundler's own
       // `Plugin` type needs assertions the type checker cannot verify.
-      files: ['packages/unplugin/src/**', 'packages/vite/src/**', 'packages/rollup/src/**'],
+      files: ['packages/unplugin/src/**'],
       rules: {
         'typescript/no-unsafe-type-assertion': 'off',
       },

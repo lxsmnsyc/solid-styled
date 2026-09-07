@@ -15,23 +15,23 @@
 ## Requirements
 
 - SolidJS 2.0 or newer, along with `@solidjs/web`.
-- One of the build integrations below. The `css` tag throws at runtime if the plugin is not installed.
+- The build plugin below. The `css` tag throws at runtime if the plugin is not installed.
 
 ## Install
 
 ```bash
 npm i solid-styled
-npm i -D vite-plugin-solid-styled
+npm i -D unplugin-solid-styled
 ```
 
 ```bash
 yarn add solid-styled
-yarn add -D vite-plugin-solid-styled
+yarn add -D unplugin-solid-styled
 ```
 
 ```bash
 pnpm add solid-styled
-pnpm add -D vite-plugin-solid-styled
+pnpm add -D unplugin-solid-styled
 ```
 
 ## Setup
@@ -41,13 +41,13 @@ Add the plugin before the Solid plugin so it sees your JSX before it is compiled
 ```js
 // vite.config.js
 import solid from '@solidjs/vite-plugin';
-import solidStyled from 'vite-plugin-solid-styled';
+import solidStyled from 'unplugin-solid-styled';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [
     solid(),
-    solidStyled({
+    solidStyled.vite({
       prefix: 'my-app',
       filter: {
         include: 'src/**/*.tsx',
@@ -58,11 +58,8 @@ export default defineConfig({
 });
 ```
 
-Other integrations:
-
-- [Vite](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/vite)
-- [Rollup](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/rollup)
-- [Unplugin](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/unplugin), for every other bundler
+[`unplugin-solid-styled`](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/unplugin)
+also provides `rollup`, `webpack` and `esbuild` entries.
 
 ## Docs
 

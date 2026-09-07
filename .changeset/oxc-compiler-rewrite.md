@@ -1,8 +1,6 @@
 ---
 'solid-styled': major
 'unplugin-solid-styled': major
-'vite-plugin-solid-styled': major
-'rollup-plugin-solid-styled': major
 ---
 
 Rewrite the compiler on Oxc and retarget the runtime at Solid 2.0.
@@ -15,6 +13,10 @@ are byte for byte identical to the previous compiler.
 
 Breaking changes:
 
+- `vite-plugin-solid-styled` and `rollup-plugin-solid-styled` are discontinued.
+  Use `unplugin-solid-styled` instead. It provides the same options, and
+  `solidStyled.vite(options)` or `solidStyled.rollup(options)` replaces the
+  default export of the old packages.
 - `compile(id, code, options)` from `solid-styled/compiler` is now synchronous
   and returns `{ code, map }`. It throws a `CompileError` carrying the line and
   column instead of a Babel error.
@@ -30,6 +32,6 @@ Breaking changes:
   same module compiled with and without a query suffix now shares one scope.
 - Generated runtime helpers are imported through a single import statement with
   `_name` locals, instead of one import per helper.
-- The plugins now require `vite@>=8` or `rollup@>=4`.
+- The plugin now requires `vite@>=8`.
 - `@babel/core`, `@babel/traverse` and `@babel/types` are no longer
   dependencies.

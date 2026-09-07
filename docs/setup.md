@@ -3,12 +3,12 @@
 ## Plugin order
 
 - `solid-styled` must run before the SolidJS JSX transform, because it rewrites JSX attributes.
-- The Vite and Unplugin integrations set `enforce: 'pre'` and move themselves ahead of the `solid` plugin for you.
-- With Rollup, put `solid-styled` first in the `plugins` array yourself.
+- The Vite entry sets `enforce: 'pre'` and moves itself ahead of the `solid` plugin for you.
+- With every other bundler, put `solid-styled` first in the `plugins` array yourself.
 
 ## Options
 
-Every integration takes the same options.
+Every bundler entry takes the same options.
 
 | Option           | Type                 | Default                                       | What it does                                                                                                                                 |
 | ---------------- | -------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -19,7 +19,7 @@ Every integration takes the same options.
 | `filter.exclude` | `string \| string[]` | `'node_modules/**/*.{jsx,tsx,ts,js,mjs,cjs}'` | Files the plugin skips.                                                                                                                      |
 
 ```js
-solidStyled({
+solidStyled.vite({
   verbose: true,
   prefix: 'my-app',
   browserslist: 'last 2 versions',
