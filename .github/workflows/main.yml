@@ -22,9 +22,6 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm run lint
-
       - name: Check formatting
         run: pnpm run format:check
 
@@ -32,6 +29,9 @@ jobs:
         run: pnpm recursive run build
         env:
           CI: true
+
+      - name: Lint
+        run: pnpm run lint
 
       - name: Typecheck
         run: pnpm run typecheck
