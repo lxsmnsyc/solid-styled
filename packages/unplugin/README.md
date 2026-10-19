@@ -2,12 +2,12 @@
 
 > [Unplugin](https://github.com/unjs/unplugin) for [`solid-styled`](https://github.com/lxsmnsyc/solid-styled)
 
-[![NPM](https://img.shields.io/npm/v/unplugin-solid-styled.svg)](https://www.npmjs.com/package/unplugin-solid-styled) [![JavaScript Style Guide](https://badgen.net/badge/code%20style/airbnb/ff5a5f?icon=airbnb)](https://github.com/airbnb/javascript)
+[![NPM](https://img.shields.io/npm/v/unplugin-solid-styled.svg)](https://www.npmjs.com/package/unplugin-solid-styled)
 
 ## Install
 
 ```bash
-npm install --D unplugin-solid-styled
+npm i -D unplugin-solid-styled
 ```
 
 ```bash
@@ -20,37 +20,35 @@ pnpm add -D unplugin-solid-styled
 
 ## Usage
 
-Please check out [`unplugin`](https://github.com/unjs/unplugin) to know more about how to use the plugins with `unplugin-thaler` in your target bundler.
+Pick the entry point for your bundler. See [`unplugin`](https://github.com/unjs/unplugin) for the full list.
 
 ```js
 import solidStyled from 'unplugin-solid-styled';
 
-/// Example: Vite
-solidStyled.vite({
-  prefix: 'my-prefix',
+const options = {
+  prefix: 'my-app',
   filter: {
-    include: 'src/**/*.{ts,js,tsx,jsx}',
-    exclude: 'node_modules/**/*.{ts,js,tsx,jsx}',
+    include: 'src/**/*.tsx',
+    exclude: 'node_modules/**/*',
   },
-}),
+};
+
+solidStyled.vite(options);
+solidStyled.rollup(options);
+solidStyled.webpack(options);
+solidStyled.esbuild(options);
 ```
 
-## Config options
+The Vite entry sets `enforce: 'pre'` and moves itself ahead of the `solid` plugin. For every other bundler, make sure `solid-styled` runs before the SolidJS JSX transform.
 
-```js
-{
-  // Toggle verbose scope names based
-  // on the owning component's name,
-  // useful for debugging
-  // Default: false
-  "verbose": true,
+## Options
 
-  // Allows prefixing scope names
-  // useful for package publishing
-  // Default: undefined ('')
-  "prefix": "example",
-}
-```
+- `verbose` puts the component name into the generated scope, which helps while debugging. Defaults to `false`.
+- `prefix` replaces the default `c-` and `v-` prefixes of generated names. Useful when publishing a component library.
+- `browserslist` sets the browser targets LightningCSS lowers the sheet for. Defaults to `'defaults'`.
+- `filter.include` and `filter.exclude` choose the files to compile.
+
+See [the docs](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/setup.md) for the full list.
 
 ## Sponsors
 

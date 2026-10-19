@@ -1,43 +1,54 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`css > should transform 1`] = `
-"import { useSolidStyled as useSolidStyled_1 } from "solid-styled";
+"import { useSolidStyled as _useSolidStyled } from "solid-styled";
+
 import { css } from 'solid-styled';
+
 const sheet_1 = "c-f0b3b6fa-0";
 const css_1 = "h1[s\\\\:c-f0b3b6fa-0]{color:red}";
 export default function Example() {
-  useSolidStyled_1(sheet_1, 1, css_1);
+  _useSolidStyled(sheet_1, 1, css_1);
+
   return <h1 s:c-f0b3b6fa-0>Hello World</h1>;
-}"
+}
+  "
 `;
 
 exports[`css > should transform dynamic templates 1`] = `
-"import { createCSSVars as createCSSVars_1 } from "solid-styled";
-import { useSolidStyled as useSolidStyled_1 } from "solid-styled";
+"import { useSolidStyled as _useSolidStyled, createCSSVars as _createCSSVars, mergeStyles as _mergeStyles } from "solid-styled";
+
 import { css } from 'solid-styled';
+
 const sheet_1 = "c-f0b3b6fa-0";
 const css_1 = "h1[s\\\\:c-f0b3b6fa-0]{color:var(--s-v-f0b3b6fa-1)}";
 export default function Example(props) {
-  const vars_1 = createCSSVars_1();
-  useSolidStyled_1(sheet_1, 1, css_1), vars_1(() => ({
-    "--s-v-f0b3b6fa-1": props.color
-  }));
+  const vars_1 = _createCSSVars();
+  (_useSolidStyled(sheet_1, 1, css_1), vars_1(() => ({ "--s-v-f0b3b6fa-1": props.color })));
+
   return <h1 s:c-f0b3b6fa-0 style={vars_1()}>Hello World</h1>;
-}"
+}
+  "
 `;
 
 exports[`css > should work with multiple templates 1`] = `
-"import { useSolidStyled as useSolidStyled_1 } from "solid-styled";
+"import { useSolidStyled as _useSolidStyled } from "solid-styled";
+
 import { css } from 'solid-styled';
+
 const sheet_1 = "c-f0b3b6fa-0";
 const css_1 = "h1[s\\\\:c-f0b3b6fa-0]{color:red}";
 const css_2 = "h2[s\\\\:c-f0b3b6fa-0]{color:#00f}";
 export default function Example() {
-  useSolidStyled_1(sheet_1, 1, css_1);
-  useSolidStyled_1(sheet_1, 2, css_2);
-  return <>
+  _useSolidStyled(sheet_1, 1, css_1);
+  _useSolidStyled(sheet_1, 2, css_2);
+
+  return (
+    <>
       <h1 s:c-f0b3b6fa-0>Hello World</h1>
       <h2 s:c-f0b3b6fa-0>Hello World</h2>
-    </>;
-}"
+    </>
+  );
+}
+  "
 `;

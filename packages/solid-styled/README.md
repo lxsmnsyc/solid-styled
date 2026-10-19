@@ -2,54 +2,80 @@
 
 > Reactive stylesheets for SolidJS
 
-[![NPM](https://img.shields.io/npm/v/solid-styled.svg)](https://www.npmjs.com/package/solid-styled) [![JavaScript Style Guide](https://badgen.net/badge/code%20style/airbnb/ff5a5f?icon=airbnb)](https://github.com/airbnb/javascript)
+[![NPM](https://img.shields.io/npm/v/solid-styled.svg)](https://www.npmjs.com/package/solid-styled)
+
+## What it is
+
+- You write plain CSS next to your component, in a `css` tagged template or a `<style jsx>` element.
+- A build plugin extracts that CSS at compile time, so almost nothing is left at runtime.
+- Every selector is scoped to the component that declared it, so styles never leak.
+- Interpolated values become CSS custom properties, so they stay reactive without re-rendering the sheet.
+- The same sheet is inserted once, no matter how many instances of the component are mounted.
+
+## Requirements
+
+- SolidJS 2.0 or newer, along with `@solidjs/web`.
+- The build plugin below. The `css` tag throws at runtime if the plugin is not installed.
 
 ## Install
 
 ```bash
 npm i solid-styled
-npm i -D postcss
+npm i -D unplugin-solid-styled
 ```
 
 ```bash
 yarn add solid-styled
-yarn add -D postcss
+yarn add -D unplugin-solid-styled
 ```
 
 ```bash
 pnpm add solid-styled
-pnpm add -D postcss
+pnpm add -D unplugin-solid-styled
 ```
 
-## Features
+## Setup
 
-- Render stylesheets only once
-- Fine-grained reactive CSS properties
-- Scoped stylesheets
-- `:global` selector
-- `@global` at-rule
-- SSR
-- Near zero-runtime
-- `<style jsx>`
+Add the plugin before the Solid plugin so it sees your JSX before it is compiled away.
 
-## Examples
+```js
+// vite.config.js
+import solid from '@solidjs/vite-plugin';
+import solidStyled from 'unplugin-solid-styled';
+import { defineConfig } from 'vite';
 
-- Vite - [![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox)](https://codesandbox.io/s/github/LXSMNSYC/solid-styled/tree/main/examples/demo)
-- Astro - [![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox)](https://codesandbox.io/s/github/LXSMNSYC/solid-styled/tree/main/examples/astro-demo)
+export default defineConfig({
+  plugins: [
+    solid(),
+    solidStyled.vite({
+      prefix: 'my-app',
+      filter: {
+        include: 'src/**/*.tsx',
+        exclude: 'node_modules/**/*',
+      },
+    }),
+  ],
+});
+```
+
+[`unplugin-solid-styled`](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/unplugin)
+also provides `rollup`, `webpack` and `esbuild` entries.
+
+## Docs
+
+- [Setup](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/setup.md) covers plugin options and TypeScript types.
+- [Styling](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/styling.md) covers `css`, `<style jsx>` and reactive values.
+- [Scoping](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/scoping.md) covers `:global`, `@global` and `use:solid-styled`.
+- [SSR](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/ssr.md) covers `StyleRegistry` and `renderSheets`.
+- [How it works](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/how-it-works.md) covers the compiler output.
 
 ## Usage
 
-### Integrations
-
-- [Rollup](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/rollup)
-- [Vite](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/vite)
-- [Unplugin](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/unplugin)
-
 ### `css`
 
-Use the `css` tagged template for writing stylesheets.
+Call `css` as a statement inside your component. The template is a normal stylesheet.
 
-```js
+```jsx
 import { css } from 'solid-styled';
 
 function Title() {
@@ -63,13 +89,15 @@ function Title() {
 }
 ```
 
-The template is also reactive. It works by replacing all templating values with a CSS variable. This allows the stylesheet to be only rendered once and can be shared by multiple components of the same scope.
+Interpolated values are replaced by CSS custom properties, so the sheet itself is static and only the variable changes.
 
-```js
+```jsx
+import { createSignal } from 'solid-js';
 import { css } from 'solid-styled';
 
 function Button() {
   const [color, setColor] = createSignal('red');
+
   css`
     button {
       color: ${color()};
@@ -77,20 +105,45 @@ function Button() {
   `;
 
   return (
-    <button onClick={() => {
-      setColor((c) => (c === 'red' ? 'blue' : 'red'));
-    }}>
+    <button onClick={() => setColor((c) => (c === 'red' ? 'blue' : 'red'))}>
       Current color: {color()}
     </button>
   );
 }
 ```
 
-By default, all styles are scoped to its component and cannot leak into another component. The scoping only applies to all DOM nodes that can be found in the component, including the children of the external components.
+### `<style jsx>`
 
-```js
-import { css } from 'solid-styled';
+`<style jsx>` does exactly what `css` does, written inside JSX instead.
 
+```jsx
+function Button() {
+  const [color, setColor] = createSignal('red');
+
+  return (
+    <>
+      <style jsx>
+        {`
+          button {
+            color: ${color()};
+          }
+        `}
+      </style>
+      <button onClick={() => setColor((c) => (c === 'red' ? 'blue' : 'red'))}>
+        Current color: {color()}
+      </button>
+    </>
+  );
+}
+```
+
+Use `<style jsx global>` to declare global styles.
+
+### Scoping
+
+Styles apply to the DOM elements written inside the component, including elements passed as children to other components. They do not apply to elements rendered by another component.
+
+```jsx
 function ForeignTitle() {
   return <h1>This is not affected</h1>;
 }
@@ -110,149 +163,28 @@ function Title() {
         <h1>This is also affected.</h1>
       </Container>
     </>
-  )
-}
-```
-
-#### `:global`
-
-Since all selectors in a given stylesheet are scoped by default, you can use the `:global` pseudo selector to opt-out of scoping:
-
-```js
-import { css } from 'solid-styled';
-
-function Feed(props) {
-  css`
-    div > :global(* + *) {
-      margin-top: 0.5rem;
-    }
-  `;
-
-  return (
-    <div>
-      <For each={props.articles}>
-        {(item) => (
-          // This item is affected by the CSS of the Feed component.
-          <FeedArticle data={item} />
-        )}
-      </For>
-    </div>
   );
 }
 ```
 
-#### `@global`
+Use `:global(...)` for a single selector, `@global { ... }` for a block, and `use:solid-styled` to forward the scope to a component. See [Scoping](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/scoping.md).
 
-You can use `@global` instead of `:global` if you want to declare multiple global styles
+### SSR
 
-```js
-css`
-  /* this is global */
-  @global {
-    body {
-      background-color: black;
-    }
+Wrap the tree in `<StyleRegistry>` and render the collected sheets into your HTML. See [SSR](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/ssr.md).
 
-    main {
-      padding: 0.5rem;
-    }
-  }
+## CSS processing
 
-  h1 {
-    color: white;
-  }
-`;
-```
-
-### Forward scope
-
-Since `solid-styled` scopes DOM elements and not components by default, it doesn't affect things like `<Dynamic>`. Using `use:solid-styled`, we can forward the current scope/sheet to the component.
-
-```js
-css`
-  * {
-    color: red;
-  }
-`;
-
-<Dynamic component={props.as} use:solid-styled>
-  {props.children}
-</Dynamic>
-```
-
-which compiles into
-
-```js
-useSolidStyled('xxxx', '*[s\\:xxxx]{color:red}');
-
-<Dynamic component={props.as} s:xxxx style={vars()}>
-  {props.children}
-</Dynamic>
-```
-
-### `<style jsx>`
-
-Inspired by [`styled-jsx`](https://github.com/vercel/styled-jsx).
-
-Use `<style jsx>` instead of `css` for declaring styles in JSX expressions. Both `<style jsx>` and `css` functions the same.
-
-```js
-function Button() {
-  const [color, setColor] = createSignal('red');
-  return (
-    <>
-      <style jsx>
-        {`
-          button {
-            color: ${color()};
-          }
-        `}
-      </style>
-      <button onClick={() => {
-        setColor((c) => (c === 'red' ? 'blue' : 'red'));
-      }}>
-        Current color: {color()}
-      </button>
-    </>
-  );
-}
-```
-
-You can also use `<style jsx global>` for declaring global styles.
-
-The main motivation for writing an alternative way of declaring styles with `<style jsx>` is to facilitate the migration from `solid-styled-jsx` to `solid-styled`. Possibly, some developers may as well use `<style jsx>` because of their familiarity with adding the styles inside the JSX.
-
-## SSR
-
-### `<StyleRegistry>`
-
-For SSR, you can pass an array to the `styles` prop of `<StyleRegistry>`. This array collects all of the "critical" (initial render) stylesheets, that which you can render as a string with `renderSheets`.
-
-```js
-import { renderSheets } from 'solid-styled';
-
-const styles = [];
-
-renderToString(() => (
-  <StyleRegistry styles={styles}>
-    <App />
-  </StyleRegistry>
-));
-
-// Render sheets
-// You can use the resulting sheet by inserting
-// it into an HTML template.
-const styles = renderSheets(styles);
-```
-
-## CSS Processing
-
-`solid-styled` uses [LightningCSS](https://lightningcss.dev/) to preprocess CSS templates as well as apply CSS scoping and transformations. By default, [CSS Nesting and Custom Media Queries](https://lightningcss.dev/transpilation.html#draft-syntax) are enabled by default.
+- Sheets are compiled with [LightningCSS](https://lightningcss.dev/), so they are minified and lowered for your browser targets.
+- CSS nesting, modern color syntax and custom media queries are always lowered.
+- Set the `browserslist` plugin option to control the targets.
 
 ## Limitations
 
-- Scoping `css` can only be called directly on components. This is so that the Babel plugin can find and transform the JSX of the component. Global `css` (i.e. `:global` or `@global`) can be used inside other functions i.e. hooks, utilities.
-- Dynamic styles are only limited to CSS properties.
+- Scoped `css` must be called directly inside a component, so the compiler can find the JSX it belongs to.
+- Global `css` (through `:global` or `@global`) can be called from any function, including hooks.
+- Interpolated values can only be used as CSS values, not as selectors or property names.
+- A component that declares reactive values needs a block body, because the compiler declares a variable holder at the top of it.
 
 ## Sponsors
 

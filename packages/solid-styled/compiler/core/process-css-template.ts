@@ -1,59 +1,47 @@
-import * as t from '@babel/types';
-import type { StateContext } from '../types';
+import type { Node } from './ast';
+import type { Ctx } from './context';
 import preprocessCSS from './preprocess-css';
-import processScopedSheet from './process-scoped-sheet.old';
-import { getPrefix, getUniqueId } from './utils';
+import processScopedSheet from './process-scoped-sheet';
 
-interface DynamicTemplateResult {
+export interface DynamicTemplateResult {
   sheet: string;
-  variables: t.ObjectProperty[];
+  /** Object entries of the form `"--s-v-hash-N": <source expression>`. */
+  variables: string[];
 }
 
-function replaceDynamicTemplate(
-  ctx: StateContext,
-  { expressions, quasis }: t.TemplateLiteral,
-): DynamicTemplateResult {
-  // Collects all the variables
-  const variables: t.ObjectProperty[] = [];
+/**
+ * Swaps every `${...}` span in the template for a generated CSS custom
+ * property, so the sheet itself becomes a static string.
+ */
+function replaceDynamicTemplate(ctx: Ctx, template: Node): DynamicTemplateResult {
+  const variables: string[] = [];
+  const { quasis, expressions } = template;
 
   let sheet = '';
-  let currentExpr = 0;
 
   for (let i = 0, len = quasis.length; i < len; i += 1) {
     sheet = `${sheet}${quasis[i].value.cooked ?? ''}`;
-    if (currentExpr < expressions.length) {
-      const expr = expressions[currentExpr];
-      if (t.isExpression(expr)) {
-        // Create a new variable
-        const id = `--s-${getPrefix(ctx, true)}${getUniqueId(ctx)}`;
-        // Push the variable access
-        sheet = `${sheet}var(${id})`;
-        // Register the variable and its expression
-        variables.push(t.objectProperty(t.stringLiteral(id), expr));
-        currentExpr += 1;
-      }
+    const expression = expressions[i];
+    if (expression) {
+      const id = `--s-${ctx.prefix(true)}${ctx.uniqueId()}`;
+      sheet = `${sheet}var(${id})`;
+      variables.push(`${JSON.stringify(id)}: ${ctx.code.slice(expression.start, expression.end)}`);
     }
   }
 
-  return {
-    sheet,
-    variables,
-  };
+  return { sheet, variables };
 }
 
 export default function processCSSTemplate(
-  ctx: StateContext,
+  ctx: Ctx,
   sheetID: string,
-  templateLiteral: t.TemplateLiteral,
+  template: Node,
   isScoped: boolean,
 ): DynamicTemplateResult {
-  // Replace the template's dynamic parts with CSS variables
-  const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
+  const { sheet, variables } = replaceDynamicTemplate(ctx, template);
   const preprocessed = preprocessCSS(ctx, sheet);
   return {
-    sheet: isScoped
-      ? preprocessCSS(ctx, processScopedSheet(ctx, sheetID, preprocessed))
-      : preprocessed,
+    sheet: isScoped ? preprocessCSS(ctx, processScopedSheet(sheetID, preprocessed)) : preprocessed,
     variables,
   };
 }

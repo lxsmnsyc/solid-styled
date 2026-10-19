@@ -9,7 +9,7 @@ const options: SolidStyledOptions = {
 const FILE = 'src/index.ts';
 
 describe('jsx', () => {
-  it('should transform', async () => {
+  it('should transform', () => {
     const code = `
 export default function Example() {
   return (
@@ -26,9 +26,9 @@ export default function Example() {
   );
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should work with multiple templates', async () => {
+  it('should work with multiple templates', () => {
     const code = `
 export default function Example() {
   return (
@@ -53,9 +53,9 @@ export default function Example() {
   );
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should transform dynamic templates', async () => {
+  it('should transform dynamic templates', () => {
     const code = `
     export default function Example() {
       return (
@@ -72,11 +72,11 @@ export default function Example() {
       );
     }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
 });
 describe('jsx.global', () => {
-  it('should transform', async () => {
+  it('should transform', () => {
     const code = `
 export default function Example() {
   return (
@@ -93,9 +93,9 @@ export default function Example() {
   );
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should work with multiple templates', async () => {
+  it('should work with multiple templates', () => {
     const code = `
 export default function Example() {
   return (
@@ -120,9 +120,9 @@ export default function Example() {
   );
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should transform dynamic templates', async () => {
+  it('should transform dynamic templates', () => {
     const code = `
     export default function Example() {
       return (
@@ -139,6 +139,6 @@ export default function Example() {
       );
     }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
 });
