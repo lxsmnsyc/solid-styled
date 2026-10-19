@@ -7,7 +7,7 @@
   ],
   "type": "module",
   "scripts": {
-    "cs:ver": "changeset version",
+    "cs:ver": "changeset version && pnpm install --lockfile-only",
     "cs:pub": "changeset publish",
     "cs:add": "changeset add",
     "lint": "oxlint",

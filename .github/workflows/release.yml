@@ -65,8 +65,9 @@ jobs:
       - name: Version packages
         uses: changesets/action/version@v2
         with:
-          commit-message: 'chore: version packages (next)'
-          pr-title: 'Version Packages (next)'
+          script: pnpm run cs:ver
+          commit-message: 'chore: version packages'
+          pr-title: 'Version Packages'
 
   pack:
     if: needs.select-mode.outputs.mode == 'publish'
