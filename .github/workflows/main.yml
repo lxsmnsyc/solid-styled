@@ -28,13 +28,13 @@ jobs:
       - name: Check formatting
         run: pnpm run format:check
 
-      - name: Typecheck
-        run: pnpm run typecheck
+      - name: Build
+        run: pnpm recursive run build
         env:
           CI: true
 
-      - name: Build
-        run: pnpm recursive run build
+      - name: Typecheck
+        run: pnpm run typecheck
         env:
           CI: true
 

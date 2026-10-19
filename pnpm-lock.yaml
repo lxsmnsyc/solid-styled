@@ -37,7 +37,7 @@ importers:
         version: 2.0.0-rc.5
       solid-styled:
         specifier: 0.12.1
-        version: 0.12.1(solid-js@2.0.0-rc.5)
+        version: link:../../packages/solid-styled
     devDependencies:
       '@playwright/test':
         specifier: ^1.62.1
@@ -53,7 +53,7 @@ importers:
         version: 7.0.2
       unplugin-solid-styled:
         specifier: 0.12.1
-        version: 0.12.1(rollup@4.63.1)(solid-styled@0.12.1(solid-js@2.0.0-rc.5))(vite@8.2.2(@types/node@26.4.1)(jiti@2.4.2)(terser@5.38.1)(yaml@2.9.1))
+        version: link:../../packages/unplugin
       vite:
         specifier: ^8.2.2
         version: 8.2.2(@types/node@26.4.1)(jiti@2.4.2)(terser@5.38.1)(yaml@2.9.1)
@@ -108,14 +108,14 @@ importers:
         version: 5.4.0(rollup@4.63.1)
       unplugin:
         specifier: ^3.3.0
-        version: 3.3.0(rolldown@1.2.7)(rollup@4.63.1)(vite@8.2.2(@types/node@26.4.1)(jiti@2.4.2)(terser@5.38.1))
+        version: 3.3.0(rolldown@1.2.7)(rollup@4.63.1)(vite@8.2.2(@types/node@26.4.1)(jiti@2.4.2)(terser@5.38.1)(yaml@2.9.1))
     devDependencies:
       '@types/node':
         specifier: ^26.4.1
         version: 26.4.1
       solid-styled:
         specifier: 0.12.1
-        version: 0.12.1(solid-js@1.9.17)
+        version: link:../solid-styled
       tsdown:
         specifier: ^0.22.14
         version: 0.22.14(typescript@7.0.2)(unrun@0.2.36)
@@ -1194,9 +1194,6 @@ packages:
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
-  '@types/css-tree@2.3.11':
-    resolution: {integrity: sha512-aEokibJOI77uIlqoBOkVbaQGC9zII0A+JH1kcTNKW2CwyYWD8KM6qdo+4c77wD3wZOQfJuNWAr9M4hdk+YhDIg==}
-
   '@types/css-tree@3.2.0':
     resolution: {integrity: sha512-J5KXmk6BFIepOT7280FdFyNs4c5fh0Uee0otjKEvzchrRs38Ii9qminqc4ds0L19X8Zd/rT+brR9jkBthygjWw==}
 
@@ -1495,11 +1492,6 @@ packages:
 
   '@yuku-toolchain/types@0.8.7':
     resolution: {integrity: sha512-2Z53dNxAJL6UvFoIrDZvYf3zlO8s4VJK4O2hhaB4mXVwwpX/7ajtss3cmfqKvamlNLWyt9FSWs4eoYdlbxpnHA==}
-
-  acorn@8.14.0:
-    resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
-    engines: {node: '>=0.4.0'}
-    hasBin: true
 
   acorn@8.19.0:
     resolution: {integrity: sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw==}
@@ -1919,18 +1911,8 @@ packages:
     peerDependencies:
       seroval: ^1.0
 
-  seroval-plugins@1.6.11:
-    resolution: {integrity: sha512-LmB3nd8pL39jKHKvnpTUjcjBtNwR8MLty/ydAR8qbfXt5j6/6KqR1atuw8cVmD2/lDxAkvAwq5tI/HsisD9Fqg==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      seroval: ^1.0
-
   seroval@1.5.6:
     resolution: {integrity: sha512-rVQVWjjSvlINzaQPZH5JFqsqEsIWdTxY3iJZCnTL/5gQbXIRooVZKI60tVCkOVfzcRPejboxO2t0P89dg5mQaA==}
-    engines: {node: '>=10'}
-
-  seroval@1.6.11:
-    resolution: {integrity: sha512-hpb6XnMCGN/A+79Uf8V7/iTGkyyyazNn5X0CoCAp7Uy9vT3RT8jZ9GLcnxGoVjg3P8AArbe4ZVHq6C8oT2a0kA==}
     engines: {node: '>=10'}
 
   shell-quote@1.12.0:
@@ -1943,17 +1925,8 @@ packages:
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
-  solid-js@1.9.17:
-    resolution: {integrity: sha512-4GAmLOWPfNV8H9Jfn2LSFTpNEG6jiOKPiwd5lnLGQtehHaX6l3TOLzJqQ7mqwB/3k1Yy3zyumFVopmc/tm34ow==}
-
   solid-js@2.0.0-rc.5:
     resolution: {integrity: sha512-AI9ndOlUtXXeFf0/MUADM5HfMYwXtxfitIayOkjBCZl67ZyD4ct5+4kqv0EF2xeyIrUwlsrFTuKpHs54BNA6iw==}
-
-  solid-styled@0.12.1:
-    resolution: {integrity: sha512-9w9+7RGRGOukBQonDmSmbmFElXtXYdN9uHhdwkH9hluYUVrg9E9Z3JFjrkCPBOwqC9TR9bTmJKCFWon+ChLXtw==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      solid-js: ^1
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -2064,20 +2037,6 @@ packages:
 
   undici-types@8.3.0:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
-
-  unplugin-solid-styled@0.12.1:
-    resolution: {integrity: sha512-Z6PQEP/S/1sVGhUd0KJsitxcHGnZhhAR4AKD/Qwsrf8fwvlTikFgPjbnowmtqYZ/ey0dAnvfCthtv/mEbWOK3g==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      solid-styled: '>=0.9'
-      vite: '>=3'
-    peerDependenciesMeta:
-      vite:
-        optional: true
-
-  unplugin@2.3.11:
-    resolution: {integrity: sha512-5uKD0nqiYVzlmCRs01Fhs2BdkEgBS3SAVP6ndrBsuK42iC2+JHyxM05Rm9G8+5mkmRtzMZGY8Ct5+mliZxU/Ww==}
-    engines: {node: '>=18.12.0'}
 
   unplugin@3.3.0:
     resolution: {integrity: sha512-qa66K+crbfyE6JK10GjvbJeRrOsuC/JpbnHctfyp/i4oBTxWOzJfRZyDiOk1PtErMFRu8JhsU/wPvOdBNWe5Rg==}
@@ -3062,8 +3021,6 @@ snapshots:
       '@types/deep-eql': 4.0.2
       assertion-error: 2.0.1
 
-  '@types/css-tree@2.3.11': {}
-
   '@types/css-tree@3.2.0': {}
 
   '@types/deep-eql@4.0.2': {}
@@ -3252,10 +3209,8 @@ snapshots:
 
   '@yuku-toolchain/types@0.8.7': {}
 
-  acorn@8.14.0:
+  acorn@8.19.0:
     optional: true
-
-  acorn@8.19.0: {}
 
   ansis@4.3.1: {}
 
@@ -3667,13 +3622,7 @@ snapshots:
     dependencies:
       seroval: 1.5.6
 
-  seroval-plugins@1.6.11(seroval@1.6.11):
-    dependencies:
-      seroval: 1.6.11
-
   seroval@1.5.6: {}
-
-  seroval@1.6.11: {}
 
   shell-quote@1.12.0: {}
 
@@ -3681,44 +3630,12 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  solid-js@1.9.17:
-    dependencies:
-      csstype: 3.1.1
-      seroval: 1.6.11
-      seroval-plugins: 1.6.11(seroval@1.6.11)
-
   solid-js@2.0.0-rc.5:
     dependencies:
       '@solidjs/signals': 2.0.0-rc.5
       csstype: 3.1.1
       seroval: 1.5.6
       seroval-plugins: 1.5.6(seroval@1.5.6)
-
-  solid-styled@0.12.1(solid-js@1.9.17):
-    dependencies:
-      '@babel/core': 7.29.0
-      '@babel/traverse': 7.29.0
-      '@babel/types': 7.29.0
-      '@types/css-tree': 2.3.11
-      browserslist: 4.28.8
-      css-tree: 3.2.1
-      lightningcss: 1.33.0
-      solid-js: 1.9.17
-    transitivePeerDependencies:
-      - supports-color
-
-  solid-styled@0.12.1(solid-js@2.0.0-rc.5):
-    dependencies:
-      '@babel/core': 7.29.0
-      '@babel/traverse': 7.29.0
-      '@babel/types': 7.29.0
-      '@types/css-tree': 2.3.11
-      browserslist: 4.28.8
-      css-tree: 3.2.1
-      lightningcss: 1.33.0
-      solid-js: 2.0.0-rc.5
-    transitivePeerDependencies:
-      - supports-color
 
   source-map-js@1.2.1: {}
 
@@ -3738,7 +3655,7 @@ snapshots:
   terser@5.38.1:
     dependencies:
       '@jridgewell/source-map': 0.3.6
-      acorn: 8.14.0
+      acorn: 8.19.0
       commander: 2.20.3
       source-map-support: 0.5.21
     optional: true
@@ -3827,24 +3744,7 @@ snapshots:
 
   undici-types@8.3.0: {}
 
-  unplugin-solid-styled@0.12.1(rollup@4.63.1)(solid-styled@0.12.1(solid-js@2.0.0-rc.5))(vite@8.2.2(@types/node@26.4.1)(jiti@2.4.2)(terser@5.38.1)(yaml@2.9.1)):
-    dependencies:
-      '@rollup/pluginutils': 5.4.0(rollup@4.63.1)
-      solid-styled: 0.12.1(solid-js@2.0.0-rc.5)
-      unplugin: 2.3.11
-    optionalDependencies:
-      vite: 8.2.2(@types/node@26.4.1)(jiti@2.4.2)(terser@5.38.1)(yaml@2.9.1)
-    transitivePeerDependencies:
-      - rollup
-
-  unplugin@2.3.11:
-    dependencies:
-      '@jridgewell/remapping': 2.3.5
-      acorn: 8.19.0
-      picomatch: 4.0.7
-      webpack-virtual-modules: 0.6.2
-
-  unplugin@3.3.0(rolldown@1.2.7)(rollup@4.63.1)(vite@8.2.2(@types/node@26.4.1)(jiti@2.4.2)(terser@5.38.1)):
+  unplugin@3.3.0(rolldown@1.2.7)(rollup@4.63.1)(vite@8.2.2(@types/node@26.4.1)(jiti@2.4.2)(terser@5.38.1)(yaml@2.9.1)):
     dependencies:
       '@jridgewell/remapping': 2.3.5
       picomatch: 4.0.4
