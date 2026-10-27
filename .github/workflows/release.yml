@@ -24,8 +24,6 @@ jobs:
           persist-credentials: false
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - uses: actions/setup-node@v7
         with:
@@ -51,8 +49,6 @@ jobs:
           persist-credentials: false
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - uses: actions/setup-node@v7
         with:
@@ -83,8 +79,6 @@ jobs:
           persist-credentials: false
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - uses: actions/setup-node@v7
         with:
@@ -117,8 +111,6 @@ jobs:
           persist-credentials: false
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - uses: actions/setup-node@v7
         with:
