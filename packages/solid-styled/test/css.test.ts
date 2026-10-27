@@ -67,4 +67,24 @@ export default function Example(props) {
   `;
     expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
+  it('should apply units written after an interpolation', () => {
+    const code = `
+import { css } from 'solid-styled';
+
+export default function Example(props) {
+  css\`
+    h1 {
+      width: \${props.width}px;
+      height: \${props.height}%;
+      margin: \${props.margin}rem \${props.margin}em;
+      transition: color \${props.duration}ms;
+      color: \${props.color};
+    }
+  \`;
+
+  return <h1>Hello World</h1>;
+}
+  `;
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
+  });
 });
