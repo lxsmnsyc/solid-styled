@@ -112,6 +112,8 @@ function Button() {
 }
 ```
 
+A CSS unit written right after an interpolation, as in `${size()}px`, is applied with `calc()`, so `width: ${size()}px` compiles to `width: calc(var(--s-v-...) * 1px)`.
+
 ### `<style jsx>`
 
 `<style jsx>` does exactly what `css` does, written inside JSX instead.
