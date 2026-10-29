@@ -1,5 +1,11 @@
 # solid-styled
 
+## 1.0.0-next.1
+
+### Patch Changes
+
+- a473284: Support CSS units written right after an interpolation, as in `width: ${size()}px`. The compiler used to output `var(--id) px`, which browsers drop. It now outputs `calc(var(--id) * 1px)`.
+
 ## 1.0.0-next.0
 
 ### Major Changes
