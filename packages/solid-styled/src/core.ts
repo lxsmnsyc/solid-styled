@@ -1,15 +1,14 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 import {
   createComponent,
   createContext,
   createEffect,
   createMemo,
-  createRoot,
   onCleanup,
   untrack,
   useContext,
 } from 'solid-js';
-import { isServer, useAssets } from 'solid-js/web';
+import { isServer, useHead } from '@solidjs/web';
 
 const SOLID_SHEET_ATTR = 's:id';
 const SOLID_SHEET_ATTR_ESCAPED = 's\\:id';
@@ -19,9 +18,7 @@ const references = new Map<string, number>();
 
 // Hydrate the sheets
 if (!isServer) {
-  const nodes = document.head.querySelectorAll(
-    `style[${SOLID_SHEET_ATTR_ESCAPED}]`,
-  );
+  const nodes = document.head.querySelectorAll(`style[${SOLID_SHEET_ATTR_ESCAPED}]`);
 
   for (let i = 0, len = nodes.length; i < len; i++) {
     tracked.add(nodes[i].getAttribute(SOLID_SHEET_ATTR));
@@ -54,9 +51,7 @@ function clientRemove(id: string): void {
     references.set(id, count - 1);
   } else {
     references.set(id, 0);
-    const node = document.head.querySelector(
-      `style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`,
-    );
+    const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`);
     if (node) {
       document.head.removeChild(node);
     }
@@ -72,7 +67,12 @@ interface StyleRegistryContextValue {
   remove(id: string): void;
 }
 
-const StyleRegistryContext = createContext<StyleRegistryContextValue>();
+// A default keeps `useSolidStyled` working without a `StyleRegistry`: Solid 2
+// throws on a default-less context that has no provider above it.
+const StyleRegistryContext = createContext<StyleRegistryContextValue>({
+  insert,
+  remove,
+});
 
 export interface StyleData {
   id: string;
@@ -89,13 +89,16 @@ function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {
   let styles = props.styles;
 
   if (props.auto) {
-    const current = styles || [];
+    const current = styles ?? [];
     styles = current;
-    useAssets(
-      () =>
-        ({
-          t: renderSheets(current),
-        }) as unknown as JSX.Element,
+    // Solid resolves head tags at flush time, so sheets collected while the
+    // children render are still picked up here.
+    useHead(() =>
+      current.map((data) => ({
+        tag: 'style' as const,
+        props: { [SOLID_SHEET_ATTR]: data.id, children: data.sheet },
+        key: data.id,
+      })),
     );
   }
 
@@ -111,7 +114,7 @@ function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {
     }
   }
 
-  return createComponent(StyleRegistryContext.Provider, {
+  return createComponent(StyleRegistryContext, {
     value: { insert: serverInsert, remove: noopRemove },
     get children() {
       return props.children;
@@ -120,7 +123,7 @@ function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {
 }
 
 function ClientStyleRegistry(props: StyleRegistryProps): JSX.Element {
-  return createComponent(StyleRegistryContext.Provider, {
+  return createComponent(StyleRegistryContext, {
     value: { insert, remove },
     get children() {
       return props.children;
@@ -128,21 +131,16 @@ function ClientStyleRegistry(props: StyleRegistryProps): JSX.Element {
   });
 }
 
-export const StyleRegistry = isServer
-  ? ServerStyleRegistry
-  : ClientStyleRegistry;
+export const StyleRegistry = isServer ? ServerStyleRegistry : ClientStyleRegistry;
 
 export type SolidStyledVariables = Record<string, string>;
 
 function serverUseSolidStyled(id: string, offset: string, sheet: string): void {
-  const ctx = useContext(StyleRegistryContext);
-  if (ctx) {
-    ctx.insert(`${id}-${offset}`, sheet);
-  }
+  useContext(StyleRegistryContext).insert(`${id}-${offset}`, sheet);
 }
 
 function clientUseSolidStyled(id: string, offset: string, sheet: string): void {
-  const ctx = useContext(StyleRegistryContext) ?? { insert, remove };
+  const ctx = useContext(StyleRegistryContext);
   const index = `${id}-${offset}`;
   ctx.insert(index, sheet);
   onCleanup(() => {
@@ -150,16 +148,12 @@ function clientUseSolidStyled(id: string, offset: string, sheet: string): void {
   });
 }
 
-export const useSolidStyled = isServer
-  ? serverUseSolidStyled
-  : clientUseSolidStyled;
+export const useSolidStyled = isServer ? serverUseSolidStyled : clientUseSolidStyled;
 
 function serializeStyle(source: JSX.CSSProperties): string {
   let result = '';
-  for (const key in source) {
-    result = `${result}${key}:${String(
-      source[key as keyof JSX.CSSProperties],
-    )};`;
+  for (const [key, value] of Object.entries(source)) {
+    result = `${result}${key}:${String(value)};`;
   }
   return result;
 }
@@ -174,10 +168,7 @@ function serverUseSolidStyledGlobal(
   sheet: string,
   vars?: () => Record<string, string>,
 ): void {
-  const ctx = useContext(StyleRegistryContext);
-  if (ctx) {
-    ctx.insert(`${id}-${offset}`, serializeRootStyle(vars) + sheet);
-  }
+  useContext(StyleRegistryContext).insert(`${id}-${offset}`, serializeRootStyle(vars) + sheet);
 }
 
 function clientUseSolidStyledGlobal(
@@ -187,16 +178,18 @@ function clientUseSolidStyledGlobal(
   vars?: () => Record<string, string>,
 ): void {
   const index = `${id}-${offset}`;
-  const ctx = useContext(StyleRegistryContext) ?? { insert, remove };
+  const ctx = useContext(StyleRegistryContext);
   ctx.insert(index, serializeRootStyle(vars) + sheet);
-  createEffect(() => {
-    if (vars) {
-      const current = vars();
-      for (const key in current) {
-        document.documentElement.style.setProperty(key, current[key]);
+  createEffect(
+    () => vars?.(),
+    (current) => {
+      if (current) {
+        for (const [key, value] of Object.entries(current)) {
+          document.documentElement.style.setProperty(key, value);
+        }
       }
-    }
-  });
+    },
+  );
   onCleanup(() => {
     ctx.remove(index);
   });
@@ -208,41 +201,25 @@ export const useSolidStyledGlobal = isServer
 
 type CSSVarsMerge = () => Record<string, string>;
 
-interface CSSVars {
-  (vars?: CSSVarsMerge): JSX.CSSProperties | undefined;
-}
-
-function createLazyMemo<T>(fn: () => T): () => T {
-  let s: () => T;
-  let dispose: (() => void) | undefined;
-  onCleanup(() => {
-    if (dispose) {
-      dispose();
-    }
-  });
-  return () => {
-    if (!s) {
-      s = createRoot(d => {
-        dispose = d;
-        return createMemo(fn);
-      });
-    }
-    return s();
-  };
-}
+type CSSVars = (vars?: CSSVarsMerge) => JSX.CSSProperties | undefined;
 
 export function createCSSVars(): CSSVars {
   const patches: CSSVarsMerge[] = [];
-  const signal = createLazyMemo(() => {
-    let source: JSX.CSSProperties = {};
-    for (let i = 0, len = patches.length; i < len; i += 1) {
-      source = Object.assign(source, patches[i]());
-    }
-    return source;
-  });
+  const signal = createMemo(
+    () => {
+      let source: JSX.CSSProperties = {};
+      for (let i = 0, len = patches.length; i < len; i += 1) {
+        source = Object.assign(source, patches[i]());
+      }
+      return source;
+    },
+    {
+      lazy: true,
+    },
+  );
 
   return (vars?: CSSVarsMerge) => {
-    if (vars) {
+    if (typeof vars === 'function') {
       patches.push(vars);
       return undefined;
     }
@@ -256,8 +233,7 @@ export function mergeStyles(
 ): string {
   const otherString = serializeStyle(other);
   if (source) {
-    const sourceString =
-      typeof source === 'string' ? source : serializeStyle(source);
+    const sourceString = typeof source === 'string' ? source : serializeStyle(source);
     return `${sourceString};${otherString}`;
   }
   return otherString;
@@ -272,9 +248,10 @@ export function renderSheets(sheets: StyleData[]): string {
   return sheet;
 }
 
-export interface CSSConstructor {
-  (template: TemplateStringsArray, ...spans: (string | boolean)[]): void;
-}
+export type CSSConstructor = (
+  template: TemplateStringsArray,
+  ...spans: (string | boolean)[]
+) => void;
 
 function invariant(methodName: string): Error {
   return new Error(

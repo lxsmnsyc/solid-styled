@@ -1,59 +1,63 @@
-import * as t from '@babel/types';
-import type { StateContext } from '../types';
+import type { Node } from './ast';
+import type { Ctx } from './context';
 import preprocessCSS from './preprocess-css';
-import processScopedSheet from './process-scoped-sheet.old';
-import { getPrefix, getUniqueId } from './utils';
+import processScopedSheet from './process-scoped-sheet';
 
-interface DynamicTemplateResult {
+export interface DynamicTemplateResult {
   sheet: string;
-  variables: t.ObjectProperty[];
+  /** Object entries of the form `"--s-v-hash-N": <source expression>`. */
+  variables: string[];
 }
 
-function replaceDynamicTemplate(
-  ctx: StateContext,
-  { expressions, quasis }: t.TemplateLiteral,
-): DynamicTemplateResult {
-  // Collects all the variables
-  const variables: t.ObjectProperty[] = [];
+// A CSS unit written right after an interpolation, as in `${size()}px`.
+// `var()` cannot be joined to a unit, so the unit is applied with `calc()`.
+const UNIT_SUFFIX =
+  /^(%|(?:px|em|rem|ex|ch|cap|ic|lh|rlh|vw|vh|vi|vb|vmin|vmax|svw|svh|svi|svb|svmin|svmax|lvw|lvh|lvi|lvb|lvmin|lvmax|dvw|dvh|dvi|dvb|dvmin|dvmax|cqw|cqh|cqi|cqb|cqmin|cqmax|cm|mm|q|in|pt|pc|deg|grad|rad|turn|s|ms|hz|khz|dpi|dpcm|dppx|x|fr)(?![\w-]))/i;
+
+/**
+ * Swaps every `${...}` span in the template for a generated CSS custom
+ * property, so the sheet itself becomes a static string.
+ */
+function replaceDynamicTemplate(ctx: Ctx, template: Node): DynamicTemplateResult {
+  const variables: string[] = [];
+  const { quasis, expressions } = template;
 
   let sheet = '';
-  let currentExpr = 0;
+  // Length of the unit at the start of the current quasi that the previous
+  // interpolation already consumed.
+  let consumed = 0;
 
   for (let i = 0, len = quasis.length; i < len; i += 1) {
-    sheet = `${sheet}${quasis[i].value.cooked ?? ''}`;
-    if (currentExpr < expressions.length) {
-      const expr = expressions[currentExpr];
-      if (t.isExpression(expr)) {
-        // Create a new variable
-        const id = `--s-${getPrefix(ctx, true)}${getUniqueId(ctx)}`;
-        // Push the variable access
+    const quasi = (quasis[i].value.cooked ?? '').slice(consumed);
+    sheet = `${sheet}${quasi}`;
+    consumed = 0;
+    const expression = expressions[i];
+    if (expression) {
+      const id = `--s-${ctx.prefix(true)}${ctx.uniqueId()}`;
+      const unit = UNIT_SUFFIX.exec(quasis[i + 1]?.value.cooked ?? '')?.[1];
+      if (unit) {
+        sheet = `${sheet}calc(var(${id}) * 1${unit})`;
+        consumed = unit.length;
+      } else {
         sheet = `${sheet}var(${id})`;
-        // Register the variable and its expression
-        variables.push(t.objectProperty(t.stringLiteral(id), expr));
-        currentExpr += 1;
       }
+      variables.push(`${JSON.stringify(id)}: ${ctx.code.slice(expression.start, expression.end)}`);
     }
   }
 
-  return {
-    sheet,
-    variables,
-  };
+  return { sheet, variables };
 }
 
 export default function processCSSTemplate(
-  ctx: StateContext,
+  ctx: Ctx,
   sheetID: string,
-  templateLiteral: t.TemplateLiteral,
+  template: Node,
   isScoped: boolean,
 ): DynamicTemplateResult {
-  // Replace the template's dynamic parts with CSS variables
-  const { sheet, variables } = replaceDynamicTemplate(ctx, templateLiteral);
+  const { sheet, variables } = replaceDynamicTemplate(ctx, template);
   const preprocessed = preprocessCSS(ctx, sheet);
   return {
-    sheet: isScoped
-      ? preprocessCSS(ctx, processScopedSheet(ctx, sheetID, preprocessed))
-      : preprocessed,
+    sheet: isScoped ? preprocessCSS(ctx, processScopedSheet(sheetID, preprocessed)) : preprocessed,
     variables,
   };
 }

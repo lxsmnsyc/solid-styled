@@ -10,7 +10,7 @@ const FILE = 'src/index.ts';
 
 describe(':global > attribute selectors', () => {
   describe('without value', () => {
-    it('should scope for ident', async () => {
+    it('should scope for ident', () => {
       const code = `
         import { css } from 'solid-styled';
         
@@ -24,9 +24,9 @@ describe(':global > attribute selectors', () => {
           return <h1>Hello World</h1>;
         }
     `;
-      expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+      expect(compile(FILE, code, options).code).toMatchSnapshot();
     });
-    it('should scope for |ident', async () => {
+    it('should scope for |ident', () => {
       const code = `
         import { css } from 'solid-styled';
         
@@ -40,9 +40,9 @@ describe(':global > attribute selectors', () => {
           return <h1>Hello World</h1>;
         }
     `;
-      expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+      expect(compile(FILE, code, options).code).toMatchSnapshot();
     });
-    it('should scope for ns|ident', async () => {
+    it('should scope for ns|ident', () => {
       const code = `
         import { css } from 'solid-styled';
         
@@ -56,9 +56,9 @@ describe(':global > attribute selectors', () => {
           return <h1>Hello World</h1>;
         }
     `;
-      expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+      expect(compile(FILE, code, options).code).toMatchSnapshot();
     });
-    it('should scope for *|ident', async () => {
+    it('should scope for *|ident', () => {
       const code = `
         import { css } from 'solid-styled';
         
@@ -72,12 +72,12 @@ describe(':global > attribute selectors', () => {
           return <h1>Hello World</h1>;
         }
     `;
-      expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+      expect(compile(FILE, code, options).code).toMatchSnapshot();
     });
   });
   describe('with value', () => {
     describe('equal', () => {
-      it('should scope for ident with ident=ident', async () => {
+      it('should scope for ident with ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -91,9 +91,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident=ident', async () => {
+      it('should scope for ident with |ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -107,9 +107,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident=ident', async () => {
+      it('should scope for ident with ns|ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -123,9 +123,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident=ident', async () => {
+      it('should scope for ident with *|ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -139,9 +139,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident="string"', async () => {
+      it('should scope for ident with ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -155,9 +155,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident="string"', async () => {
+      it('should scope for ident with |ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -171,9 +171,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident="string"', async () => {
+      it('should scope for ident with ns|ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -187,9 +187,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident="string"', async () => {
+      it('should scope for ident with *|ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -203,11 +203,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('prefix-match', () => {
-      it('should scope for ident with ident^=ident', async () => {
+      it('should scope for ident with ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -221,9 +221,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident^=ident', async () => {
+      it('should scope for ident with |ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -237,9 +237,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident^=ident', async () => {
+      it('should scope for ident with ns|ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -253,9 +253,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident^=ident', async () => {
+      it('should scope for ident with *|ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -269,9 +269,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident^="string"', async () => {
+      it('should scope for ident with ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -285,9 +285,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident^="string"', async () => {
+      it('should scope for ident with |ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -301,9 +301,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident^="string"', async () => {
+      it('should scope for ident with ns|ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -317,9 +317,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident^="string"', async () => {
+      it('should scope for ident with *|ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -333,11 +333,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('suffix-match', () => {
-      it('should scope for ident with ident$=ident', async () => {
+      it('should scope for ident with ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -351,9 +351,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident$=ident', async () => {
+      it('should scope for ident with |ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -367,9 +367,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident$=ident', async () => {
+      it('should scope for ident with ns|ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -383,9 +383,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident$=ident', async () => {
+      it('should scope for ident with *|ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -399,9 +399,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident$="string"', async () => {
+      it('should scope for ident with ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -415,9 +415,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident$="string"', async () => {
+      it('should scope for ident with |ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -431,9 +431,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident$="string"', async () => {
+      it('should scope for ident with ns|ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -447,9 +447,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident$="string"', async () => {
+      it('should scope for ident with *|ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -463,11 +463,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('substring-match', () => {
-      it('should scope for ident with ident*=ident', async () => {
+      it('should scope for ident with ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -481,9 +481,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident*=ident', async () => {
+      it('should scope for ident with |ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -497,9 +497,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident*=ident', async () => {
+      it('should scope for ident with ns|ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -513,9 +513,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident*=ident', async () => {
+      it('should scope for ident with *|ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -529,9 +529,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident*="string"', async () => {
+      it('should scope for ident with ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -545,9 +545,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident*="string"', async () => {
+      it('should scope for ident with |ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -561,9 +561,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident*="string"', async () => {
+      it('should scope for ident with ns|ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -577,9 +577,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident*="string"', async () => {
+      it('should scope for ident with *|ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -593,11 +593,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('includes-match', () => {
-      it('should scope for ident with ident~=ident', async () => {
+      it('should scope for ident with ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -611,9 +611,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident~=ident', async () => {
+      it('should scope for ident with |ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -627,9 +627,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident~=ident', async () => {
+      it('should scope for ident with ns|ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -643,9 +643,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident~=ident', async () => {
+      it('should scope for ident with *|ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -659,9 +659,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident~="string"', async () => {
+      it('should scope for ident with ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -675,9 +675,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident~="string"', async () => {
+      it('should scope for ident with |ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -691,9 +691,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident~="string"', async () => {
+      it('should scope for ident with ns|ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -707,9 +707,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident~="string"', async () => {
+      it('should scope for ident with *|ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -723,11 +723,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('dash-match', () => {
-      it('should scope for ident with ident|=ident', async () => {
+      it('should scope for ident with ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -741,9 +741,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident|=ident', async () => {
+      it('should scope for ident with |ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -757,9 +757,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident|=ident', async () => {
+      it('should scope for ident with ns|ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -773,9 +773,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident|=ident', async () => {
+      it('should scope for ident with *|ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -789,9 +789,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident|="string"', async () => {
+      it('should scope for ident with ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -805,9 +805,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident|="string"', async () => {
+      it('should scope for ident with |ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -821,9 +821,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident|="string"', async () => {
+      it('should scope for ident with ns|ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -837,9 +837,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident|="string"', async () => {
+      it('should scope for ident with *|ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -853,13 +853,13 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
   });
   describe('with value + s modifier', () => {
     describe('equal', () => {
-      it('should scope for ident with ident=ident', async () => {
+      it('should scope for ident with ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -873,9 +873,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident=ident', async () => {
+      it('should scope for ident with |ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -889,9 +889,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident=ident', async () => {
+      it('should scope for ident with ns|ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -905,9 +905,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident=ident', async () => {
+      it('should scope for ident with *|ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -921,9 +921,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident="string"', async () => {
+      it('should scope for ident with ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -937,9 +937,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident="string"', async () => {
+      it('should scope for ident with |ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -953,9 +953,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident="string"', async () => {
+      it('should scope for ident with ns|ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -969,9 +969,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident="string"', async () => {
+      it('should scope for ident with *|ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -985,11 +985,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('prefix-match', () => {
-      it('should scope for ident with ident^=ident', async () => {
+      it('should scope for ident with ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1003,9 +1003,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident^=ident', async () => {
+      it('should scope for ident with |ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1019,9 +1019,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident^=ident', async () => {
+      it('should scope for ident with ns|ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1035,9 +1035,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident^=ident', async () => {
+      it('should scope for ident with *|ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1051,9 +1051,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident^="string"', async () => {
+      it('should scope for ident with ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1067,9 +1067,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident^="string"', async () => {
+      it('should scope for ident with |ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1083,9 +1083,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident^="string"', async () => {
+      it('should scope for ident with ns|ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1099,9 +1099,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident^="string"', async () => {
+      it('should scope for ident with *|ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1115,11 +1115,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('suffix-match', () => {
-      it('should scope for ident with ident$=ident', async () => {
+      it('should scope for ident with ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1133,9 +1133,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident$=ident', async () => {
+      it('should scope for ident with |ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1149,9 +1149,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident$=ident', async () => {
+      it('should scope for ident with ns|ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1165,9 +1165,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident$=ident', async () => {
+      it('should scope for ident with *|ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1181,9 +1181,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident$="string"', async () => {
+      it('should scope for ident with ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1197,9 +1197,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident$="string"', async () => {
+      it('should scope for ident with |ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1213,9 +1213,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident$="string"', async () => {
+      it('should scope for ident with ns|ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1229,9 +1229,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident$="string"', async () => {
+      it('should scope for ident with *|ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1245,11 +1245,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('substring-match', () => {
-      it('should scope for ident with ident*=ident', async () => {
+      it('should scope for ident with ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1263,9 +1263,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident*=ident', async () => {
+      it('should scope for ident with |ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1279,9 +1279,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident*=ident', async () => {
+      it('should scope for ident with ns|ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1295,9 +1295,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident*=ident', async () => {
+      it('should scope for ident with *|ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1311,9 +1311,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident*="string"', async () => {
+      it('should scope for ident with ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1327,9 +1327,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident*="string"', async () => {
+      it('should scope for ident with |ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1343,9 +1343,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident*="string"', async () => {
+      it('should scope for ident with ns|ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1359,9 +1359,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident*="string"', async () => {
+      it('should scope for ident with *|ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1375,11 +1375,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('includes-match', () => {
-      it('should scope for ident with ident~=ident', async () => {
+      it('should scope for ident with ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1393,9 +1393,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident~=ident', async () => {
+      it('should scope for ident with |ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1409,9 +1409,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident~=ident', async () => {
+      it('should scope for ident with ns|ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1425,9 +1425,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident~=ident', async () => {
+      it('should scope for ident with *|ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1441,9 +1441,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident~="string"', async () => {
+      it('should scope for ident with ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1457,9 +1457,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident~="string"', async () => {
+      it('should scope for ident with |ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1473,9 +1473,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident~="string"', async () => {
+      it('should scope for ident with ns|ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1489,9 +1489,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident~="string"', async () => {
+      it('should scope for ident with *|ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1505,11 +1505,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('dash-match', () => {
-      it('should scope for ident with ident|=ident', async () => {
+      it('should scope for ident with ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1523,9 +1523,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident|=ident', async () => {
+      it('should scope for ident with |ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1539,9 +1539,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident|=ident', async () => {
+      it('should scope for ident with ns|ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1555,9 +1555,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident|=ident', async () => {
+      it('should scope for ident with *|ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1571,9 +1571,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident|="string"', async () => {
+      it('should scope for ident with ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1587,9 +1587,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident|="string"', async () => {
+      it('should scope for ident with |ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1603,9 +1603,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident|="string"', async () => {
+      it('should scope for ident with ns|ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1619,9 +1619,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident|="string"', async () => {
+      it('should scope for ident with *|ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1635,13 +1635,13 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
   });
   describe('with value + i modifier', () => {
     describe('equal', () => {
-      it('should scope for ident with ident=ident', async () => {
+      it('should scope for ident with ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1655,9 +1655,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident=ident', async () => {
+      it('should scope for ident with |ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1671,9 +1671,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident=ident', async () => {
+      it('should scope for ident with ns|ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1687,9 +1687,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident=ident', async () => {
+      it('should scope for ident with *|ident=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1703,9 +1703,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident="string"', async () => {
+      it('should scope for ident with ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1719,9 +1719,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident="string"', async () => {
+      it('should scope for ident with |ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1735,9 +1735,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident="string"', async () => {
+      it('should scope for ident with ns|ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1751,9 +1751,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident="string"', async () => {
+      it('should scope for ident with *|ident="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1767,11 +1767,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('prefix-match', () => {
-      it('should scope for ident with ident^=ident', async () => {
+      it('should scope for ident with ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1785,9 +1785,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident^=ident', async () => {
+      it('should scope for ident with |ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1801,9 +1801,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident^=ident', async () => {
+      it('should scope for ident with ns|ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1817,9 +1817,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident^=ident', async () => {
+      it('should scope for ident with *|ident^=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1833,9 +1833,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident^="string"', async () => {
+      it('should scope for ident with ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1849,9 +1849,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident^="string"', async () => {
+      it('should scope for ident with |ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1865,9 +1865,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident^="string"', async () => {
+      it('should scope for ident with ns|ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1881,9 +1881,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident^="string"', async () => {
+      it('should scope for ident with *|ident^="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1897,11 +1897,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('suffix-match', () => {
-      it('should scope for ident with ident$=ident', async () => {
+      it('should scope for ident with ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1915,9 +1915,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident$=ident', async () => {
+      it('should scope for ident with |ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1931,9 +1931,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident$=ident', async () => {
+      it('should scope for ident with ns|ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1947,9 +1947,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident$=ident', async () => {
+      it('should scope for ident with *|ident$=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1963,9 +1963,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident$="string"', async () => {
+      it('should scope for ident with ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1979,9 +1979,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident$="string"', async () => {
+      it('should scope for ident with |ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -1995,9 +1995,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident$="string"', async () => {
+      it('should scope for ident with ns|ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2011,9 +2011,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident$="string"', async () => {
+      it('should scope for ident with *|ident$="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2027,11 +2027,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('substring-match', () => {
-      it('should scope for ident with ident*=ident', async () => {
+      it('should scope for ident with ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2045,9 +2045,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident*=ident', async () => {
+      it('should scope for ident with |ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2061,9 +2061,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident*=ident', async () => {
+      it('should scope for ident with ns|ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2077,9 +2077,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident*=ident', async () => {
+      it('should scope for ident with *|ident*=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2093,9 +2093,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident*="string"', async () => {
+      it('should scope for ident with ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2109,9 +2109,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident*="string"', async () => {
+      it('should scope for ident with |ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2125,9 +2125,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident*="string"', async () => {
+      it('should scope for ident with ns|ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2141,9 +2141,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident*="string"', async () => {
+      it('should scope for ident with *|ident*="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2157,11 +2157,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('includes-match', () => {
-      it('should scope for ident with ident~=ident', async () => {
+      it('should scope for ident with ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2175,9 +2175,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident~=ident', async () => {
+      it('should scope for ident with |ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2191,9 +2191,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident~=ident', async () => {
+      it('should scope for ident with ns|ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2207,9 +2207,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident~=ident', async () => {
+      it('should scope for ident with *|ident~=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2223,9 +2223,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident~="string"', async () => {
+      it('should scope for ident with ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2239,9 +2239,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident~="string"', async () => {
+      it('should scope for ident with |ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2255,9 +2255,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident~="string"', async () => {
+      it('should scope for ident with ns|ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2271,9 +2271,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident~="string"', async () => {
+      it('should scope for ident with *|ident~="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2287,11 +2287,11 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
     describe('dash-match', () => {
-      it('should scope for ident with ident|=ident', async () => {
+      it('should scope for ident with ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2305,9 +2305,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident|=ident', async () => {
+      it('should scope for ident with |ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2321,9 +2321,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident|=ident', async () => {
+      it('should scope for ident with ns|ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2337,9 +2337,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident|=ident', async () => {
+      it('should scope for ident with *|ident|=ident', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2353,9 +2353,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ident|="string"', async () => {
+      it('should scope for ident with ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2369,9 +2369,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with |ident|="string"', async () => {
+      it('should scope for ident with |ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2385,9 +2385,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with ns|ident|="string"', async () => {
+      it('should scope for ident with ns|ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2401,9 +2401,9 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
-      it('should scope for ident with *|ident|="string"', async () => {
+      it('should scope for ident with *|ident|="string"', () => {
         const code = `
           import { css } from 'solid-styled';
           
@@ -2417,7 +2417,7 @@ describe(':global > attribute selectors', () => {
             return <h1>Hello World</h1>;
           }
       `;
-        expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+        expect(compile(FILE, code, options).code).toMatchSnapshot();
       });
     });
   });
