@@ -144,3 +144,15 @@ function Bar(props) {
 // becomes
 <div s:c-1a2b3c-0 style={mergeStyles({ color: 'red' }, vars_1())} />
 ```
+
+### Spread attributes
+
+- The scope marker and the generated `style` go after the last spread, so a spread cannot replace them.
+- The generated `style` merges the CSS variables into the style the element would get without it: the last spread that has a `style` key, else an explicit `style` before it.
+- A spread such as `{...getProps()}` is wrapped in a memo, so the call still runs once per change and stays reactive.
+
+```jsx
+<button style={base} {...props} />
+// becomes
+<button {...props} s:c-1a2b3c-0 style={mergeStyles('style' in props ? props.style : base, vars_1())} />
+```

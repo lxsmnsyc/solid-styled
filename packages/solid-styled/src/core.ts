@@ -239,6 +239,15 @@ export function mergeStyles(
   return otherString;
 }
 
+/**
+ * Compiler helper for a spread the generated `style` also reads, such as
+ * `{...getProps()}`. The memo runs the expression once per change, and the
+ * spread and the `style` both read the memo.
+ */
+export function trackSpread<T>(source: () => T): () => T {
+  return createMemo(source);
+}
+
 export function renderSheets(sheets: StyleData[]): string {
   let sheet = '';
   for (let i = 0, len = sheets.length; i < len; i += 1) {

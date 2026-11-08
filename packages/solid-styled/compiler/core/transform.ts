@@ -1,5 +1,5 @@
 import { type CssTask, type ElementRecord, type StyleTask, hasScopedAttribute } from './analyze';
-import { type Node, indentAt } from './ast';
+import { type Node, indentAt, textOf } from './ast';
 import { RUNTIME_IDENTIFIERS, SHEET_ID, SOLID_STYLED_NS, VARS_ID } from './constants';
 import type { Ctx, ScopedSheet } from './context';
 import processCSSTemplate from './process-css-template';
@@ -158,56 +158,168 @@ function transformStyleTask(ctx: Ctx, task: StyleTask): void {
   ctx.s.remove(task.element.start, task.element.end);
 }
 
-function getStyleAttribute(opening: Node): Node | null {
-  for (const attr of opening.attributes) {
-    if (
-      attr.type === 'JSXAttribute' &&
-      attr.name.type === 'JSXIdentifier' &&
-      attr.name.name === 'style'
-    ) {
-      return attr;
-    }
-  }
-  return null;
+function isStyleAttribute(attr: Node): boolean {
+  return (
+    attr.type === 'JSXAttribute' && attr.name.type === 'JSXIdentifier' && attr.name.name === 'style'
+  );
 }
 
-/** Folds every applicable `vars_N()` into the element's `style` prop. */
-function applyStyle(ctx: Ctx, opening: Node, varsList: string[]): void {
-  const merge = ctx.importIdent(RUNTIME_IDENTIFIERS.mergeStyles);
-
-  function nest(base: string | null): string {
-    let expression = base;
-    for (const vars of varsList) {
-      expression = expression === null ? `${vars}()` : `${merge}(${expression}, ${vars}())`;
+/**
+ * True when the expression can be read again without running anything new:
+ * `props`, `this.props`, `props.rest`, `props["rest"]`. Getters may run again;
+ * calls never do.
+ */
+function isReadableAgain(node: Node): boolean {
+  if (node.type === 'Identifier' || node.type === 'ThisExpression') {
+    return true;
+  }
+  if (node.type === 'MemberExpression' && !node.optional) {
+    if (node.computed && node.property.type !== 'Literal') {
+      return false;
     }
-    return expression!;
+    return isReadableAgain(node.object);
   }
+  return false;
+}
 
-  const style = getStyleAttribute(opening);
-  if (!style) {
-    ctx.s.appendLeft(opening.name.end, ` style={${nest(null)}}`);
-    return;
+/** Wraps a base style in one `mergeStyles` call per sheet. */
+function nestStyles(ctx: Ctx, base: string | null, varsList: string[]): string {
+  let expression = base;
+  for (const vars of varsList) {
+    expression =
+      expression === null
+        ? `${vars}()`
+        : `${ctx.importIdent(RUNTIME_IDENTIFIERS.mergeStyles)}(${expression}, ${vars}())`;
   }
+  return expression!;
+}
+
+/** Folds every applicable `vars_N()` into an explicit `style` attribute, in place. */
+function mergeStyleAttribute(ctx: Ctx, style: Node, varsList: string[]): void {
   if (!style.value) {
-    ctx.s.appendLeft(style.name.end, `={${nest(null)}}`);
+    ctx.s.appendLeft(style.name.end, `={${nestStyles(ctx, null, varsList)}}`);
     return;
   }
   const value = style.value;
   if (value.type === 'JSXExpressionContainer') {
     const expression = value.expression;
     if (expression.type === 'JSXEmptyExpression') {
-      ctx.s.overwrite(value.start, value.end, `{${nest(null)}}`);
+      ctx.s.overwrite(value.start, value.end, `{${nestStyles(ctx, null, varsList)}}`);
       return;
     }
+    const merge = ctx.importIdent(RUNTIME_IDENTIFIERS.mergeStyles);
+    let closing = '';
+    for (const vars of varsList) {
+      closing += `, ${vars}())`;
+    }
     ctx.s.appendLeft(expression.start, `${merge}(`.repeat(varsList.length));
-    ctx.s.appendRight(expression.end, varsList.map((vars) => `, ${vars}())`).join(''));
+    ctx.s.appendRight(expression.end, closing);
     return;
   }
   if (value.type === 'Literal') {
-    ctx.s.overwrite(value.start, value.end, `{${nest(value.raw)}}`);
+    ctx.s.overwrite(value.start, value.end, `{${nestStyles(ctx, value.raw, varsList)}}`);
     return;
   }
   ctx.error(value, 'Invalid style value.');
+}
+
+/** Source text of an explicit `style` value, or null when it sets nothing. */
+function readStyleValue(ctx: Ctx, style: Node): string | null {
+  const value = style.value;
+  if (!value) {
+    return null;
+  }
+  if (value.type === 'JSXExpressionContainer') {
+    if (value.expression.type === 'JSXEmptyExpression') {
+      return null;
+    }
+    return textOf(ctx.code, value.expression);
+  }
+  if (value.type === 'Literal') {
+    return value.raw;
+  }
+  return ctx.error(value, 'Invalid style value.');
+}
+
+const WHITESPACE = /\s/;
+
+/** Drops an attribute along with the space in front of it. */
+function removeAttribute(ctx: Ctx, attr: Node): void {
+  let start = attr.start;
+  while (start > 0 && WHITESPACE.test(ctx.code[start - 1])) {
+    start--;
+  }
+  ctx.s.remove(start, attr.end);
+}
+
+interface SpreadBinding {
+  name: string;
+  source: string;
+}
+
+// A JSX child or attribute value needs braces around a plain expression.
+const JSX_HOLDERS = new Set(['JSXElement', 'JSXFragment', 'JSXAttribute']);
+
+/**
+ * Binds each spread call to a parameter of an arrow function called in place:
+ * `((_spread_1) => <a {..._spread_1()} />)(_trackSpread(() => getProps()))`.
+ * `trackSpread` is a memo, so the call runs once per change, and both the
+ * spread and the `style` that reads it stay reactive.
+ */
+function bindSpreads(ctx: Ctx, record: ElementRecord, bindings: SpreadBinding[]): void {
+  const track = ctx.importIdent(RUNTIME_IDENTIFIERS.trackSpread);
+  const names: string[] = [];
+  const sources: string[] = [];
+  for (const binding of bindings) {
+    names.push(binding.name);
+    sources.push(`${track}(() => ${binding.source})`);
+  }
+  const inJSX = record.parent !== undefined && JSX_HOLDERS.has(record.parent.type);
+  const element = record.element;
+  ctx.s.prependRight(element.start, `${inJSX ? '{' : ''}((${names.join(', ')}) => `);
+  ctx.s.appendLeft(element.end, `)(${sources.join(', ')})${inJSX ? '}' : ''}`);
+}
+
+/**
+ * Adds a `style` after the last spread. It merges `vars_N()` into the style
+ * JSX would resolve without it: the last spread that has a `style` key, else
+ * the source before it, down to the last explicit `style`.
+ */
+function addSpreadStyle(
+  ctx: Ctx,
+  record: ElementRecord,
+  lastStyle: number,
+  lastSpread: number,
+  varsList: string[],
+): void {
+  const attributes = record.element.openingElement.attributes;
+  let base: string | null = null;
+  if (lastStyle >= 0) {
+    // The explicit style moves into the fallback, so it is still evaluated once.
+    base = readStyleValue(ctx, attributes[lastStyle]);
+    removeAttribute(ctx, attributes[lastStyle]);
+  }
+
+  const bindings: SpreadBinding[] = [];
+  for (let index = lastStyle + 1; index <= lastSpread; index++) {
+    const attr = attributes[index];
+    if (attr.type !== 'JSXSpreadAttribute') {
+      continue;
+    }
+    let read = textOf(ctx.code, attr.argument);
+    if (!isReadableAgain(attr.argument)) {
+      const name = ctx.unique('_spread');
+      bindings.push({ name, source: read });
+      read = `${name}()`;
+      ctx.s.overwrite(attr.argument.start, attr.argument.end, read);
+    }
+    base = base === null ? `${read}.style` : `("style" in ${read} ? ${read}.style : ${base})`;
+  }
+
+  ctx.s.appendLeft(attributes[lastSpread].end, ` style={${nestStyles(ctx, base, varsList)}}`);
+  if (bindings.length > 0) {
+    bindSpreads(ctx, record, bindings);
+  }
 }
 
 /** Marks host elements (and `use:solid-styled` opt-ins) with their sheet scopes. */
@@ -218,6 +330,19 @@ function scopeElement(ctx: Ctx, record: ElementRecord): void {
     return;
   }
 
+  // Find the last spread and the last explicit `style`.
+  let lastSpread = -1;
+  let lastStyle = -1;
+  for (const [index, attr] of opening.attributes.entries()) {
+    if (attr.type === 'JSXSpreadAttribute') {
+      lastSpread = index;
+    } else if (isStyleAttribute(attr)) {
+      lastStyle = index;
+    }
+  }
+  // Added attributes go after the last spread, so a spread cannot replace them.
+  const anchor = lastSpread >= 0 ? opening.attributes[lastSpread].end : opening.name.end;
+
   const varsList: string[] = [];
   // Outermost first, matching the order the sheets were declared in.
   for (const fn of record.functions) {
@@ -225,27 +350,25 @@ function scopeElement(ctx: Ctx, record: ElementRecord): void {
     if (!sheet || hasScopedAttribute(opening, sheet.scope)) {
       continue;
     }
-    ctx.s.appendLeft(opening.name.end, ` ${SOLID_STYLED_NS}:${sheet.scope}`);
+    ctx.s.appendLeft(anchor, ` ${SOLID_STYLED_NS}:${sheet.scope}`);
     const vars = ctx.vars.get(fn);
     if (vars) {
       varsList.push(vars);
     }
   }
 
-  if (varsList.length > 0) {
-    applyStyle(ctx, opening, varsList);
+  if (varsList.length === 0) {
+    return;
   }
-}
-
-const WHITESPACE = /\s/;
-
-/** Drops the `use:solid-styled` marker along with the space in front of it. */
-function removeUseAttribute(ctx: Ctx, attr: Node): void {
-  let start = attr.start;
-  while (start > 0 && WHITESPACE.test(ctx.code[start - 1])) {
-    start--;
+  // Registered up front, as before, so the import header keeps its order.
+  ctx.importIdent(RUNTIME_IDENTIFIERS.mergeStyles);
+  if (lastStyle > lastSpread) {
+    mergeStyleAttribute(ctx, opening.attributes[lastStyle], varsList);
+  } else if (lastSpread >= 0) {
+    addSpreadStyle(ctx, record, lastStyle, lastSpread, varsList);
+  } else {
+    ctx.s.appendLeft(anchor, ` style={${nestStyles(ctx, null, varsList)}}`);
   }
-  ctx.s.remove(start, attr.end);
 }
 
 export default function transform(ctx: Ctx): void {
@@ -260,7 +383,7 @@ export default function transform(ctx: Ctx): void {
     scopeElement(ctx, record);
   }
   for (const attr of ctx.analysis.useAttributes) {
-    removeUseAttribute(ctx, attr);
+    removeAttribute(ctx, attr);
   }
   ctx.finalize();
 }

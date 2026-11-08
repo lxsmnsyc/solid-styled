@@ -11,6 +11,7 @@ export const GLOBAL_SELECTOR = 'global';
 export const RUNTIME_IDENTIFIERS = {
   createCSSVars: 'createCSSVars',
   mergeStyles: 'mergeStyles',
+  trackSpread: 'trackSpread',
   useSolidStyled: 'useSolidStyled',
   useSolidStyledGlobal: 'useSolidStyledGlobal',
 };
