@@ -13,7 +13,7 @@ export const SITE_URL: string = import.meta.env.SITE_URL;
 /** Replaced by the server entry with the number of sheets on the page. */
 export const SHEET_COUNT_TOKEN = '%%SHEET_COUNT%%';
 
-/** Strips the trailing slash so `/docs/setup` and `/docs/setup/` match. */
+/** Strips the trailing slash so `/docs/ssr` and `/docs/ssr/` match. */
 export function normalizePath(path: string): string {
   return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
 }

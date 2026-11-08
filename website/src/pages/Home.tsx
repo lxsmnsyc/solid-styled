@@ -243,7 +243,7 @@ function Hero(): JSX.Element {
           </button>
         </div>
         <div class="actions">
-          <a class="primary" href="/docs/setup/">
+          <a class="primary" href="/docs/">
             Read the docs
           </a>
           <a class="secondary" href={REPO_URL}>
@@ -775,7 +775,7 @@ export default function Home(): JSX.Element {
         <Platform />
       </Section>
       <div class="next">
-        <a href="/docs/setup/">
+        <a href="/docs/">
           <span>
             <small>Next</small>
             Set up solid-styled

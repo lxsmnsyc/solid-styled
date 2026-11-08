@@ -26,7 +26,19 @@ const RUNTIME_FILE = path.join(REPO_DIR, 'packages/solid-styled/dist/index.js');
 const PACKAGE_FILE = path.join(REPO_DIR, 'packages/solid-styled/package.json');
 
 /** The guides in reading order. The order matches the README. */
-export const DOC_SLUGS = ['setup', 'styling', 'scoping', 'ssr', 'how-it-works', 'editor'];
+export const DOC_SLUGS = [
+  'getting-started',
+  'styling',
+  'scoping',
+  'ssr',
+  'component-libraries',
+  'configuration',
+  'editor',
+  'migrating-from-0.x',
+  'how-it-works',
+  'api',
+  'known-limits',
+];
 
 /** Fonts served from `/fonts/`, copied out of the @fontsource packages. */
 const FONTS: Record<string, string> = {
