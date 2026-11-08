@@ -14,18 +14,6 @@ export default function DocsNav(props: DocsNavProps): JSX.Element {
       top: 6rem;
       align-self: start;
     }
-    a.all {
-      display: block;
-      margin-bottom: 1rem;
-      color: var(--text-3);
-      font: 600 0.75rem/1 var(--font-mono);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      text-decoration: none;
-    }
-    a.all:hover {
-      color: var(--text);
-    }
     ol {
       display: grid;
       gap: 0.125rem;
@@ -39,31 +27,49 @@ export default function DocsNav(props: DocsNavProps): JSX.Element {
     }
     li a {
       display: flex;
-      gap: 0.75rem;
-      padding: 0.5rem 0.75rem;
-      border-radius: 8px;
-      color: var(--text-2);
+      align-items: baseline;
+      gap: 0.875rem;
+      padding: 0.5rem 0;
+      color: var(--text-3);
       font: 500 0.875rem/1.3 var(--font-mono);
       text-decoration: none;
       white-space: nowrap;
+      transition: color 0.2s var(--ease);
     }
+    /* The number is a small ribbon: skewed like the strokes of the S mark. */
     li a::before {
       content: counter(guide, decimal-leading-zero);
+      display: inline-block;
+      min-width: 2.25em;
+      padding: 0.125em 0.375em;
+      transform: skewX(-14deg);
       color: var(--text-3);
-      font-size: 0.75rem;
-      line-height: 1.75;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-align: center;
+      transition:
+        background-color 0.2s var(--ease),
+        color 0.2s var(--ease);
     }
     li a:hover {
-      background: var(--surface-2);
       color: var(--text);
+    }
+    li a:hover::before {
+      color: var(--text-2);
     }
     li a[aria-current] {
-      background: var(--surface-2);
       color: var(--text);
-      box-shadow: inset 2px 0 0 var(--accent);
+      font-weight: 700;
     }
     li a[aria-current]::before {
-      color: var(--accent);
+      background: var(--gradient-strong);
+      color: #fff;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      li a,
+      li a::before {
+        transition: none;
+      }
     }
     @media (max-width: 52rem) {
       nav {
@@ -77,9 +83,6 @@ export default function DocsNav(props: DocsNavProps): JSX.Element {
         -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--line);
       }
-      a.all {
-        display: none;
-      }
       ol {
         display: flex;
         gap: 0.25rem;
@@ -91,9 +94,6 @@ export default function DocsNav(props: DocsNavProps): JSX.Element {
 
   return (
     <nav aria-label="Guides">
-      <a class="all" href="/docs/">
-        Guides
-      </a>
       <ol>
         <For each={content.docs}>
           {(doc) => (

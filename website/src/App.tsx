@@ -4,7 +4,6 @@ import content from 'virtual:site-content';
 import type { DocPage as DocPageData } from './content-types';
 import Document from './components/Document';
 import DocPage from './pages/DocPage';
-import DocsIndex from './pages/DocsIndex';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import { TAGLINE, normalizePath } from './site';
@@ -39,16 +38,10 @@ export default function App(props: AppProps): JSX.Element {
     );
   }
 
-  if (path === '/docs') {
-    return (
-      <Document path="/docs/" title="Docs · solid-styled" description="The solid-styled guides.">
-        <DocsIndex />
-      </Document>
-    );
-  }
-
   for (const [index, doc] of content.docs.entries()) {
-    if (path === `/docs/${doc.slug}`) {
+    // `/docs/` opens the first guide, so the docs are one click away. Its
+    // canonical URL stays the guide's own page.
+    if (path === `/docs/${doc.slug}` || (index === 0 && path === '/docs')) {
       return (
         <Document
           path={`/docs/${doc.slug}/`}

@@ -50,27 +50,44 @@ export default function DocPage(props: DocPageProps): JSX.Element {
       margin: 0;
       padding: 0;
       list-style: none;
-      border-left: 1px solid var(--line);
     }
     .toc a {
-      display: block;
-      margin-left: -1px;
-      padding: 0.3125rem 0 0.3125rem 0.875rem;
-      border-left: 1px solid transparent;
+      display: grid;
+      grid-template-columns: 0.875rem 1fr;
+      align-items: baseline;
+      padding: 0.3125rem 0;
       color: var(--text-3);
       font-size: 0.8125rem;
       line-height: 1.4;
       text-decoration: none;
+      transition: color 0.2s var(--ease);
     }
     .toc .depth-3 a {
-      padding-left: 1.625rem;
+      padding-left: 0.875rem;
+    }
+    /* A sliver of ribbon marks the section in view. */
+    .toc a::before {
+      content: '';
+      width: 0.3125rem;
+      height: 0.75rem;
+      transform: skewX(-20deg) scaleY(0);
+      background: var(--gradient-strong);
+      transition: transform 0.25s var(--ease);
     }
     .toc a:hover {
       color: var(--text);
     }
     .toc a[aria-current] {
-      border-left-color: var(--accent);
       color: var(--text);
+    }
+    .toc a[aria-current]::before {
+      transform: skewX(-20deg) scaleY(1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .toc a,
+      .toc a::before {
+        transition: none;
+      }
     }
     .pager {
       display: grid;
@@ -213,12 +230,14 @@ export default function DocPage(props: DocPageProps): JSX.Element {
     .prose :global(tr:last-child td) {
       border-bottom: 0;
     }
-    .prose :global(td:last-child) {
-      min-width: 18rem;
-    }
+    /* Names and types stay whole. Long values such as default globs wrap, so
+       every column stays in view. */
     .prose :global(td code) {
+      overflow-wrap: anywhere;
+    }
+    .prose :global(:is(th, td):is(:first-child, :nth-child(2))) {
+      width: 1%;
       white-space: nowrap;
-      overflow-wrap: normal;
     }
 
     @media (max-width: 72rem) {

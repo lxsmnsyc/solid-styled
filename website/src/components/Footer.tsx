@@ -1,6 +1,6 @@
 import type { JSX } from '@solidjs/web';
 import { css } from 'solid-styled';
-import { LEGACY_URL, LICENSE_URL, NPM_URL, REPO_URL, TAGLINE } from '../site';
+import { LICENSE_URL, NPM_URL, REPO_URL, TAGLINE } from '../site';
 import Mark from './Mark';
 
 export default function Footer(): JSX.Element {
@@ -57,17 +57,6 @@ export default function Footer(): JSX.Element {
       text-decoration: underline;
       text-underline-offset: 0.2em;
     }
-    .legacy {
-      grid-column: 1 / -1;
-      margin: 0;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--line);
-      color: var(--text-3);
-      font-size: 0.8125rem;
-    }
-    .legacy a {
-      color: var(--accent);
-    }
     @media (max-width: 48rem) {
       .inner {
         grid-template-columns: 1fr;
@@ -98,10 +87,6 @@ export default function Footer(): JSX.Element {
             <a href={LICENSE_URL}>MIT License</a>
           </li>
         </ul>
-        <p class="legacy">
-          On Solid 1.x? Use solid-styled 0.x from the <a href={LEGACY_URL}>0.x branch</a>. It only
-          gets fixes.
-        </p>
       </div>
     </footer>
   );

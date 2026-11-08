@@ -1,7 +1,6 @@
 export const REPO_URL = 'https://github.com/lxsmnsyc/solid-styled';
 export const NPM_URL = 'https://www.npmjs.com/package/solid-styled';
 export const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`;
-export const LEGACY_URL = `${REPO_URL}/tree/0.x`;
 export const TAGLINE = 'Near zero-runtime, reactive stylesheets for SolidJS';
 export const INSTALL = 'npm i solid-styled';
 
