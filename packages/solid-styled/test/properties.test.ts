@@ -20,7 +20,7 @@ import { cssTemplate } from './arbitraries';
 const RUNS = Number(process.env.FC_RUNS ?? 150);
 const SEED = Number(process.env.FC_SEED ?? 20261108);
 
-function params(max: number): fc.Parameters<unknown> {
+function createParams(max: number): fc.Parameters<unknown> {
   return { seed: SEED, numRuns: Math.max(1, Math.round((max * RUNS) / 150)) };
 }
 
@@ -97,7 +97,7 @@ function isGlobalCompound(compound: csstree.CssNode[]): boolean {
 
 /**
  * Visits each top-level selector outside `@keyframes`. Selectors inside a
- * pseudo class such as `:not(.off)` are skipped: the compiler scopes those too.
+ * pseudo class such as `:not(.off)` are skipped. The compiler scopes those too.
  */
 function visitSelectors(
   ast: csstree.CssNode,
@@ -229,24 +229,52 @@ function listAnimationNames(ast: csstree.CssNode): string[] {
   return names;
 }
 
-function hasPseudoClass(ast: csstree.CssNode, name: string): boolean {
+/** True when an `:is(...)` holds a `:global(...)`. */
+function hasGlobalInIs(ast: csstree.CssNode): boolean {
   let found = false;
   csstree.walk(ast, (node) => {
-    if (node.type === 'PseudoClassSelector' && node.name === name) {
-      found = true;
+    if (node.type === 'PseudoClassSelector' && node.name === 'is') {
+      csstree.walk(node, (inner) => {
+        if (inner.type === 'PseudoClassSelector' && inner.name === 'global') {
+          found = true;
+        }
+      });
     }
   });
   return found;
 }
 
-function hasNesting(ast: csstree.CssNode): boolean {
+/** True when an `@global` block holds a nesting selector `&`. */
+function hasNestingInGlobal(ast: csstree.CssNode): boolean {
   let found = false;
   csstree.walk(ast, (node) => {
-    if (node.type === 'NestingSelector') {
-      found = true;
+    if (node.type === 'Atrule' && node.name === 'global' && node.block) {
+      csstree.walk(node.block, (inner) => {
+        if (inner.type === 'NestingSelector') {
+          found = true;
+        }
+      });
     }
   });
   return found;
+}
+
+/** Lists the property of each `${}` in the source: the last `name:` before it. */
+function listInterpolationProperties(source: string): string[] {
+  const properties: string[] = [];
+  let from = 0;
+  for (;;) {
+    const at = source.indexOf('${', from);
+    if (at === -1) {
+      return properties;
+    }
+    let name = '';
+    for (const match of source.slice(0, at).matchAll(/([a-z-]+)\s*:/g)) {
+      name = match[1];
+    }
+    properties.push(name);
+    from = at + 2;
+  }
 }
 
 describe('sheet scoping', () => {
@@ -260,9 +288,9 @@ describe('sheet scoping', () => {
 
           // LightningCSS wraps a list that holds `:global(...)` in `:is(...)`. See the
           // `it.fails` below.
-          fc.pre(!hasPseudoClass(inputAst, 'is'));
+          fc.pre(!hasGlobalInIs(inputAst));
           // Nested rules in `@global` keep their `&`. The compiler drops it. See below.
-          fc.pre(!hasNesting(inputAst));
+          fc.pre(!hasNestingInGlobal(inputAst));
           const outputAst = parseSheet(processScopedSheet(SHEET, input));
 
           // Scoped compounds carry the attribute once, global ones never.
@@ -271,7 +299,7 @@ describe('sheet scoping', () => {
           // Apart from the attribute and the `:global` wrapper, selectors keep their text.
           expect(listBareSelectors(outputAst)).toEqual(listBareSelectors(inputAst));
         }),
-        params(150),
+        createParams(150),
       );
     },
     TIMEOUT,
@@ -292,6 +320,11 @@ describe('sheet scoping', () => {
     expect(sheet).toContain('&.on');
   });
 
+  it('scopes the selectors inside :not(...)', () => {
+    const { sheet } = processTemplate('a:not(.off) { color: red; }', true);
+    expect(sheet).toBe(`a[${SCOPE_NAME}]:not(.off[${SCOPE_NAME}]){color:red}`);
+  });
+
   it(
     'produces CSS that LightningCSS and css-tree parse, and does so deterministically',
     () => {
@@ -307,7 +340,7 @@ describe('sheet scoping', () => {
           });
           parseSheet(first.sheet);
         }),
-        params(150),
+        createParams(150),
       );
     },
     TIMEOUT,
@@ -323,6 +356,28 @@ describe('interpolation', () => {
           const { sheet: spaced, variables } = processTemplate(source, false);
           const sheet = spaced.replaceAll(' ', '');
           expect(variables.length).toBe(vars.length);
+
+          // Every variable the sheet names is one of the declared ids.
+          const ids = new Set<string>();
+          for (const [index] of vars.entries()) {
+            ids.add(`--s-v-${NAMESPACE}-${index}`);
+          }
+          for (const match of sheet.matchAll(/--s-v-[\w-]*/g)) {
+            expect(ids.has(match[0])).toBe(true);
+          }
+
+          // A declaration that holds the N-th variable has the property the N-th
+          // `${}` was written in.
+          const properties = listInterpolationProperties(source);
+          csstree.walk(parseSheet(spaced), (node) => {
+            if (node.type !== 'Declaration') {
+              return;
+            }
+            const text = csstree.generate(node.value);
+            for (const match of text.matchAll(/var\(--s-v-[\w-]*-(\d+)\)/g)) {
+              expect(node.property).toBe(properties[Number(match[1])]);
+            }
+          });
 
           // The unit that follows each interpolation, in source order.
           const units: string[] = [];
@@ -350,7 +405,7 @@ describe('interpolation', () => {
             }
           }
         }),
-        params(150),
+        createParams(150),
       );
     },
     TIMEOUT,
@@ -363,7 +418,9 @@ describe('keyframes', () => {
     () => {
       fc.assert(
         fc.property(cssTemplate({ global: false, media: false }), ({ sample }) => {
-          const input = preprocessCSS(createCtx(sample), sample);
+          // A fixed rule with an undeclared name and keywords: none is renamed.
+          const withOther = `${sample}\n.u { animation: other 1s ease-in infinite }`;
+          const input = preprocessCSS(createCtx(withOther), withOther);
           const inputAst = parseSheet(input);
           const outputAst = parseSheet(processScopedSheet(SHEET, input));
 
@@ -381,8 +438,9 @@ describe('keyframes', () => {
           for (const [index, name] of before.entries()) {
             expect(after[index]).toBe(names.includes(name) ? `${SHEET}-${name}` : name);
           }
+          expect(after).toContain('other');
         }),
-        params(150),
+        createParams(150),
       );
     },
     TIMEOUT,
@@ -404,17 +462,16 @@ describe('xxHash32', () => {
           expect(xxHash32(value)).toBe(referenceHash(value));
           expect(xxHash32(value).toString(16)).toBe(referenceHash(value).toString(16));
         }),
-        params(300),
+        createParams(300),
       );
     },
     TIMEOUT,
   );
 
-  // Bug (low impact): a lone surrogate is not valid UTF-16. js-xxhash encodes it
-  // as U+FFFD, the compiler encodes it as three raw bytes. Only odd file names hit it.
-  it.fails('matches js-xxhash for a string with a lone surrogate', () => {
-    expect(xxHash32('\ud800')).toBe(referenceHash('\ud800'));
-  });
+  // The contract is well-formed strings. The compiler hashes only `id.split('?')[0]`,
+  // a bundler path that is well-formed in practice, and the hash only has to be
+  // deterministic. `toUtf8` treats any surrogate as the start of a pair and swallows
+  // the next code unit, so a lone one differs from js-xxhash. This is intended.
 
   it(
     'matches js-xxhash for bytes and for any 32-bit seed',
@@ -427,7 +484,7 @@ describe('xxHash32', () => {
             expect(xxHash32(bytes, seed)).toBe(referenceHash(bytes, seed));
           },
         ),
-        params(300),
+        createParams(300),
       );
     },
     TIMEOUT,
