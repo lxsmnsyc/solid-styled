@@ -24,8 +24,6 @@ npm i solid-styled
 npm i -D unplugin-solid-styled
 ```
 
-A CSS unit written right after an interpolation, as in `${size()}px`, is applied with `calc()`, so `width: ${size()}px` compiles to `width: calc(var(--s-v-...) * 1px)`.
-
 ```bash
 yarn add solid-styled
 yarn add -D unplugin-solid-styled
@@ -114,6 +112,8 @@ function Button() {
   );
 }
 ```
+
+A CSS unit written right after an interpolation, as in `${size()}px`, is applied with `calc()`, so `width: ${size()}px` compiles to `width: calc(var(--s-v-...) * 1px)`.
 
 ### `<style jsx>`
 

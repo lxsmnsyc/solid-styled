@@ -82,4 +82,9 @@ export default function Example() {
     expect(a).not.toBe(b);
     expect(compile(FILE, SHEET, {}).code).toBe(transform(SHEET));
   });
+
+  it('should throw an unknown browserslist query as is, not as a CompileError', () => {
+    expect(() => transform(SHEET, { browserslist: 'nope 99' })).toThrow(/Unknown browser/);
+    expect(() => transform(SHEET, { browserslist: 'nope 99' })).not.toThrow(/\(\d+:\d+\)/);
+  });
 });

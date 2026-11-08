@@ -41,7 +41,8 @@ function repushPlugin(plugins: Plugin[], pluginName: string, pluginNames: string
 const DEFAULT_INCLUDE = 'src/**/*.{jsx,tsx,ts,js,mjs,cjs}';
 const DEFAULT_EXCLUDE = 'node_modules/**/*.{jsx,tsx,ts,js,mjs,cjs}';
 
-const solidStyledPlugin = createUnplugin((options: SolidStyledPluginOptions) => {
+const solidStyledPlugin = createUnplugin((pluginOptions?: SolidStyledPluginOptions) => {
+  const options = pluginOptions ?? {};
   const filter = createFilter(
     options.filter?.include ?? DEFAULT_INCLUDE,
     options.filter?.exclude ?? DEFAULT_EXCLUDE,
