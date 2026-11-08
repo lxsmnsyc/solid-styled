@@ -42,7 +42,12 @@ Each scoped sheet goes through LightningCSS (lower nesting), css-tree (scoping),
 4. Full PostCSS (`postcss-nesting`, `postcss-preset-env`, `cssnano`) with no LightningCSS. Pure JS, so it would also run on StackBlitz (#19).
 5. `lightningcss-wasm` as a fallback where the native binary does not load.
 
+## Known bugs each option must handle
+
+- `.a, :global(.b)`: LightningCSS wraps the list in `:is()`, so `.b` gets scoped (node `fix-global-in-selector-list`).
+- Nesting inside `@global`: LightningCSS does not parse the custom at-rule body, and the `&` is lost (node `fix-nesting-in-global`).
+
 ## Acceptance
 
-- [ ] For each option: compile time on the benchmark fixtures, sheet bytes identical to 0.12.1 or not (oracle), install size, StackBlitz support.
+- [ ] For each option: whether it fixes the two bugs above, compile time on the benchmark fixtures, sheet bytes identical to 0.12.1 or not (oracle), install size, StackBlitz support.
 - [ ] A recommendation in outcome.md. Gate: the maintainer picks before any rewrite node is written.
