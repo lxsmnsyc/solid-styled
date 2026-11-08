@@ -4,13 +4,13 @@
 
 - The module is parsed with [oxc](https://oxc.rs), which is a native parser, so parsing costs almost nothing.
 - A single walk collects the `css` templates, the `<style jsx>` elements, every JSX element and every `use:solid-styled` attribute.
-- Each edit is applied as a span edit over [magic-string](https://github.com/Rich-Harris/magic-string), so code the compiler does not touch keeps its exact formatting.
+- Each edit is a span edit over [magic-string](https://github.com/Rich-Harris/magic-string). Code the compiler does not touch keeps its exact formatting.
 - A scoped sheet goes through [LightningCSS](https://lightningcss.dev/) for lowering. A [css-tree](https://github.com/csstree/csstree) pass then applies the scoping, and LightningCSS runs again for minification. A `<style jsx global>` sheet goes through LightningCSS once.
 - The result is the rewritten code plus a high resolution source map.
 
 ## What the output looks like
 
-Given this input in `src/Example.jsx`:
+Given this input in `src/Example.tsx`:
 
 ```jsx
 import { css } from 'solid-styled';
@@ -26,7 +26,7 @@ export default function Example() {
 }
 ```
 
-The compiler emits this:
+The compiler emits this, shown formatted. The real output uses double quotes for generated strings.
 
 ```jsx
 import { useSolidStyled as _useSolidStyled } from 'solid-styled';
@@ -52,7 +52,7 @@ export default function Example() {
 - `c-<hash>-<n>` is a scope id, and `<n>` counts the ids generated in the module.
 - `--s-v-<hash>-<n>` is a CSS custom property standing in for one interpolated value.
 - With `verbose`, the component name is inserted into the scope id, giving names such as `c-Example-<hash>-0`. CSS custom properties do not change.
-- With `prefix: 'my-app'`, the leading `c-` and `v-` become `my-app-`, giving `my-app-<hash>-0` and `--s-my-app-<hash>-1`.
+- With `prefix`, the leading `c-` and `v-` change. See [`verbose` and `prefix`](./configuration.md#verbose-and-prefix).
 - `s:id` is the attribute on each inserted `<style>` element. It holds the scope id and the sheet number, such as `c-76110b4f-0-1`.
 
 ## How values reach elements
@@ -71,7 +71,7 @@ function Bar(props) {
 }
 ```
 
-The output is this, with the import line left out.
+The output for `src/Bar.jsx` is this, shown formatted and without the import line.
 
 ```jsx
 const sheet_1 = 'c-67589289-0';
@@ -87,7 +87,7 @@ function Bar(props) {
 - `vars_1` is declared at the top of the component body, which is why the component needs a block body.
 - `vars_1(() => ({ ... }))` registers the values. `vars_1()` reads them as a style object.
 - Each scoped element gets `style={vars_1()}`, so a change updates the custom property on that element only.
-- A nested component that declares its own sheet gets both scope markers, and both sets of values are merged with `mergeStyles`.
+- For a component declared inside another one, see [Nested components](./scoping.md#nested-components).
 
 ### Merging with an existing `style` prop
 
@@ -108,7 +108,7 @@ Solid gives an element the `style` of the last source that has a `style` key. A 
 - An explicit `style` after the last spread merges the CSS variables in place, as above.
 - Otherwise, the last explicit `style` merges them in place. With no explicit `style`, the compiler adds `style={vars_1()}` after the element name.
 - Each spread after that `style` is wrapped by `spreadStyle`. When the spread has a `style` key, `spreadStyle` returns it through Solid's `merge` with that style merged with the CSS variables. Any other spread is returned as is. A function spread such as `{...signal}` is called first, as Solid does.
-- The spread is wrapped where it is. It is not copied or moved, so a call such as `{...getProps()}` runs as often as with any other reactive attribute on the element, and the element stays in its parent template.
+- The spread is wrapped where it is. It is not copied or moved. A call such as `{...getProps()}` runs as often as with any other reactive attribute on the element, and the element stays in its parent template.
 - A static sheet has no CSS variables. The compiler only adds the scope marker after the last spread.
 
 ```jsx

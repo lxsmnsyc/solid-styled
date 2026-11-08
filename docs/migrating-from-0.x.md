@@ -7,7 +7,7 @@ This page lists every breaking change from 0.12.x to 1.0. Work through it top to
 - [ ] **Solid 2.0.** The peer range is now `solid-js@^2.0.0-rc.5` and `@solidjs/web@^2.0.0-rc.5`. Upgrade Solid first, then install `solid-styled@next` and `unplugin-solid-styled@next`.
 - [ ] **Node.** Both packages now require Node `^20.19.0 || >=22.12.0`, the range `oxc-parser` and `unplugin` need. Upgrade Node if you are on an older release.
 - [ ] **Vite 8.** `unplugin-solid-styled` now requires `vite@>=8` when you use Vite. Upgrade Vite.
-- [ ] **ESM only.** Both packages ship ES modules only. The CommonJS builds and the `development` export condition are gone. Node `^20.19.0 || >=22.12.0` can `require()` them, so most setups need no change.
+- [ ] **ESM only.** Both packages ship ES modules only. The CommonJS builds and the `development` export condition are gone. Node `^20.19.0 || >=22.12.0` can `require()` them, so most setups need no change. In a CommonJS config, the plugin is on `default`: `require('unplugin-solid-styled').default.vite()`.
 
 ## Plugins
 
@@ -33,7 +33,7 @@ Skip this section if you only use the bundler plugin.
 
 - [ ] **`compile()` is synchronous.** `compile(id, code, options)` from `solid-styled/compiler` now returns `{ code, map }` directly instead of a promise. Remove the `await`.
 - [ ] **The source map comes from magic-string.** `map` is a magic-string source map with `hires: true`, not a Babel map. It has the standard `version`, `sources`, `names` and `mappings` fields.
-- [ ] **Errors are `CompileError`.** A parse error, a CSS error in a template or an invalid `style` value throws a `CompileError` instead of a Babel error. It has 1-based `line` and `column` fields, and the message ends with `(line:column)`. Update any code that reads Babel error fields such as `loc`.
+- [ ] **Errors are `CompileError`.** A parse error, a CSS error in a template or an invalid `style` value throws a `CompileError`. 0.x threw a Babel error. It has 1-based `line` and `column` fields, and the message ends with `(line:column)`. Update any code that reads Babel error fields such as `loc`.
 - [ ] **Babel is gone.** `@babel/core`, `@babel/traverse` and `@babel/types` are no longer dependencies. Add them to your own `package.json` if your code imported them through solid-styled.
 
 See [`solid-styled/compiler`](./api.md#solid-styledcompiler).
@@ -42,7 +42,7 @@ See [`solid-styled/compiler`](./api.md#solid-styledcompiler).
 
 - [ ] **`StyleRegistry` has a default context.** Solid 2.0 throws when a context without a default is read without a provider. `useSolidStyled` keeps working outside a registry. No action needed.
 - [ ] **`<StyleRegistry auto>` uses `useHead`.** Solid 2.0 removed `useAssets`, so the sheets are now added as head tags through `useHead`. No action needed, unless your server template placed the `useAssets` output itself. Then render the head tags that Solid 2.0 collects.
-- [ ] **JSX types moved to `@solidjs/web`.** The `jsx`, `global` and `use:solid-styled` attribute types now augment the `JSX` namespace of `@solidjs/web`, where Solid 2.0 exposes it. Keep `/// <reference types="solid-styled" />` or `compilerOptions.types`. See [TypeScript](./getting-started.md#typescript).
+- [ ] **JSX types moved to `@solidjs/web`.** The `jsx`, `global` and `use:solid-styled` attribute types now augment the `JSX` namespace of `@solidjs/web`. That is where Solid 2.0 exposes it. Keep `/// <reference types="solid-styled" />` or `compilerOptions.types`. See [TypeScript](./getting-started.md#typescript).
 
 ## Output
 

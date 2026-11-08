@@ -10,13 +10,13 @@
 
 Every bundler entry takes the same options. All of them are optional, and `solidStyled.vite()` with no argument uses the defaults.
 
-| Option           | Type                 | Default                                       | What it does                                                                                                                                 |
-| ---------------- | -------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `verbose`        | `boolean`            | `false`                                       | Puts the component name into the generated scope, which makes the DOM easier to read while debugging.                                        |
-| `prefix`         | `string`             | `undefined`                                   | Replaces the default `c-` and `v-` prefixes of generated names. Use it when you publish a styled component library, so scopes never collide. |
-| `browserslist`   | `string`             | `'defaults'`                                  | The browser targets LightningCSS lowers the sheet for.                                                                                       |
-| `filter.include` | `string \| string[]` | `'src/**/*.{jsx,tsx,ts,js,mjs,cjs}'`          | Files the plugin compiles.                                                                                                                   |
-| `filter.exclude` | `string \| string[]` | `'node_modules/**/*.{jsx,tsx,ts,js,mjs,cjs}'` | Files the plugin skips.                                                                                                                      |
+| Option           | Type            | Default                                       | What it does                                                                                                                                 |
+| ---------------- | --------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verbose`        | `boolean`       | `false`                                       | Puts the component name into the scope id, which makes the DOM easier to read while debugging.                                               |
+| `prefix`         | `string`        | `undefined`                                   | Replaces the default `c-` and `v-` prefixes of generated names. Use it when you publish a styled component library, so scopes never collide. |
+| `browserslist`   | `string`        | `'defaults'`                                  | The browser targets LightningCSS lowers the sheet for.                                                                                       |
+| `filter.include` | `FilterPattern` | `'src/**/*.{jsx,tsx,ts,js,mjs,cjs}'`          | Files the plugin compiles.                                                                                                                   |
+| `filter.exclude` | `FilterPattern` | `'node_modules/**/*.{jsx,tsx,ts,js,mjs,cjs}'` | Files the plugin skips.                                                                                                                      |
 
 ```js
 solidStyled.vite({
@@ -44,7 +44,8 @@ solidStyled.vite({
 
 ### `filter.include` and `filter.exclude`
 
-- Both are glob patterns, or arrays of them, matched against the absolute file path. A query string such as `?v=123` is removed first.
+- Both take a `FilterPattern` from `@rollup/pluginutils`: a glob string, a `RegExp`, an array of them, or `null`. `null` keeps the default.
+- Patterns are matched against the absolute file path. A query string such as `?v=123` is removed first.
 - A pattern that does not start with `**` and is not absolute is resolved against the current working directory.
 - `exclude` is checked first. A file that matches `exclude` is skipped, even when it also matches `include`.
 - Each option replaces its default. Setting only `include` keeps the default `exclude`, which skips everything in `node_modules`.

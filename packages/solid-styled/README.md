@@ -76,7 +76,7 @@ function Title(props) {
 - [Component libraries](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/component-libraries.md) covers publishing components that use solid-styled.
 - [Configuration](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/configuration.md) covers plugin order, options and file filters.
 - [Editor and linting](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/editor.md) covers syntax highlighting, comment shortcuts and `no-unused-expressions`.
-- [Migrating from 0.x](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/migrating-from-0.x.md) covers every breaking change from 0.12.x to 1.0.
+- [Migrating from 0.x](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/migrating-from-0.x.md) lists the breaking changes from 0.12.x to 1.0.
 - [How it works](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/how-it-works.md) covers the compiler pipeline, its output and how values reach elements.
 - [API reference](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/api.md) covers every export of `solid-styled`, `solid-styled/compiler` and `unplugin-solid-styled`.
 - [Known limits](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/known-limits.md) covers unsupported setups and open bugs.

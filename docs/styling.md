@@ -39,6 +39,7 @@ See [Editor and linting](./editor.md#linting) if your linter reports the bare `c
 - `<style jsx>` is the same feature written inside JSX, and it compiles to the same output.
 - The element itself is removed from the tree, so it renders nothing.
 - It exists mostly to ease migration from `solid-styled-jsx`.
+- Write it as a child of an element or fragment, inside a component with a block body. See [Known limits](./known-limits.md) for what fails otherwise.
 
 ```jsx
 function Card() {
@@ -65,13 +66,16 @@ function Card() {
 ```jsx
 function Theme(props) {
   return (
-    <style jsx global>
-      {`
-        body {
-          color: ${props.color};
-        }
-      `}
-    </style>
+    <>
+      <style jsx global>
+        {`
+          body {
+            color: ${props.color};
+          }
+        `}
+      </style>
+      {props.children}
+    </>
   );
 }
 ```
