@@ -34,15 +34,19 @@ const MARKER = /^\/\*t\d+\*\//;
 // minifies (`calc(var(--id)*1px)`, `calc(...)50%0`). 0.12.1 emits `var(--id) px`
 // or `var(--id)px`, which browsers drop and lightningcss prints token by
 // token. In the extracted sheet strings (never in the code), both forms become
-// `<unit --id px>`, and every space inside a declaration that holds one is
-// dropped.
+// `<unit --id px>`. 1.0 minifies a declaration that holds one as a token list,
+// so it drops each space that ends no token: after `%`, `)` and the unit
+// (`50% 0` becomes `50%0`). 0.12.1 keeps them. In such a declaration the
+// filter drops only those spaces. A space after a number or a word stays,
+// since dropping it would join two tokens (`0 calc(` is not `0calc(`).
 const UNIT_LIST = [...UNITS.length, ...UNITS.time].join('|');
 const UNIT_CALC = new RegExp(`calc\\(var\\((--[\\w-]+)\\) ?\\* ?1(${UNIT_LIST})\\)`, 'g');
 const UNIT_SPACED = new RegExp(`var\\((--[\\w-]+)\\) ?(${UNIT_LIST})(?![\\w-])`, 'g');
 const UNIT_DECLARATION = /[\w-]+:[^;{}]*<unit [^;{}]*/g;
+const TOKEN_END_SPACE = /(?<=[%)>]) /g;
 
-function dropSpaces(declaration: string): string {
-  return declaration.replaceAll(' ', '');
+function dropTokenEndSpaces(declaration: string): string {
+  return declaration.replace(TOKEN_END_SPACE, '');
 }
 
 /** What both compilers must agree on, with names and formatting normalized. */
@@ -53,7 +57,11 @@ interface Artifacts {
   sheets: string[];
   /** `sheet_N = "<scope id>"` constants, in order. */
   scopes: string[];
-  /** Calls to runtime helpers and `vars_N` outside JSX, in order. */
+  /**
+   * Calls to runtime helpers and `vars_N` outside JSX attribute values, in
+   * order, each with the path of its enclosing functions (`<module>` at the
+   * top level).
+   */
   calls: string[];
   /** Per JSX opening element: its own attributes, then the added ones. */
   elements: string[];
@@ -172,6 +180,7 @@ function renderAttributeName(name: Node): string {
   return name.name;
 }
 
+/** True for `s:*` and for any `style`, the user's own included. */
 function isAddedAttribute(attribute: Node): boolean {
   if (attribute.type !== 'JSXAttribute') {
     return false;
@@ -206,18 +215,24 @@ function renderElementName(name: Node): string {
  * and `style` right after the element name, 0.12.1 appends them after the
  * other attributes, and an existing `style` keeps its place. Between
  * attributes with different names the position has no runtime effect, so the
- * record keeps the element's own attributes in order and the added ones
- * sorted. A spread attribute is the exception: see the `it.fails` below.
+ * record keeps the element's own attributes in order and sorts the added ones
+ * (`s:*` and `style`). A spread attribute is the exception: it can hold a
+ * `style` of its own, so each added attribute keeps the number of spreads
+ * before it, and the sort only reorders attributes between the same spreads.
  */
 function recordElement(node: Node, collector: Collector): void {
   const own: string[] = [];
   const added: string[] = [];
+  let spreads = 0;
   for (const attribute of node.attributes) {
     const rendered = renderAttribute(attribute, collector.aliases);
     if (isAddedAttribute(attribute)) {
-      added.push(rendered);
+      added.push(`${spreads}:${rendered}`);
     } else {
       own.push(rendered);
+    }
+    if (attribute.type === 'JSXSpreadAttribute') {
+      spreads += 1;
     }
   }
   added.sort();
@@ -255,14 +270,48 @@ function isRuntimeCall(node: Node, aliases: Map<string, string>): boolean {
   return VARS_ID.test(name) || RUNTIME_HELPERS.has(aliases.get(name) ?? '');
 }
 
+/** Where the walk is: the enclosing functions, and whether it is in an attribute value. */
+interface Place {
+  scope: string;
+  inAttribute: boolean;
+  /** The declared name for a function that is the `init` of a declarator. */
+  hint: string | null;
+}
+
+const FUNCTION_TYPES = new Set([
+  'FunctionDeclaration',
+  'FunctionExpression',
+  'ArrowFunctionExpression',
+]);
+
+function enterFunction(record: Node, place: Place): string {
+  const name: string = record.id?.name ?? place.hint ?? '<anonymous>';
+  return place.scope === '<module>' ? name : `${place.scope} > ${name}`;
+}
+
+/** Computes the place of one child of `record`, found under `key`. */
+function placeChild(record: Node, key: string, place: Place): Place {
+  const scope = FUNCTION_TYPES.has(record.type) ? enterFunction(record, place) : place.scope;
+  // `elements` already prints every attribute value, calls included.
+  const inAttribute =
+    place.inAttribute ||
+    (record.type === 'JSXAttribute' && key === 'value') ||
+    (record.type === 'JSXSpreadAttribute' && key === 'argument');
+  const hint =
+    record.type === 'VariableDeclarator' && key === 'init' && record.id.type === 'Identifier'
+      ? (record.id.name as string)
+      : null;
+  return { scope, inAttribute, hint };
+}
+
 /** Walks the tree and records every artifact. JSX attributes are recorded per element. */
-function walk(node: unknown, collector: Collector, inJsx: boolean): void {
+function walk(node: unknown, collector: Collector, place: Place): void {
   if (node === null || typeof node !== 'object') {
     return;
   }
   if (Array.isArray(node)) {
     for (const child of node) {
-      walk(child, collector, inJsx);
+      walk(child, collector, place);
     }
     return;
   }
@@ -278,15 +327,14 @@ function walk(node: unknown, collector: Collector, inJsx: boolean): void {
       recordTemplate(record, collector);
       break;
     case 'CallExpression':
-      if (!inJsx && isRuntimeCall(record, collector.aliases)) {
-        collector.artifacts.calls.push(renderNode(record, collector.aliases));
+      if (!place.inAttribute && isRuntimeCall(record, collector.aliases)) {
+        collector.artifacts.calls.push(`${place.scope}: ${renderNode(record, collector.aliases)}`);
       }
       break;
   }
-  const childInJsx = inJsx || record.type === 'JSXElement' || record.type === 'JSXFragment';
   for (const key in record) {
     if (key !== 'parent') {
-      walk(record[key], collector, childInJsx);
+      walk(record[key], collector, placeChild(record, key, place));
     }
   }
 }
@@ -305,7 +353,7 @@ function extractArtifacts(code: string, markers: readonly string[]): Artifacts {
   for (const marker of markers) {
     collector.artifacts.compiled[marker] = true;
   }
-  walk(program, collector, false);
+  walk(program, collector, { scope: '<module>', inAttribute: false, hint: null });
   return collector.artifacts;
 }
 
@@ -313,7 +361,9 @@ function extractArtifacts(code: string, markers: readonly string[]): Artifacts {
 function normalizeUnits(artifacts: Artifacts, pattern: RegExp): Artifacts {
   const sheets: string[] = [];
   for (const sheet of artifacts.sheets) {
-    sheets.push(sheet.replace(pattern, '<unit $1 $2>').replace(UNIT_DECLARATION, dropSpaces));
+    sheets.push(
+      sheet.replace(pattern, '<unit $1 $2>').replace(UNIT_DECLARATION, dropTokenEndSpaces),
+    );
   }
   return { ...artifacts, sheets };
 }
@@ -387,25 +437,6 @@ async function expectSameOutput(
   expect(actual).toEqual(expected);
 }
 
-/** Lists the attributes of the first JSX opening element, in source order. */
-function listFirstAttributes(node: unknown, attributes: string[]): void {
-  if (node === null || typeof node !== 'object' || attributes.length > 0) {
-    return;
-  }
-  const record = node as Node;
-  if (record.type === 'JSXOpeningElement') {
-    for (const attribute of record.attributes) {
-      attributes.push(renderAttribute(attribute, new Map()));
-    }
-    return;
-  }
-  for (const key in record) {
-    if (key !== 'parent') {
-      listFirstAttributes(record[key], attributes);
-    }
-  }
-}
-
 const FILE = 'src/index.tsx';
 
 describe('oracle: solid-styled 0.12.1', () => {
@@ -437,15 +468,32 @@ describe('oracle: solid-styled 0.12.1', () => {
     await expectSameOutput(FILE, code, ['/*t1*/'], {});
   });
 
+  // An element in a nested function gets the scope and the CSS variables of
+  // every enclosing function that calls `css`, outermost first. The
+  // generators only put elements in the component body.
+  it('scopes an element in a nested function with both sheets', async () => {
+    const code = `import { css } from 'solid-styled';
+export function C(props: any) {
+  css\`/*t1*/a { color: \${props.c}; }\`;
+  function Inner() {
+    css\`/*t2*/b { margin: 0 \${props.m}px; }\`;
+    return <a style={props.s} id="x" />;
+  }
+  return <div>{Inner()}<b /></div>;
+}
+`;
+    await expectSameOutput(FILE, code, ['/*t1*/', '/*t2*/'], {});
+  });
+
   // Bug found while building this oracle, outside what the generators
   // produce. 0.12.1 appends `s:<scope>` and `style={vars_1()}` after a spread,
   // so the CSS variables win over `props.style`. 1.0 inserts them before the
   // spread, so a `style` in the spread replaces the variables and the
-  // interpolated values are lost. Turns red once 1.0 keeps them after it.
-  it.fails('keeps the added attributes after a spread attribute', () => {
-    const code = `import { css } from 'solid-styled';\nexport function C(props: any) {\ncss\`a { color: \${props.c}; }\`;\nreturn <a {...props} />;\n}\n`;
-    const attributes: string[] = [];
-    listFirstAttributes(parseOutput(compile(FILE, code).code), attributes);
-    expect(attributes).toEqual(['{...props}', 's:c-186be8d0-0', 'style={vars_1()}']);
+  // interpolated values are lost. The oracle flags it: the added attributes
+  // sit before the spread in 1.0 and after it in 0.12.1. Turns red once 1.0
+  // keeps them after it.
+  it.fails('keeps the added attributes after a spread attribute', async () => {
+    const code = `import { css } from 'solid-styled';\nexport function C(props: any) {\ncss\`/*t1*/a { color: \${props.c}; }\`;\nreturn <a {...props} />;\n}\n`;
+    await expectSameOutput(FILE, code, ['/*t1*/'], {});
   });
 });
