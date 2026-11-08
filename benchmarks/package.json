@@ -1,0 +1,27 @@
+{
+  "name": "benchmarks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bench": "node bench.ts",
+    "bench:suspects": "node suspects.ts",
+    "bench:profile": "node --cpu-prof --cpu-prof-dir=profiles --cpu-prof-interval=100 profile.ts && node scripts/attribute.ts profiles",
+    "bench:count": "node scripts/count-calls.ts",
+    "bench:raw-transfer": "node scripts/raw-transfer-check.ts",
+    "generate": "node scripts/generate-large.ts && oxfmt fixtures/large.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/css-tree": "^3.2.0",
+    "@types/node": "^26.6.6",
+    "browserslist": "^4.29.5",
+    "css-tree": "^3.2.1",
+    "lightningcss": "^1.33.0",
+    "magic-string": "^1.4.5",
+    "oxc-parser": "^0.157.0",
+    "solid-styled": "workspace:*",
+    "tinybench": "^6.2.3",
+    "typescript": "^7.0.2",
+    "unplugin-solid-styled": "workspace:*"
+  }
+}
