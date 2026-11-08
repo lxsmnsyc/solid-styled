@@ -487,14 +487,16 @@ export function C(props: any) {
 
   // Intended difference, outside what the generators produce. With a spread,
   // 0.12.1 appends `s:<scope>` and `style={vars_1()}` after it, so the CSS
-  // variables replace `props.style`. 1.0 also places them after the spread
-  // but merges the spread's style with the variables (#71), so both survive.
-  // The oracle cannot compare this case, so it checks the 1.0 output alone.
+  // variables replace `props.style`. 1.0 places `s:<scope>` after the spread
+  // and wraps the spread in `spreadStyle`, which merges its style with the
+  // variables (#71), so both survive. A `style={vars_1()}` before the spread
+  // covers a spread without a style. The oracle cannot compare this case, so
+  // it checks the 1.0 output alone.
   it('merges a spread style with the CSS variables', () => {
     const code = `import { css } from 'solid-styled';\nexport function C(props: any) {\ncss\`/*t1*/a { color: \${props.c}; }\`;\nreturn <a {...props} />;\n}\n`;
     const output = compile(FILE, code).code;
     expect(output).toMatch(
-      /<a \{\.\.\.props\} s:[\w-]+ style=\{_mergeStyles\(props\?\.style, vars_1\(\)\)\} \/>/,
+      /<a style=\{vars_1\(\)\} \{\.\.\._spreadStyle\(props, vars_1\)\} s:[\w-]+ \/>/,
     );
   });
 });

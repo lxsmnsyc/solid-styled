@@ -1,6 +1,8 @@
 import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vitest';
-import { transform } from './util';
+import { compile } from '../compiler';
+import { spreadStyle } from '../src/core';
+import { FILE, options, transform } from './util';
 
 describe('element scoping', () => {
   it('should scope host elements only', () => {
@@ -187,11 +189,11 @@ describe('spread attributes', () => {
   const STATIC = 'css`button { color: red; }`;';
 
   /** Wraps a return value in a component that owns the given sheet. */
-  function wrapComponent(body: string, sheet = DYNAMIC): string {
+  function wrapComponent(body: string, sheet = DYNAMIC, head = 'function Button(props)'): string {
     return `
 import { css } from 'solid-styled';
 
-export function Button(props) {
+export ${head} {
   ${sheet}
   return ${body};
 }
@@ -208,62 +210,42 @@ export function Button(props) {
     return result.replaceAll(`s:${scope!}`, 's:S');
   }
 
-  /**
-   * Runs the generated `style` expression with stub helpers, so a test can
-   * check what it resolves to for given spread values.
-   */
-  function runStyle(result: string, names: string[], values: unknown[]): unknown {
-    const expression = /style=\{(_mergeStyles\(.*\))\}/.exec(result)?.[1];
-    expect(expression).toBeDefined();
-    // The test runs the compiled expression on purpose.
-    // oxlint-disable-next-line no-new-func, typescript/no-implied-eval
-    const run = new Function('_mergeStyles', 'vars_1', ...names, `return ${expression!};`);
-    function mergeStub(base: unknown, vars: unknown): unknown {
-      return [base, vars];
-    }
-    function varsStub(): string {
-      return 'vars';
-    }
-    return run(mergeStub, varsStub, ...values);
-  }
-
   it('should merge the style of a single spread', () => {
     const result = compileSpread(wrapComponent('<button {...props} />'));
-    expect(result).toContain(
-      '<button {...props} s:S style={_mergeStyles(props?.style, vars_1())} />',
-    );
+    expect(result).toContain('<button style={vars_1()} {..._spreadStyle(props, vars_1)} s:S />');
   });
 
   it('should merge an explicit style that follows the spread', () => {
     const result = compileSpread(wrapComponent('<button {...props} style={x} />'));
     expect(result).toContain('<button {...props} s:S style={_mergeStyles(x, vars_1())} />');
+    expect(result).not.toContain('_spreadStyle');
   });
 
-  it('should prefer the spread style over an explicit style before it', () => {
+  it('should merge an explicit style before the spread in place', () => {
     const result = compileSpread(wrapComponent('<button style={x} {...props} />'));
     expect(result).toContain(
-      '<button {...props} s:S style={_mergeStyles((props != null && "style" in props ? props.style : x), vars_1())} />',
+      '<button style={_mergeStyles(x, vars_1())} {..._spreadStyle(props, vars_1)} s:S />',
     );
   });
 
-  it('should take a string style before the spread as the fallback', () => {
+  it('should merge a string style before the spread in place', () => {
     const result = compileSpread(wrapComponent('<button style="color: blue" {...props} />'));
     expect(result).toContain(
-      '<button {...props} s:S style={_mergeStyles((props != null && "style" in props ? props.style : "color: blue"), vars_1())} />',
+      '<button style={_mergeStyles("color: blue", vars_1())} {..._spreadStyle(props, vars_1)} s:S />',
     );
   });
 
-  it('should resolve the style across several spreads', () => {
+  it('should wrap every spread', () => {
     const result = compileSpread(wrapComponent('<button {...a} {...props.rest} title="t" />'));
     expect(result).toContain(
-      '<button {...a} {...props.rest} s:S style={_mergeStyles((props.rest != null && "style" in props.rest ? props.rest.style : a?.style), vars_1())} title="t" />',
+      '<button style={vars_1()} {..._spreadStyle(a, vars_1)} {..._spreadStyle(props.rest, vars_1)} s:S title="t" />',
     );
   });
 
-  it('should ignore spreads before the last explicit style', () => {
+  it('should leave spreads before the last explicit style alone', () => {
     const result = compileSpread(wrapComponent('<button {...a} style={x} {...b} />'));
     expect(result).toContain(
-      '<button {...a} {...b} s:S style={_mergeStyles((b != null && "style" in b ? b.style : x), vars_1())} />',
+      '<button {...a} style={_mergeStyles(x, vars_1())} {..._spreadStyle(b, vars_1)} s:S />',
     );
   });
 
@@ -272,58 +254,37 @@ export function Button(props) {
     expect(result).toContain('<div s:S style={a} style={_mergeStyles(b, vars_1())} />');
   });
 
-  it('should skip a nullish spread read directly', () => {
-    const single = compileSpread(wrapComponent('<button {...props.attrs} />'));
-    expect(single).toContain(
-      '<button {...props.attrs} s:S style={_mergeStyles(props.attrs?.style, vars_1())} />',
-    );
-    expect(runStyle(single, ['props'], [{}])).toEqual([undefined, 'vars']);
+  it('should pass every sheet of nested components', () => {
+    const code = `
+import { css } from 'solid-styled';
 
-    const chained = compileSpread(wrapComponent('<button style={x} {...a} {...b} />'));
-    expect(runStyle(chained, ['x', 'a', 'b'], ['base', null, undefined])).toEqual(['base', 'vars']);
-    expect(runStyle(chained, ['x', 'a', 'b'], ['base', { style: 'a' }, null])).toEqual([
-      'a',
-      'vars',
-    ]);
-    expect(runStyle(chained, ['x', 'a', 'b'], ['base', { style: 'a' }, {}])).toEqual(['a', 'vars']);
-    expect(
-      runStyle(chained, ['x', 'a', 'b'], ['base', { style: 'a' }, { style: undefined }]),
-    ).toEqual([undefined, 'vars']);
+export function Outer(props) {
+  ${DYNAMIC}
+  function Inner(props) {
+    ${DYNAMIC}
+    return <button style={x} {...props} />;
+  }
+  return <Inner />;
+}
+`;
+    const result = transform(code);
+    expect(result).toContain(
+      'style={_mergeStyles(_mergeStyles(x, vars_1()), vars_2())} {..._spreadStyle(props, vars_1, vars_2)}',
+    );
   });
 
-  it('should skip a nullish bound spread', () => {
-    const single = compileSpread(wrapComponent('<button {...maybe()} />'));
-    expect(single).toContain('style={_mergeStyles(_spread_1()?.style, vars_1())}');
-    expect(runStyle(single, ['_spread_1'], [() => undefined])).toEqual([undefined, 'vars']);
-
-    const chained = compileSpread(wrapComponent('<button style={x} {...props?.attrs} />'));
-    expect(chained).toContain(
-      'style={_mergeStyles((_spread_1() != null && "style" in _spread_1() ? _spread_1().style : x), vars_1())}',
-    );
-    expect(runStyle(chained, ['x', '_spread_1'], ['base', () => null])).toEqual(['base', 'vars']);
-  });
-
-  it('should evaluate a spread call once and keep it reactive', () => {
+  it('should evaluate a spread call once, in place', () => {
     const result = compileSpread(wrapComponent('<button {...getProps()} />'));
     expect(result.split('getProps()')).toHaveLength(2);
     expect(result).toContain(
-      'return ((_spread_1) => <button {..._spread_1()} s:S style={_mergeStyles(_spread_1()?.style, vars_1())} />)(_trackSpread(() => getProps()));',
+      'return <button style={vars_1()} {..._spreadStyle(getProps(), vars_1)} s:S />;',
     );
   });
 
-  it('should bind every spread call the style reads', () => {
-    const result = compileSpread(wrapComponent('<button {...getA()} title="t" {...getB()} />'));
-    expect(result.split('getA()')).toHaveLength(2);
-    expect(result.split('getB()')).toHaveLength(2);
-    expect(result).toContain(
-      '((_spread_1, _spread_2) => <button {..._spread_1()} title="t" {..._spread_2()} s:S style={_mergeStyles((_spread_2() != null && "style" in _spread_2() ? _spread_2().style : _spread_1()?.style), vars_1())} />)(_trackSpread(() => getA()), _trackSpread(() => getB()))',
-    );
-  });
-
-  it('should wrap a bound element in braces when it is a JSX child', () => {
+  it('should keep a spread element inside its parent template', () => {
     const result = compileSpread(wrapComponent('<div><button {...getProps()} /></div>'));
     expect(result).toContain(
-      'return <div s:S style={vars_1()}>{((_spread_1) => <button {..._spread_1()} s:S style={_mergeStyles(_spread_1()?.style, vars_1())} />)(_trackSpread(() => getProps()))}</div>;',
+      'return <div s:S style={vars_1()}><button style={vars_1()} {..._spreadStyle(getProps(), vars_1)} s:S /></div>;',
     );
   });
 
@@ -331,12 +292,13 @@ export function Button(props) {
     const result = compileSpread(wrapComponent('<button {...getProps()} />', STATIC));
     expect(result).toContain('<button {...getProps()} s:S />');
     expect(result).not.toContain('style=');
+    expect(result).not.toContain('_spreadStyle');
   });
 
   it('should apply the same rules to `use:solid-styled`', () => {
     const result = compileSpread(wrapComponent('<Custom style={x} {...props} use:solid-styled />'));
     expect(result).toContain(
-      '<Custom {...props} s:S style={_mergeStyles((props != null && "style" in props ? props.style : x), vars_1())} />',
+      '<Custom style={_mergeStyles(x, vars_1())} {..._spreadStyle(props, vars_1)} s:S />',
     );
   });
 
@@ -352,8 +314,183 @@ export function Button(props) {
 }
 `;
     const result = compileSpread(code);
+    expect(result).toContain('<button style={vars_1()} {..._spreadStyle(props, vars_1)} s:S />');
+  });
+
+  // The review of #71 found these cases broke when the spread was copied
+  // into `_trackSpread(() => ...)` and the explicit style moved.
+  it('should keep object literal and sequence spreads', () => {
+    const literal = compileSpread(wrapComponent("<div {...{ id: 'x', title: 'y' }} />"));
+    expect(literal).toContain("{..._spreadStyle({ id: 'x', title: 'y' }, vars_1)}");
+
+    const sequence = compileSpread(wrapComponent('<div {...(a, b)} />'));
+    expect(sequence).toContain('{...(_spreadStyle((a, b), vars_1))}');
+  });
+
+  it('should scope JSX inside a spread argument', () => {
+    const conditional = compileSpread(
+      wrapComponent('<div {...(props.x ? { children: <b /> } : {})} />'),
+    );
+    expect(conditional).toContain(
+      '{...(_spreadStyle(props.x ? { children: <b s:S style={vars_1()} /> } : {}, vars_1))}',
+    );
+
+    const component = compileSpread(
+      wrapComponent(
+        '<Show {...merge(props, { get fallback() { return <i />; } })} use:solid-styled />',
+      ),
+    );
+    expect(component).toContain(
+      '<Show style={vars_1()} {..._spreadStyle(merge(props, { get fallback() { return <i s:S style={vars_1()} />; } }), vars_1)} s:S />',
+    );
+  });
+
+  it('should keep an SVG child in its parent template', () => {
+    const result = compileSpread(wrapComponent('<svg><a {...getP()} href="#x" /></svg>'));
     expect(result).toContain(
-      '<button {...props} s:S style={_mergeStyles(props?.style, vars_1())} />',
+      'return <svg s:S style={vars_1()}><a style={vars_1()} {..._spreadStyle(getP(), vars_1)} s:S href="#x" /></svg>;',
+    );
+  });
+
+  it('should keep `await` and `yield` in their function', () => {
+    const awaited = compileSpread(
+      wrapComponent('<div {...await props.p} />', DYNAMIC, 'async function Button(props)'),
+    );
+    expect(awaited).toContain('{..._spreadStyle(await props.p, vars_1)}');
+
+    const yielded = compileSpread(
+      wrapComponent('<div {...(yield props.p)} />', DYNAMIC, 'function* Button(props)'),
+    );
+    expect(yielded).toContain('{...(_spreadStyle(yield props.p, vars_1))}');
+  });
+
+  it('should scope JSX inside an explicit style before a spread', () => {
+    const plain = compileSpread(wrapComponent('<div style={f(<i />)} {...props} />'));
+    expect(plain).toContain(
+      '<div style={_mergeStyles(f(<i s:S style={vars_1()} />), vars_1())} {..._spreadStyle(props, vars_1)} s:S />',
+    );
+
+    const spread = compileSpread(wrapComponent('<div style={f(<i {...g()} />)} {...p()} />'));
+    expect(spread).toContain(
+      '<div style={_mergeStyles(f(<i style={vars_1()} {..._spreadStyle(g(), vars_1)} s:S />), vars_1())} {..._spreadStyle(p(), vars_1)} s:S />',
+    );
+  });
+
+  it('should map a token inside the spread to its original column', () => {
+    const code = wrapComponent('<button {...getProps(token)} />');
+    const { code: output, map } = compile(FILE, code, options);
+    const original = locate(code, 'token');
+    const generated = locate(output, 'token');
+    expect(generated.column).not.toBe(original.column);
+    expect(findOriginal(map.mappings, generated)).toEqual({
+      line: original.line,
+      column: original.column,
+    });
+  });
+});
+
+describe('spreadStyle', () => {
+  function vars(): Record<string, string> {
+    return { '--v': 'red' };
+  }
+
+  it('should return a source without a style key as is', () => {
+    const source = { id: 'x' };
+    expect(spreadStyle(source, vars)).toBe(source);
+    expect(spreadStyle(null, vars)).toBeNull();
+    expect(spreadStyle(undefined, vars)).toBeUndefined();
+  });
+
+  it('should merge the variables into a style key', () => {
+    expect(spreadStyle({ id: 'x', style: 'top: 1px' }, vars)).toEqual({
+      id: 'x',
+      style: 'top: 1px;--v:red;',
+    });
+    expect(spreadStyle({ style: { top: '2px' } }, vars)).toHaveProperty(
+      'style',
+      'top:2px;;--v:red;',
+    );
+    // A style key without a value still wins, as in Solid.
+    expect(spreadStyle({ style: undefined }, vars)).toHaveProperty('style', '--v:red;');
+  });
+
+  it('should read the source style on each access', () => {
+    let style = 'top: 1px';
+    const source = {
+      get style() {
+        return style;
+      },
+    };
+    const merged = spreadStyle(source, vars);
+    expect(merged).toHaveProperty('style', 'top: 1px;--v:red;');
+    style = 'top: 2px';
+    expect(merged).toHaveProperty('style', 'top: 2px;--v:red;');
+  });
+
+  it('should merge every sheet in order', () => {
+    function inner(): Record<string, string> {
+      return { '--w': 'blue' };
+    }
+    expect(spreadStyle({ style: 'a: b' }, vars, inner)).toHaveProperty(
+      'style',
+      'a: b;--v:red;;--w:blue;',
     );
   });
 });
+
+interface Position {
+  line: number;
+  column: number;
+}
+
+/** Zero-based line and column of the first `needle` in `code`. */
+function locate(code: string, needle: string): Position {
+  const lines = code.slice(0, code.indexOf(needle)).split('\n');
+  return { line: lines.length - 1, column: lines[lines.length - 1].length };
+}
+
+const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+/** Decodes one line of a source map's VLQ mappings into number groups. */
+function decodeLine(line: string): number[][] {
+  const segments: number[][] = [];
+  for (const segment of line.split(',')) {
+    const values: number[] = [];
+    let value = 0;
+    let shift = 0;
+    for (const char of segment) {
+      const digit = BASE64.indexOf(char);
+      value += (digit & 31) << shift;
+      if (digit & 32) {
+        shift += 5;
+      } else {
+        values.push(value & 1 ? -(value >>> 1) : value >>> 1);
+        value = 0;
+        shift = 0;
+      }
+    }
+    segments.push(values);
+  }
+  return segments;
+}
+
+/** The original position a generated position maps to. */
+function findOriginal(mappings: string, generated: Position): Position | undefined {
+  let line = 0;
+  let column = 0;
+  for (const [index, text] of mappings.split(';').entries()) {
+    let generatedColumn = 0;
+    for (const segment of decodeLine(text)) {
+      if (segment.length < 4) {
+        continue;
+      }
+      generatedColumn += segment[0];
+      line += segment[2];
+      column += segment[3];
+      if (index === generated.line && generatedColumn === generated.column) {
+        return { line, column };
+      }
+    }
+  }
+  return undefined;
+}

@@ -4,6 +4,7 @@ import {
   createContext,
   createEffect,
   createMemo,
+  merge,
   onCleanup,
   untrack,
   useContext,
@@ -240,12 +241,33 @@ export function mergeStyles(
 }
 
 /**
- * Compiler helper for a spread the generated `style` also reads, such as
- * `{...getProps()}`. The memo runs the expression once per change, and the
- * spread and the `style` both read the memo.
+ * Compiler helper for a spread on an element with CSS variables:
+ * `{...source}` becomes `{...spreadStyle(source, vars_1)}`. A source with a
+ * `style` key gets that style merged with the variables, through `merge` so
+ * getters and reactivity survive. Any other source is returned as is, so the
+ * key set, and which source wins `style`, does not change.
  */
-export function trackSpread<T>(source: () => T): () => T {
-  return createMemo(source);
+export function spreadStyle(source: unknown, ...varsList: CSSVars[]): unknown {
+  if (!hasStyleKey(source)) {
+    return source;
+  }
+  return merge(source, {
+    get style() {
+      let style = source.style;
+      for (const vars of varsList) {
+        style = mergeStyles(style, vars() ?? {});
+      }
+      return style;
+    },
+  });
+}
+
+interface StyledSource {
+  style?: JSX.CSSProperties | string | null;
+}
+
+function hasStyleKey(source: unknown): source is StyledSource {
+  return source != null && typeof source === 'object' && 'style' in source;
 }
 
 export function renderSheets(sheets: StyleData[]): string {
