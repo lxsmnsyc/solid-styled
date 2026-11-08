@@ -4,7 +4,7 @@ run: parallel
 review: auto
 merge:
   mode: maintainer
-# Releases publish whatever changesets are on 1.0 when the version PR merges.
+# Releases publish whatever changesets are on main when the version PR merges.
 # Work does not wait for a publish, so the fence covers only pre.json.
 release:
   publish: changesets
@@ -16,11 +16,11 @@ release:
 
 ## Outcome
 
-The `1.0` branch ships `1.0.0-next.2` with current dependencies (Solid 2.0 rc.21, oxc-parser 0.157) and fixes for every open compiler bug (#49, #50). Before the stable `1.0.0`, the compiler is covered by property-based, model-based and oracle tests, its compile time is measured and improved with evidence, and the project has a redesigned website.
+`main` (1.0) ships `1.0.0-next.2` with current dependencies (Solid 2.0 rc.21, oxc-parser 0.157) and fixes for every open compiler bug (#49, #50). Before the stable `1.0.0`, the compiler is covered by property-based, model-based and oracle tests, its compile time is measured and improved with evidence, and the project has a redesigned website.
 
 ## Acceptance
 
-- `pnpm install --frozen-lockfile && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e` passes on `1.0`.
+- `pnpm install --frozen-lockfile && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e` passes on `main`.
 - Issues #49 and #50 are closed by merged PRs. Issues #19, #23, #26, #33, #34 and #40 have an answer or a parked node.
 - The differential test against `solid-styled@0.12.1` and the property tests run in `pnpm test`.
 - A benchmark in `benchmarks/` reports compile time before and after the perf work.
@@ -37,6 +37,7 @@ The `1.0` branch ships `1.0.0-next.2` with current dependencies (Solid 2.0 rc.21
 - All PRs target `main`. Since 2026-11-08, `main` holds 1.0 (moved from the `1.0` branch) and `0.x` holds the 0.x line in maintenance mode: no new features there.
 - Compiler output stays byte for byte the same as 0.12.1 for inputs both compilers accept, unless a node fixes a bug in that output (then the changeset says so).
 - The repo is public, so CI runs on PRs. Open PRs as drafts until the review is clean.
+- `preprocess-css.ts` and `process-scoped-sheet.ts` are edited by the three `@global` fixes and `perf-compiler`, so these run one after another. They are not split first, because `spike-css-pipeline` decides which pipeline those files keep.
 - Changesets in pre mode (`next` tag). Every user-facing change adds a changeset.
 
 ## Non-goals
@@ -57,7 +58,7 @@ The `1.0` branch ships `1.0.0-next.2` with current dependencies (Solid 2.0 rc.21
 ## Sources
 
 - Open issues: #19, #23, #26, #33, #34, #40, #49, #50.
-- PR #43 (`1.0` branch description).
+- PR #43 (description of the former `1.0` branch, merged into `main` by #75).
 
 ## Coverage
 
@@ -67,6 +68,7 @@ The `1.0` branch ships `1.0.0-next.2` with current dependencies (Solid 2.0 rc.21
 - perf improvements -> bench-baseline, perf-compiler
 - website redesign -> website (no site exists; new `website/` app on Solid 2.0 and `@solidjs/vite-plugin`, decided 2026-11-08)
 - release -> release-next-2, release-1-0
+- found during 1.0 review (2026-11-08): fix-spread-style, fix-namespace-shadowing, fix-style-anchor-unbraced, fix-release-polish (done); fix-style-jsx-bare-expression, fix-style-jsx-arrow-body, fix-unicode-range-global, fix-css-tag-number-type (listed in `docs/known-limits.md`)
 
 ## Open questions
 

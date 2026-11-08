@@ -10,3 +10,5 @@
 
 - 0.x `rollup-plugin-solid-styled` and `vite-plugin-solid-styled` CommonJS builds export `undefined` as default (0.11.1 and 0.12.1). This caused #34. Both packages are removed in 1.0.
 - README doc links must switch from `blob/1.0` to `main` when `1.0` merges into `main` (release-1-0).
+
+Later, #78 removed `docs/setup.md` and moved its content into the restructured guides in `docs/`.
