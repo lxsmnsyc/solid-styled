@@ -1,7 +1,7 @@
 ---
 id: fix-media-compile-error
 title: Throw CompileError for CSS errors from LightningCSS
-status: todo
+status: active
 priority: should
 type: fix
 milestone: '1.0'

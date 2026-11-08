@@ -4,9 +4,11 @@ run: parallel
 review: auto
 merge:
   mode: maintainer
+# Releases publish whatever changesets are on 1.0 when the version PR merges.
+# Work does not wait for a publish, so the fence covers only pre.json.
 release:
   publish: changesets
-  paths: [packages/**]
+  paths: [.changeset/pre.json]
   fence: merge
 ---
 
