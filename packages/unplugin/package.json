@@ -1,6 +1,6 @@
 {
   "name": "unplugin-solid-styled",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "private": false,
   "description": "Unplugin for solid-styled",
   "keywords": [
@@ -43,14 +43,14 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
-    "solid-styled": "1.0.0-next.1",
+    "solid-styled": "1.0.0-next.2",
     "tsdown": "^0.23.7",
     "tslib": "^2.9.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.6"
   },
   "peerDependencies": {
-    "solid-styled": ">=1.0.0-next.1",
+    "solid-styled": ">=1.0.0-next.2",
     "vite": ">=8"
   },
   "peerDependenciesMeta": {
