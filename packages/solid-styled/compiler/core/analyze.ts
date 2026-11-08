@@ -129,6 +129,69 @@ function hoistStatements(body: Node[], names: Set<string>): void {
   }
 }
 
+/**
+ * Declares every `var` binding in a statement list, including those in nested
+ * blocks, loops, `switch` cases and `try` blocks. It does not enter functions
+ * or classes, since a `var` inside them stays inside them.
+ */
+function hoistVars(body: Node[], names: Set<string>): void {
+  for (const statement of body) {
+    hoistVarsInStatement(statement, names);
+  }
+}
+
+function hoistVarsInStatement(statement: Node | null, names: Set<string>): void {
+  if (!statement) {
+    return;
+  }
+  switch (statement.type) {
+    case 'VariableDeclaration':
+      if (statement.kind === 'var') {
+        for (const declarator of statement.declarations) {
+          declarePattern(declarator.id, names);
+        }
+      }
+      break;
+    case 'BlockStatement':
+      hoistVars(statement.body, names);
+      break;
+    case 'IfStatement':
+      hoistVarsInStatement(statement.consequent, names);
+      hoistVarsInStatement(statement.alternate, names);
+      break;
+    case 'ForStatement':
+      hoistVarsInStatement(statement.init, names);
+      hoistVarsInStatement(statement.body, names);
+      break;
+    case 'ForInStatement':
+    case 'ForOfStatement':
+      hoistVarsInStatement(statement.left, names);
+      hoistVarsInStatement(statement.body, names);
+      break;
+    case 'WhileStatement':
+    case 'DoWhileStatement':
+    case 'LabeledStatement':
+    case 'WithStatement':
+      hoistVarsInStatement(statement.body, names);
+      break;
+    case 'TryStatement':
+      hoistVarsInStatement(statement.block, names);
+      hoistVarsInStatement(statement.handler?.body, names);
+      hoistVarsInStatement(statement.finalizer, names);
+      break;
+    case 'SwitchStatement':
+      for (const clause of statement.cases) {
+        hoistVars(clause.consequent, names);
+      }
+      break;
+    case 'ExportNamedDeclaration':
+      hoistVarsInStatement(statement.declaration, names);
+      break;
+    default:
+      break;
+  }
+}
+
 function isStyleJSXElement(element: Node): boolean {
   const opening = element.openingElement;
   return (
@@ -194,6 +257,7 @@ export function analyze(program: Node): Analysis {
   }
 
   hoistStatements(program.body, moduleNames);
+  hoistVars(program.body, moduleNames);
 
   const scopes: Set<string>[] = [];
   const fnStack: Node[] = [];
@@ -241,10 +305,30 @@ export function analyze(program: Node): Analysis {
         for (const param of node.params) {
           declarePattern(param, names);
         }
+        // `var` anywhere in the body is visible in the whole function.
+        if (node.body.type === 'BlockStatement') {
+          hoistVars(node.body.body, names);
+        }
+        break;
+      case 'StaticBlock':
+        // A static block is its own `var` scope.
+        hoistVars(node.body, names);
+        hoistStatements(node.body, names);
         break;
       case 'BlockStatement':
-      case 'StaticBlock':
         hoistStatements(node.body, names);
+        break;
+      case 'SwitchStatement':
+        // Declarations in any `case` are visible in the whole switch body.
+        for (const clause of node.cases) {
+          hoistStatements(clause.consequent, names);
+        }
+        break;
+      case 'ClassExpression':
+        // A class expression name is visible only inside the class.
+        if (node.id) {
+          names.add(node.id.name);
+        }
         break;
       case 'ForStatement':
         if (node.init?.type === 'VariableDeclaration') {
