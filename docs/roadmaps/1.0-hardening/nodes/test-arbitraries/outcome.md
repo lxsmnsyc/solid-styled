@@ -23,7 +23,7 @@ Exports (all use `import fc from 'fast-check'`):
 
 - A template has `compiled: true` when it must become a `useSolidStyled` or `useSolidStyledGlobal` call: every `<style jsx>` template (global or not), and every `css` template whose tag still resolves to the `solid-styled` import.
 - Check a compile with `countCompiled(output) === templates.filter(compiled).length`, and for each template: `output.includes('`' + marker) === !compiled`. Compiling minifies the marker comment away.
-- Import forms: `named`, `aliased` (`css as c`), `namespace` (`s.css`), `with-type` (`{ css, type CSSProperties }`), `default-and-named`, `two-aliases` (`{ css, css as c }`, both used), `type-only`, `type-specifier`, `foreign`, `none`. Type imports must not compile. They are left out of `DEFAULT_IMPORT_FORMS` because of a compiler bug (below). With `none`, only `<style jsx>` is generated.
+- Import forms: `named`, `aliased` (`css as c`), `namespace` (`s.css`), `with-type` (`{ css, type CSSProperties }`), `default-and-named`, `two-aliases` (`{ css, css as c }`, both used), `type-only`, `type-specifier`, `foreign`, `none`. Type imports must not compile. They joined `DEFAULT_IMPORT_FORMS` once #63 fixed the compiler. With `none`, only `<style jsx>` is generated.
 - Shadow kinds (each untouched): `let`, `const`, `var-nested`, `var-later`, `var-later-top`, `var-destructured`, `var-labeled`, `parameter`, `parameter-destructured`, `parameter-default`, `class-name`, `class-expression-name`, `switch-case`, `switch-other-case`, `catch-param`, `for-var`, `for-of-var`, `for-let-of`, `function-expression-name`.
 - Control kinds (each compiled): `switch-outside`, `class-expression-outside`, `for-let-of-outside`, `catch-outside`, `function-expression-outside`, `var-in-sibling-function`, `var-in-arrow`, `var-in-static-block`, `nested-callback` (a `css` call inside a callback in the component).
 - A `FUNCTION_SCOPED_SHADOWS` kind hides its local from every template in its component. With `two-aliases`, it hides only the alias it declares.
@@ -38,7 +38,7 @@ Exports (all use `import fc from 'fast-check'`):
 
 ## Compiler bugs found
 
-Kept as `it.fails` in `arbitraries.test.ts` under "known compiler bugs". Not fixed here.
+Kept in `arbitraries.test.ts` under "compiler bugs found by the generators". The type import and exported arrow bugs are fixed (#63, #64) and are now plain regression tests. The `@media` case is still `it.fails` (node `fix-media-compile-error`).
 
 - `import type { css }` and `import { type css }` still compile. 0.12.1 leaves them alone.
 - An exported expression-body arrow with a static `<style jsx>` emits `export _useSolidStyled(sheet_1, 1, css_1);\nconst C = ...`, which does not parse. 0.12.1 emits valid code. Both put the call at module level.

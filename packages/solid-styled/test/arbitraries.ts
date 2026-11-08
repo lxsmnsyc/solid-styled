@@ -346,11 +346,7 @@ export const IMPORT_FORMS: ImportForm[] = [
   'none',
 ];
 
-/**
- * The forms `component()` draws from by default. The type import forms are
- * left out: the compiler still compiles their templates (see the `it.fails`
- * case in arbitraries.test.ts). Pass them in `imports` to test them.
- */
+/** The forms `component()` draws from by default: every form. */
 export const DEFAULT_IMPORT_FORMS: ImportForm[] = [
   'named',
   'aliased',
@@ -358,6 +354,8 @@ export const DEFAULT_IMPORT_FORMS: ImportForm[] = [
   'with-type',
   'default-and-named',
   'two-aliases',
+  'type-only',
+  'type-specifier',
   'foreign',
   'none',
 ];
