@@ -107,10 +107,27 @@ function transformCssTask(ctx: Ctx, task: CssTask): void {
   );
 }
 
+/**
+ * The statement a `<style jsx>` setup call goes before. A declaration that an
+ * `export` wraps resolves to the export, so the call never lands between
+ * `export` and the declaration.
+ */
+function getStyleAnchor(task: StyleTask): Node {
+  const root = task.root;
+  if (
+    (root.type === 'ExportNamedDeclaration' || root.type === 'ExportDefaultDeclaration') &&
+    root.declaration === task.statement
+  ) {
+    return root;
+  }
+  return task.statement;
+}
+
 /** `<style jsx>` — setup calls hoisted before the enclosing statement. */
 function transformStyleTask(ctx: Ctx, task: StyleTask): void {
   const sheet = getSheet(ctx, task.fn, task.root);
-  const indent = indentAt(ctx.code, task.statement.start);
+  const anchor = getStyleAnchor(task);
+  const indent = indentAt(ctx.code, anchor.start);
 
   for (const template of task.templates) {
     const { sheet: compiled, variables } = processCSSTemplate(
@@ -135,7 +152,7 @@ function transformStyleTask(ctx: Ctx, task: StyleTask): void {
       const setup = `${ctx.importIdent(RUNTIME_IDENTIFIERS.useSolidStyled)}(${sheet.id}, ${sheet.count}, ${cssID})`;
       call = computed ? `(${setup}, ${getVars(ctx, task.fn)}(${computed}))` : setup;
     }
-    ctx.s.appendLeft(task.statement.start, `${call};\n${indent}`);
+    ctx.s.appendLeft(anchor.start, `${call};\n${indent}`);
   }
 
   ctx.s.remove(task.element.start, task.element.end);
