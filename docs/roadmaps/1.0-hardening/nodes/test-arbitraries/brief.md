@@ -1,7 +1,7 @@
 ---
 id: test-arbitraries
 status: done
-target: 1.0
+target: main
 ship: auto
 size: M
 gate: false

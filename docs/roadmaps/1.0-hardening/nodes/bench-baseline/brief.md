@@ -1,7 +1,7 @@
 ---
 id: bench-baseline
-status: active
-target: 1.0
+status: done
+target: main
 ship: auto
 size: M
 gate: true

@@ -1,7 +1,7 @@
 ---
 id: release-1-0
 status: todo
-target: 1.0
+target: main
 ship: auto
 size: S
 gate: true
@@ -63,4 +63,4 @@ depends_on:
 
 ## Goal
 
-Exit Changesets pre mode, publish `1.0.0` under `latest`, and decide how `1.0` and `main` merge. Waits for Solid 2.0 stable. Switch README doc links from `blob/1.0` to `main` when `1.0` merges into `main`. Refine when near.
+Exit Changesets pre mode and publish `1.0.0` under `latest`. `1.0` already moved to `main` (2026-11-08), so doc links point at `main`. Waits for Solid 2.0 stable. Refine when near.

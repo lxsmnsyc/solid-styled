@@ -5,7 +5,7 @@ status: done
 priority: must
 type: fix
 milestone: next.2
-target: 1.0
+target: main
 ship: auto
 size: S
 gate: false

@@ -34,7 +34,7 @@ The `1.0` branch ships `1.0.0-next.2` with current dependencies (Solid 2.0 rc.21
 
 ## Constraints
 
-- All PRs target `1.0`. `main` holds 0.x and is not touched.
+- All PRs target `main`. Since 2026-11-08, `main` holds 1.0 (moved from the `1.0` branch) and `0.x` holds the 0.x line in maintenance mode: no new features there.
 - Compiler output stays byte for byte the same as 0.12.1 for inputs both compilers accept, unless a node fixes a bug in that output (then the changeset says so).
 - The repo is public, so CI runs on PRs. Open PRs as drafts until the review is clean.
 - Changesets in pre mode (`next` tag). Every user-facing change adds a changeset.
