@@ -1,4 +1,4 @@
-# Editor
+# Editor and linting
 
 ## Syntax highlighting
 
@@ -49,3 +49,46 @@
 
 - The `when` clause matches `.js`, `.jsx`, `.ts` and `.tsx` files, and skips `.json`. Edit it to match your file types.
 - These keybindings were shared by [@AverTry](https://github.com/AverTry) in [#40](https://github.com/lxsmnsyc/solid-styled/issues/40).
+
+## Linting
+
+- A bare ``css`...`;`` statement is an unused expression to linters. The `no-unused-expressions` rule reports it as `Expected an assignment or function call and instead saw an expression`.
+- Set `allowTaggedTemplates: true` on the rule to allow tagged templates used as statements.
+
+ESLint:
+
+```js
+// eslint.config.js
+export default [
+  {
+    rules: {
+      'no-unused-expressions': ['error', { allowTaggedTemplates: true }],
+    },
+  },
+];
+```
+
+typescript-eslint replaces the core rule, so turn the core rule off and set the option on its own rule:
+
+```js
+// eslint.config.js
+export default [
+  {
+    rules: {
+      'no-unused-expressions': 'off',
+      '@typescript-eslint/no-unused-expressions': ['error', { allowTaggedTemplates: true }],
+    },
+  },
+];
+```
+
+oxlint takes the same option:
+
+```jsonc
+// .oxlintrc.json
+{
+  "rules": {
+    "no-unused-expressions": ["error", { "allowTaggedTemplates": true }],
+  },
+}
+```
