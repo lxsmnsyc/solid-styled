@@ -354,6 +354,7 @@ describe('interpolation', () => {
       fc.assert(
         fc.property(cssTemplate(), ({ source, vars }) => {
           const { sheet: spaced, variables } = processTemplate(source, false);
+          const { code } = parseTemplate(source);
           const sheet = spaced.replaceAll(' ', '');
           expect(variables.length).toBe(vars.length);
 
@@ -387,7 +388,9 @@ describe('interpolation', () => {
 
           for (const [index, expression] of vars.entries()) {
             const id = `--s-v-${NAMESPACE}-${index}`;
-            expect(variables[index]).toBe(`${JSON.stringify(id)}: ${expression}`);
+            const variable = variables[index];
+            expect(variable.id).toBe(id);
+            expect(code.slice(variable.expression.start, variable.expression.end)).toBe(expression);
 
             // LightningCSS may merge, reorder or copy rules, and drops a declaration
             // that a later one overrides. So the sheet order is not checked, and a

@@ -2,7 +2,7 @@ import { type CssTask, type ElementRecord, type StyleTask, hasScopedAttribute } 
 import { type Node, eachChild, indentAt } from './ast';
 import { RUNTIME_IDENTIFIERS, SHEET_ID, SOLID_STYLED_NS, VARS_ID } from './constants';
 import type { Ctx, ScopedSheet } from './context';
-import processCSSTemplate from './process-css-template';
+import processCSSTemplate, { type CSSVariable } from './process-css-template';
 
 const HOST_ELEMENT = /^[a-z]/;
 
@@ -86,8 +86,78 @@ function getVars(ctx: Ctx, fn: Node): string {
   return name;
 }
 
-function computedVarsOf(variables: string[]): string | null {
-  return variables.length > 0 ? `() => ({ ${variables.join(', ')} })` : null;
+/**
+ * Generated code as text pieces around source expressions. Emitting a node
+ * keeps its original chunk, so the source map still points into it.
+ */
+type Part = string | Node;
+
+/** `() => ({ "--id": expression, ... })`, or nothing without variables. */
+function computedVarsParts(variables: CSSVariable[]): Part[] {
+  if (variables.length === 0) {
+    return [];
+  }
+  const parts: Part[] = ['() => ({ '];
+  for (const [index, variable] of variables.entries()) {
+    parts.push(`${index > 0 ? ', ' : ''}${JSON.stringify(variable.id)}: `, variable.expression);
+  }
+  parts.push(' })');
+  return parts;
+}
+
+/** `(setup, vars_N(computed))`, or the bare setup call without variables. */
+function setupParts(ctx: Ctx, fn: Node, setup: string, variables: CSSVariable[]): Part[] {
+  if (variables.length === 0) {
+    return [setup];
+  }
+  return [`(${setup}, ${getVars(ctx, fn)}(`, ...computedVarsParts(variables), '))'];
+}
+
+/**
+ * Replaces `start..end` with the parts. Only the text between the parts'
+ * nodes is overwritten, so the nodes keep their code and mappings.
+ */
+function replaceWithParts(ctx: Ctx, start: number, end: number, parts: Part[]): void {
+  let cursor = start;
+  let text = '';
+  for (const part of parts) {
+    if (typeof part === 'string') {
+      text += part;
+    } else {
+      ctx.s.overwrite(cursor, part.start, text);
+      cursor = part.end;
+      text = '';
+    }
+  }
+  ctx.s.overwrite(cursor, end, text);
+}
+
+/** Inserts text before `anchor`, after anything already hoisted there. */
+function hoistText(ctx: Ctx, anchor: number, text: string): void {
+  if (text === '') {
+    return;
+  }
+  const last = ctx.hoisted.get(anchor);
+  ctx.s.appendLeft(last ?? anchor, text);
+}
+
+/**
+ * Hoists the parts before `anchor` in order. Nodes are moved rather than
+ * copied, so they keep their code and mappings.
+ */
+function hoistParts(ctx: Ctx, anchor: number, parts: Part[]): void {
+  let text = '';
+  for (const part of parts) {
+    if (typeof part === 'string') {
+      text += part;
+    } else {
+      hoistText(ctx, anchor, text);
+      text = '';
+      ctx.s.move(part.start, part.end, anchor);
+      ctx.hoisted.set(anchor, part.end);
+    }
+  }
+  hoistText(ctx, anchor, text);
 }
 
 /** `css\`...\`` — replaced in place by the runtime setup call. */
@@ -99,11 +169,11 @@ function transformCssTask(ctx: Ctx, task: CssTask): void {
 
   sheet.count += 1;
   const setup = `${ctx.importIdent(RUNTIME_IDENTIFIERS.useSolidStyled)}(${sheet.id}, ${sheet.count}, ${cssID})`;
-  const computed = computedVarsOf(variables);
-  ctx.s.overwrite(
+  replaceWithParts(
+    ctx,
     task.expression.start,
     task.expression.end,
-    computed ? `(${setup}, ${getVars(ctx, task.fn)}(${computed}))` : setup,
+    setupParts(ctx, task.fn, setup, variables),
   );
 }
 
@@ -180,6 +250,8 @@ function transformStyleTask(ctx: Ctx, task: StyleTask): void {
   const anchor = getStyleAnchor(task);
   const indent = indentAt(ctx.code, anchor.start);
 
+  // The element goes away, except for the expressions moved into the calls.
+  const kept: Node[] = [];
   for (const template of task.templates) {
     const { sheet: compiled, variables } = processCSSTemplate(
       ctx,
@@ -191,22 +263,31 @@ function transformStyleTask(ctx: Ctx, task: StyleTask): void {
     ctx.s.appendLeft(task.root.start, `const ${cssID} = ${JSON.stringify(compiled)};\n`);
 
     sheet.count += 1;
-    const computed = computedVarsOf(variables);
-    let call: string;
+    let call: Part[];
     if (task.isGlobal) {
-      const args = [sheet.id, String(sheet.count), cssID];
-      if (computed) {
-        args.push(computed);
-      }
-      call = `${ctx.importIdent(RUNTIME_IDENTIFIERS.useSolidStyledGlobal)}(${args.join(', ')})`;
+      const args = `${sheet.id}, ${sheet.count}, ${cssID}`;
+      const computed = computedVarsParts(variables);
+      call = [
+        `${ctx.importIdent(RUNTIME_IDENTIFIERS.useSolidStyledGlobal)}(${args}`,
+        ...(computed.length > 0 ? [', ', ...computed] : []),
+        ')',
+      ];
     } else {
       const setup = `${ctx.importIdent(RUNTIME_IDENTIFIERS.useSolidStyled)}(${sheet.id}, ${sheet.count}, ${cssID})`;
-      call = computed ? `(${setup}, ${getVars(ctx, task.fn)}(${computed}))` : setup;
+      call = setupParts(ctx, task.fn, setup, variables);
     }
-    ctx.s.appendLeft(anchor.start, `${call};\n${indent}`);
+    hoistParts(ctx, anchor.start, [...call, `;\n${indent}`]);
+    for (const variable of variables) {
+      kept.push(variable.expression);
+    }
   }
 
-  ctx.s.remove(task.element.start, task.element.end);
+  let cursor = task.element.start;
+  for (const node of kept) {
+    ctx.s.remove(cursor, node.start);
+    cursor = node.end;
+  }
+  ctx.s.remove(cursor, task.element.end);
 }
 
 function isStyleAttribute(attr: Node): boolean {

@@ -3,10 +3,16 @@ import type { Ctx } from './context';
 import preprocessCSS from './preprocess-css';
 import processScopedSheet from './process-scoped-sheet';
 
+/** A generated CSS custom property and the `${...}` expression it holds. */
+export interface CSSVariable {
+  id: string;
+  expression: Node;
+}
+
 export interface DynamicTemplateResult {
   sheet: string;
-  /** Object entries of the form `"--s-v-hash-N": <source expression>`. */
-  variables: string[];
+  /** One entry per `${...}`, in source order. */
+  variables: CSSVariable[];
 }
 
 // A CSS unit written right after an interpolation, as in `${size()}px`.
@@ -19,7 +25,7 @@ const UNIT_SUFFIX =
  * property, so the sheet itself becomes a static string.
  */
 function replaceDynamicTemplate(ctx: Ctx, template: Node): DynamicTemplateResult {
-  const variables: string[] = [];
+  const variables: CSSVariable[] = [];
   const { quasis, expressions } = template;
 
   let sheet = '';
@@ -41,7 +47,7 @@ function replaceDynamicTemplate(ctx: Ctx, template: Node): DynamicTemplateResult
       } else {
         sheet = `${sheet}var(${id})`;
       }
-      variables.push(`${JSON.stringify(id)}: ${ctx.code.slice(expression.start, expression.end)}`);
+      variables.push({ id, expression });
     }
   }
 

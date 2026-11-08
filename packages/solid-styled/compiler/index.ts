@@ -43,6 +43,6 @@ export function compile(id: string, code: string, options: SolidStyledOptions = 
   transform(ctx);
   return {
     code: s.toString(),
-    map: s.generateMap({ source: id, hires: true }),
+    map: s.generateMap({ source: filename, includeContent: true, hires: true }),
   };
 }

@@ -30,6 +30,8 @@ export class Ctx {
   importOrder: { name: string; local: string }[] = [];
   sheets = new Map<Node, ScopedSheet>();
   vars = new Map<Node, string>();
+  /** End of the last expression moved before each hoist anchor, by anchor start. */
+  hoisted = new Map<number, number>();
 
   constructor(
     s: MagicString,

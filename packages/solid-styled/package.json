@@ -51,6 +51,7 @@
     "oxc-parser": "^0.157.0"
   },
   "devDependencies": {
+    "@jridgewell/trace-mapping": "^0.3.31",
     "@solidjs/compiler": "2.0.0-rc.21",
     "@solidjs/web": "2.0.0-rc.21",
     "@types/css-tree": "^3.2.0",
