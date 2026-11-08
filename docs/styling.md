@@ -152,8 +152,8 @@ Solid gives an element the `style` of the last source that has a `style` key. A 
 - The scope marker goes after the last spread, so a spread cannot replace it.
 - An explicit `style` after the last spread merges the CSS variables in place, as above.
 - Otherwise, the last explicit `style` merges them in place. With no explicit `style`, the compiler adds `style={vars_1()}` after the element name.
-- Each spread after that `style` is wrapped by `spreadStyle`. When the spread has a `style` key, `spreadStyle` returns it through Solid's `merge` with that style merged with the CSS variables. Any other spread is returned as is.
-- The spread is wrapped where it is. It is not copied or moved, so a call such as `{...getProps()}` runs as often as it does without solid-styled, and the element stays in its parent template.
+- Each spread after that `style` is wrapped by `spreadStyle`. When the spread has a `style` key, `spreadStyle` returns it through Solid's `merge` with that style merged with the CSS variables. Any other spread is returned as is. A function spread such as `{...signal}` is called first, as Solid does.
+- The spread is wrapped where it is. It is not copied or moved, so a call such as `{...getProps()}` runs as often as with any other reactive attribute on the element, and the element stays in its parent template.
 - A static sheet has no CSS variables. The compiler only adds the scope marker after the last spread.
 
 ```jsx

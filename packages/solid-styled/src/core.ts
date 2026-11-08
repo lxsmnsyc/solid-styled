@@ -247,7 +247,10 @@ export function mergeStyles(
  * getters and reactivity survive. Any other source is returned as is, so the
  * key set, and which source wins `style`, does not change.
  */
-export function spreadStyle(source: unknown, ...varsList: CSSVars[]): unknown {
+export function spreadStyle(input: unknown, ...varsList: CSSVars[]): unknown {
+  // Solid reads a function spread source, such as `{...signal}`, by calling
+  // it. This runs inside Solid's own function source, so it stays tracked.
+  const source = isAccessor(input) ? input() : input;
   if (!hasStyleKey(source)) {
     return source;
   }
@@ -264,6 +267,10 @@ export function spreadStyle(source: unknown, ...varsList: CSSVars[]): unknown {
 
 interface StyledSource {
   style?: JSX.CSSProperties | string | null;
+}
+
+function isAccessor(value: unknown): value is () => unknown {
+  return typeof value === 'function';
 }
 
 function hasStyleKey(source: unknown): source is StyledSource {

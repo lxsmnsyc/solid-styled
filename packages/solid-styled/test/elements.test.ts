@@ -414,6 +414,16 @@ describe('spreadStyle', () => {
     expect(spreadStyle({ style: undefined }, vars)).toHaveProperty('style', '--v:red;');
   });
 
+  it('should resolve an accessor source, as Solid does', () => {
+    expect(spreadStyle(() => ({ title: 'a', style: 'x' }), vars)).toEqual({
+      title: 'a',
+      style: 'x;--v:red;',
+    });
+    const plain = { title: 'b' };
+    expect(spreadStyle(() => plain, vars)).toBe(plain);
+    expect(spreadStyle(() => null, vars)).toBeNull();
+  });
+
   it('should read the source style on each access', () => {
     let style = 'top: 1px';
     const source = {
