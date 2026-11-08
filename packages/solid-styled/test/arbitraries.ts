@@ -1,4 +1,5 @@
 import fc from 'fast-check';
+import { parseSync } from 'oxc-parser';
 
 /**
  * Shared fast-check generators for compiler tests.
@@ -7,15 +8,22 @@ import fc from 'fast-check';
  * that shrinking stays fast and a failing counterexample is readable.
  */
 
-// ---------------------------------------------------------------------------
-// CSS
-// ---------------------------------------------------------------------------
-
 export interface GeneratedCss {
   /** The body of a `css` template, with `${expr}` spans in place. */
   source: string;
   /** The interpolated expressions, in source order. */
   vars: string[];
+  /** `source` with each `${expr}` (and its unit) replaced by a valid value of its kind. */
+  sample: string;
+}
+
+export interface CssTemplateOptions {
+  /** Allow `@global { }` and `:global(...)`. Default: true. */
+  global?: boolean;
+  /** Allow `@keyframes` with a rule that uses it. Default: true. */
+  keyframes?: boolean;
+  /** Allow `@media`. Default: true. */
+  media?: boolean;
 }
 
 const NAMES = ['a', 'b', 'box', 'item', 'row', 'x1', 'my-class'];
@@ -27,74 +35,133 @@ const COMBINATORS = [' ', ' > ', ' + ', ' ~ '];
 /** Interpolation names. Each one is an expression over the `props` parameter. */
 const PROP_NAMES = ['color', 'size', 'gap', 'ms', 'opacity'];
 
-/** Units the compiler recognizes right after an interpolation. */
-export const UNITS = ['px', 'em', 'rem', '%', 'vw', 'vh', 'ms', 's', 'deg', 'fr', 'ch', 'pt'];
+type ValueKind = 'color' | 'length' | 'number' | 'time';
 
-/** Fixed values; each is valid for the property group named by its key. */
-const STATIC_VALUES = {
-  color: ['red', 'blue', '#fff', '#112233', 'rgb(1, 2, 3)', 'transparent'],
-  length: ['0', '1px', '2em', '50%', '10rem', 'auto'],
-  number: ['0', '1', '0.5'],
-  time: ['1s', '200ms'],
-} as const;
-
-type ValueKind = keyof typeof STATIC_VALUES;
-
-/** Properties grouped by the kind of value they take. */
-const PROPERTIES: Record<ValueKind, string[]> = {
-  color: ['color', 'background-color', 'border-color'],
-  length: ['width', 'height', 'margin', 'padding', 'top', 'left', 'font-size'],
-  number: ['opacity', 'flex-grow', 'z-index'],
-  time: ['transition-duration', 'animation-duration'],
+/**
+ * Units that may follow an interpolation, per value kind. The compiler
+ * recognizes each of them. Kinds with no unit take a bare `${expr}`.
+ */
+export const UNITS: Record<ValueKind, string[]> = {
+  color: [],
+  length: ['px', 'em', 'rem', '%', 'vw', 'vh', 'ch', 'pt'],
+  number: [],
+  time: ['ms', 's'],
 };
 
-const KINDS = Object.keys(PROPERTIES) as ValueKind[];
+/** Fixed values, each valid for every property of its kind. */
+const STATIC_VALUES: Record<ValueKind, string[]> = {
+  color: ['red', 'blue', '#fff', '#112233', 'rgb(1, 2, 3)', 'transparent'],
+  length: ['0', '1px', '2em', '50%', '10rem'],
+  number: ['0', '1', '0.5'],
+  time: ['1s', '200ms'],
+};
 
-/** One `${props.x}` span; the expression is recorded for the caller. */
-function interpolation(): fc.Arbitrary<{ text: string; expr: string }> {
-  return fc.constantFrom(...PROP_NAMES).map((name) => {
-    const expr = `props.${name}`;
-    return { text: `\${${expr}}`, expr };
-  });
+/** What a bare `${expr}` of each kind stands for in `sample`. */
+const SAMPLE_VALUES: Record<ValueKind, string> = {
+  color: 'red',
+  length: '1px',
+  number: '1',
+  time: '1s',
+};
+
+interface Property {
+  name: string;
+  kind: ValueKind;
+  /** Maximum number of space-separated parts. */
+  parts: number;
+  /** True when `auto` is a valid value. */
+  auto: boolean;
 }
 
-/** A value made of fixed words and interpolations, with optional units. */
-function value(kind: ValueKind): fc.Arbitrary<{ text: string; vars: string[] }> {
-  const fixed = fc
-    .constantFrom(...STATIC_VALUES[kind])
-    .map((text) => ({ text, vars: [] as string[] }));
-  const dynamic = interpolation().map(({ text, expr }) => ({ text, vars: [expr] }));
-  // `${x}px`: the unit follows the interpolation with no space.
-  const withUnit = fc
-    .tuple(interpolation(), fc.constantFrom(...UNITS))
-    .map(([{ text, expr }, unit]) => ({ text: `${text}${unit}`, vars: [expr] }));
-  const single = fc.oneof(fixed, fixed, dynamic, withUnit);
-  return fc.array(single, { minLength: 1, maxLength: kind === 'length' ? 3 : 1 }).map((parts) => ({
-    text: parts.map((part) => part.text).join(' '),
-    vars: parts.flatMap((part) => part.vars),
-  }));
-}
+const PROPERTIES: Property[] = [
+  { name: 'color', kind: 'color', parts: 1, auto: false },
+  { name: 'background-color', kind: 'color', parts: 1, auto: false },
+  { name: 'border-color', kind: 'color', parts: 1, auto: false },
+  { name: 'width', kind: 'length', parts: 1, auto: true },
+  { name: 'height', kind: 'length', parts: 1, auto: true },
+  { name: 'top', kind: 'length', parts: 1, auto: true },
+  { name: 'left', kind: 'length', parts: 1, auto: true },
+  { name: 'font-size', kind: 'length', parts: 1, auto: false },
+  { name: 'margin', kind: 'length', parts: 4, auto: true },
+  { name: 'padding', kind: 'length', parts: 4, auto: false },
+  { name: 'opacity', kind: 'number', parts: 1, auto: false },
+  { name: 'flex-grow', kind: 'number', parts: 1, auto: false },
+  { name: 'transition-duration', kind: 'time', parts: 1, auto: false },
+  { name: 'animation-duration', kind: 'time', parts: 1, auto: false },
+];
 
-interface Declaration {
+/** A piece of CSS text, its sample rendering, and its interpolations in order. */
+interface Piece {
   text: string;
+  sample: string;
   vars: string[];
 }
 
-function declaration(): fc.Arbitrary<Declaration> {
-  return fc.constantFrom(...KINDS).chain((kind) =>
-    fc.tuple(fc.constantFrom(...PROPERTIES[kind]), value(kind)).map(([property, v]) => ({
-      text: `${property}: ${v.text};`,
-      vars: v.vars,
-    })),
-  );
+function createPiece(text: string, sample = text, vars: string[] = []): Piece {
+  return { text, sample, vars };
 }
 
-function declarations(max = 3): fc.Arbitrary<Declaration[]> {
-  return fc.array(declaration(), { minLength: 1, maxLength: max });
+/** Joins pieces with a separator, keeping vars in order. */
+function joinPieces(pieces: Piece[], separator: string): Piece {
+  const text: string[] = [];
+  const sample: string[] = [];
+  const vars: string[] = [];
+  for (const piece of pieces) {
+    text.push(piece.text);
+    sample.push(piece.sample);
+    vars.push(...piece.vars);
+  }
+  return { text: text.join(separator), sample: sample.join(separator), vars };
+}
+
+/** Wraps a piece: `before + piece + after`, in both renderings. */
+function wrapPiece(before: string, piece: Piece, after: string): Piece {
+  return {
+    text: `${before}${piece.text}${after}`,
+    sample: `${before}${piece.sample}${after}`,
+    vars: piece.vars,
+  };
+}
+
+/** One value part: a fixed word, a bare `${props.x}`, or `${props.x}<unit>`. */
+function makeValuePart(property: Property): fc.Arbitrary<Piece> {
+  const words = property.auto
+    ? [...STATIC_VALUES[property.kind], 'auto']
+    : STATIC_VALUES[property.kind];
+  const fixed = fc.constantFrom(...words).map((word) => createPiece(word));
+  const expr = fc.constantFrom(...PROP_NAMES).map((name) => `props.${name}`);
+  const bare = expr.map((e) => createPiece(`\${${e}}`, SAMPLE_VALUES[property.kind], [e]));
+  const options = [fixed, fixed, bare];
+  const units = UNITS[property.kind];
+  if (units.length > 0) {
+    // `${x}px`: the unit follows the interpolation with no space.
+    options.push(
+      fc
+        .tuple(expr, fc.constantFrom(...units))
+        .map(([e, unit]) => createPiece(`\${${e}}${unit}`, `1${unit}`, [e])),
+    );
+  }
+  return fc.oneof(...options);
+}
+
+function makeDeclaration(): fc.Arbitrary<Piece> {
+  return fc
+    .constantFrom(...PROPERTIES)
+    .chain((property) =>
+      fc
+        .array(makeValuePart(property), { minLength: 1, maxLength: property.parts })
+        .map((parts) => wrapPiece(`${property.name}: `, joinPieces(parts, ' '), ';')),
+    );
+}
+
+function makeDeclarations(max = 3): fc.Arbitrary<Piece> {
+  return fc
+    .array(makeDeclaration(), { minLength: 1, maxLength: max })
+    .map((list) => joinPieces(list, ' '));
 }
 
 /** A compound selector: type, class, id, attribute or universal, plus pseudos. */
-function compound(allowPseudoElement: boolean): fc.Arbitrary<string> {
+function makeCompound(allowPseudoElement: boolean): fc.Arbitrary<string> {
   const head = fc.oneof(
     fc.constantFrom(...TYPES),
     fc.constantFrom(...NAMES).map((name) => `.${name}`),
@@ -112,73 +179,72 @@ function compound(allowPseudoElement: boolean): fc.Arbitrary<string> {
   return fc.tuple(head, tail).map(([h, t]) => `${h}${t}`);
 }
 
-/** `:global(.x)` as a whole compound, so the scope marker is skipped for it. */
-function globalCompound(): fc.Arbitrary<string> {
-  return fc.constantFrom(...NAMES).map((name) => `:global(.${name})`);
+/** One compound, or `:global(.x)` as a whole compound when allowed. */
+function makeSelectorPart(allowPseudoElement: boolean, global: boolean): fc.Arbitrary<string> {
+  const compound = makeCompound(allowPseudoElement);
+  if (!global) {
+    return compound;
+  }
+  // `:global(.x)` skips the scope marker for that compound.
+  const globalCompound = fc.constantFrom(...NAMES).map((name) => `:global(.${name})`);
+  return fc.oneof(compound, compound, globalCompound);
 }
 
-function selector(allowPseudoElement = true): fc.Arbitrary<string> {
-  const part = fc.oneof(compound(false), compound(false), globalCompound());
-  const last = fc.oneof(
-    compound(allowPseudoElement),
-    compound(allowPseudoElement),
-    globalCompound(),
+function makeSelector(global: boolean, allowPseudoElement = true): fc.Arbitrary<string> {
+  const prefix = fc.array(
+    fc
+      .tuple(makeSelectorPart(false, global), fc.constantFrom(...COMBINATORS))
+      .map(([part, combinator]) => `${part}${combinator}`),
+    { maxLength: 2 },
   );
   return fc
-    .tuple(fc.array(fc.tuple(part, fc.constantFrom(...COMBINATORS)), { maxLength: 2 }), last)
-    .map(([prefix, tail]) => `${prefix.map(([p, c]) => `${p}${c}`).join('')}${tail}`);
+    .tuple(prefix, makeSelectorPart(allowPseudoElement, global))
+    .map(([head, last]) => `${head.join('')}${last}`);
 }
 
-function selectorList(): fc.Arbitrary<string> {
-  return fc.array(selector(), { minLength: 1, maxLength: 2 }).map((list) => list.join(', '));
-}
-
-interface Piece {
-  text: string;
-  vars: string[];
-}
-
-function join(declList: Declaration[]): Piece {
-  return {
-    text: declList.map((d) => d.text).join(' '),
-    vars: declList.flatMap((d) => d.vars),
-  };
+function makeSelectorList(global: boolean): fc.Arbitrary<string> {
+  return fc
+    .array(makeSelector(global), { minLength: 1, maxLength: 2 })
+    .map((list) => list.join(', '));
 }
 
 /** A style rule, optionally with one nested rule (CSS nesting with `&`). */
-function rule(): fc.Arbitrary<Piece> {
-  const plain = fc.tuple(selectorList(), declarations()).map(([sel, decls]): Piece => {
-    const body = join(decls);
-    return { text: `${sel} { ${body.text} }`, vars: body.vars };
-  });
+function makeRule(global: boolean): fc.Arbitrary<Piece> {
+  const plain = fc
+    .tuple(makeSelectorList(global), makeDeclarations())
+    .map(([selector, body]) => wrapPiece(`${selector} { `, body, ' }'));
   const nested = fc
     .tuple(
       // A pseudo element cannot be followed by a nested rule.
-      selector(false).filter((sel) => !sel.includes('::')),
-      declarations(2),
+      makeSelector(global, false),
+      makeDeclarations(2),
       fc.constantFrom('& ', '& > ', '&.on ', '& + '),
-      selector(false),
-      declarations(2),
+      makeSelector(global, false),
+      makeDeclarations(2),
     )
-    .map(([outer, outerDecls, amp, inner, innerDecls]): Piece => {
-      const a = join(outerDecls);
-      const b = join(innerDecls);
-      return {
-        text: `${outer} { ${a.text} ${amp}${inner} { ${b.text} } }`,
-        vars: [...a.vars, ...b.vars],
-      };
-    });
+    .map(([outer, outerBody, amp, inner, innerBody]) =>
+      joinPieces(
+        [
+          wrapPiece(`${outer} { `, outerBody, ' '),
+          wrapPiece(`${amp}${inner} { `, innerBody, ' } }'),
+        ],
+        '',
+      ),
+    );
   return fc.oneof(plain, plain, nested);
 }
 
-function rules(max: number): fc.Arbitrary<Piece> {
-  return fc.array(rule(), { minLength: 1, maxLength: max }).map((list) => ({
-    text: list.map((r) => r.text).join('\n'),
-    vars: list.flatMap((r) => r.vars),
-  }));
+function makeRules(max: number, global: boolean): fc.Arbitrary<Piece> {
+  return fc
+    .array(makeRule(global), { minLength: 1, maxLength: max })
+    .map((list) => joinPieces(list, '\n'));
 }
 
-function media(): fc.Arbitrary<Piece> {
+/**
+ * `@media` with a fixed query. An interpolation inside the query makes both
+ * compilers throw "Invalid media query", so the query never has one.
+ */
+function makeMedia(global: boolean): fc.Arbitrary<Piece> {
   return fc
     .tuple(
       fc.constantFrom(
@@ -187,33 +253,35 @@ function media(): fc.Arbitrary<Piece> {
         'screen',
         '(prefers-color-scheme: dark)',
       ),
-      rules(2),
+      makeRules(2, global),
     )
-    .map(([query, body]) => ({ text: `@media ${query} {\n${body.text}\n}`, vars: body.vars }));
+    .map(([query, body]) => wrapPiece(`@media ${query} {\n`, body, '\n}'));
 }
 
 /** A `@keyframes` rule plus a rule that uses it by name. */
-function keyframes(): fc.Arbitrary<Piece> {
+function makeKeyframes(): fc.Arbitrary<Piece> {
   return fc
     .tuple(
       fc.constantFrom('spin', 'fade', 'slide-in'),
       fc.constantFrom('animation-name', 'animation'),
-      declarations(1),
-      declarations(1),
+      makeDeclarations(1),
+      makeDeclarations(1),
     )
-    .map(([name, property, from, to]): Piece => {
-      const start = join(from);
-      const end = join(to);
+    .map(([name, property, from, to]) => {
       const use = property === 'animation' ? `${name} 1s` : name;
-      return {
-        text: `.k { ${property}: ${use}; }\n@keyframes ${name} { from { ${start.text} } to { ${end.text} } }`,
-        vars: [...start.vars, ...end.vars],
-      };
+      return joinPieces(
+        [
+          createPiece(`.k { ${property}: ${use}; }\n`),
+          wrapPiece(`@keyframes ${name} { from { `, from, ' } '),
+          wrapPiece('to { ', to, ' } }'),
+        ],
+        '',
+      );
     });
 }
 
-function globalBlock(): fc.Arbitrary<Piece> {
-  return rules(2).map((body) => ({ text: `@global {\n${body.text}\n}`, vars: body.vars }));
+function makeGlobalBlock(): fc.Arbitrary<Piece> {
+  return makeRules(2, true).map((body) => wrapPiece('@global {\n', body, '\n}'));
 }
 
 /**
@@ -221,34 +289,91 @@ function globalBlock(): fc.Arbitrary<Piece> {
  * `@keyframes`, `@global`, `:global(...)` and interpolations in property
  * values, including ones followed by a unit (`${props.size}px`).
  *
- * `vars` lists the interpolated expressions in source order.
+ * `vars` lists the interpolated expressions in source order. The options turn
+ * off the at-rules and `:global` for tests that cannot model them.
  */
-export function cssTemplate(): fc.Arbitrary<GeneratedCss> {
-  const entry = fc.oneof(
-    { weight: 5, arbitrary: rule() },
-    { weight: 2, arbitrary: media() },
-    { weight: 1, arbitrary: keyframes() },
-    { weight: 1, arbitrary: globalBlock() },
-  );
-  return fc.array(entry, { minLength: 1, maxLength: 3 }).map((list) => ({
-    source: list.map((piece) => piece.text).join('\n'),
-    vars: list.flatMap((piece) => piece.vars),
-  }));
+export function cssTemplate(opts: CssTemplateOptions = {}): fc.Arbitrary<GeneratedCss> {
+  const global = opts.global ?? true;
+  const entries: fc.WeightedArbitrary<Piece>[] = [{ weight: 5, arbitrary: makeRule(global) }];
+  if (opts.media ?? true) {
+    entries.push({ weight: 2, arbitrary: makeMedia(global) });
+  }
+  if (opts.keyframes ?? true) {
+    entries.push({ weight: 1, arbitrary: makeKeyframes() });
+  }
+  if (global) {
+    entries.push({ weight: 1, arbitrary: makeGlobalBlock() });
+  }
+  return fc.array(fc.oneof(...entries), { minLength: 1, maxLength: 3 }).map((list) => {
+    const { text, sample, vars } = joinPieces(list, '\n');
+    return { source: text, vars, sample };
+  });
 }
 
-// ---------------------------------------------------------------------------
-// Modules
-// ---------------------------------------------------------------------------
+/**
+ * How `css` is brought into the module.
+ *
+ * - `named`: `import { css }`. `aliased`: `import { css as c }`.
+ * - `namespace`: `import * as s`, tag `s.css`.
+ * - `with-type`: `import { css, type X }`. `default-and-named`: `import d, { css }`.
+ * - `two-aliases`: `import { css, css as c }`, both used as tags.
+ * - `type-only`: `import type { css }`. `type-specifier`: `import { type css }`.
+ *   A type import has no runtime value, so its templates must not compile.
+ * - `foreign`: `import { css } from 'other-styled'`. `none`: no import.
+ */
+export type ImportForm =
+  | 'named'
+  | 'aliased'
+  | 'namespace'
+  | 'with-type'
+  | 'default-and-named'
+  | 'two-aliases'
+  | 'type-only'
+  | 'type-specifier'
+  | 'foreign'
+  | 'none';
 
-/** How `css` is brought into the module. */
-export type ImportForm = 'named' | 'aliased' | 'namespace' | 'foreign' | 'none';
+export const IMPORT_FORMS: ImportForm[] = [
+  'named',
+  'aliased',
+  'namespace',
+  'with-type',
+  'default-and-named',
+  'two-aliases',
+  'type-only',
+  'type-specifier',
+  'foreign',
+  'none',
+];
+
+/**
+ * The forms `component()` draws from by default. The type import forms are
+ * left out: the compiler still compiles their templates (see the `it.fails`
+ * case in arbitraries.test.ts). Pass them in `imports` to test them.
+ */
+export const DEFAULT_IMPORT_FORMS: ImportForm[] = [
+  'named',
+  'aliased',
+  'namespace',
+  'with-type',
+  'default-and-named',
+  'two-aliases',
+  'foreign',
+  'none',
+];
 
 /** The ways a local binding can hide the imported `css` (or namespace). */
 export type ShadowKind =
   | 'let'
+  | 'const'
   | 'var-nested'
   | 'var-later'
+  | 'var-later-top'
+  | 'var-destructured'
+  | 'var-labeled'
   | 'parameter'
+  | 'parameter-destructured'
+  | 'parameter-default'
   | 'class-name'
   | 'class-expression-name'
   | 'switch-case'
@@ -261,9 +386,15 @@ export type ShadowKind =
 
 export const SHADOW_KINDS: ShadowKind[] = [
   'let',
+  'const',
   'var-nested',
   'var-later',
+  'var-later-top',
+  'var-destructured',
+  'var-labeled',
   'parameter',
+  'parameter-destructured',
+  'parameter-default',
   'class-name',
   'class-expression-name',
   'switch-case',
@@ -282,6 +413,9 @@ export const SHADOW_KINDS: ShadowKind[] = [
 export const FUNCTION_SCOPED_SHADOWS: ShadowKind[] = [
   'var-nested',
   'var-later',
+  'var-later-top',
+  'var-destructured',
+  'var-labeled',
   'for-var',
   'for-of-var',
 ];
@@ -295,7 +429,8 @@ export type ControlKind =
   | 'function-expression-outside'
   | 'var-in-sibling-function'
   | 'var-in-arrow'
-  | 'var-in-static-block';
+  | 'var-in-static-block'
+  | 'nested-callback';
 
 export const CONTROL_KINDS: ControlKind[] = [
   'switch-outside',
@@ -306,10 +441,11 @@ export const CONTROL_KINDS: ControlKind[] = [
   'var-in-sibling-function',
   'var-in-arrow',
   'var-in-static-block',
+  'nested-callback',
 ];
 
 export interface ComponentOptions {
-  /** Import forms to draw from. Default: all of them. */
+  /** Import forms to draw from. Default: `DEFAULT_IMPORT_FORMS`. */
   imports?: readonly ImportForm[];
   /** Shadow kinds to draw from. Default: `SHADOW_KINDS`. `[]` disables them. */
   shadows?: readonly ShadowKind[];
@@ -319,127 +455,171 @@ export interface ComponentOptions {
   styleJsx?: boolean;
   /** Allow `use:solid-styled` on component elements. Default: true. */
   useAttribute?: boolean;
+  /**
+   * Allow a module-level `var` in a nested block that hides `css` in every
+   * component. It redeclares the import, which is an early error in JS that
+   * oxc-parser accepts and Babel rejects. Default: true.
+   */
+  modulePoison?: boolean;
   /** Maximum number of components in the module. Default: 2. */
   maxComponents?: number;
+  /** Options for every generated template. Default: everything on. */
+  css?: CssTemplateOptions;
+}
+
+export type TemplateKind = 'css' | 'style' | 'global';
+
+export interface GeneratedTemplate {
+  /**
+   * A `/*t<N>*\/` comment at the start of the template body, unique in the
+   * module. Compiling minifies it away, so it stays in the output (right after
+   * a backtick) exactly when the template is left as is.
+   */
+  marker: string;
+  /** `css` for a tagged template, `style` or `global` for `<style jsx>`. */
+  kind: TemplateKind;
+  /** True when the template must compile; false when it must be left as is. */
+  compiled: boolean;
+  /** The interpolated expressions, in source order. */
+  vars: string[];
 }
 
 export interface GeneratedModule {
   /** The module source. TSX syntax. Parses without errors. */
   code: string;
-  /** The `css` and `<style jsx>` templates that must compile. */
-  expectedCompiled: number;
-  /** The `css` templates that must be left as is (shadowed, or not from solid-styled). */
-  expectedUntouched: number;
-  /** Of `expectedCompiled`: how many are `<style jsx global>` templates. */
-  expectedGlobal: number;
-  /** Of `expectedCompiled`: how many are tagged `css` templates. */
-  expectedCss: number;
-  /** Of `expectedCompiled`: how many are `<style jsx>` templates (global or not). */
-  expectedStyle: number;
   importForm: ImportForm;
-  /** The bindings used: local name of `css` (or of the namespace). */
-  local: string;
-  /** Every interpolated expression, per compiled or untouched template. */
-  vars: string[];
+  /** Every template in the module, in source order. */
+  templates: GeneratedTemplate[];
+}
+
+const COMPILED_CALLEE = /^_?useSolidStyled(Global)?(_\d+)?$/;
+
+/** Counts calls to an identifier matching `COMPILED_CALLEE` in a parsed tree. */
+function countCalls(node: unknown): number {
+  if (node === null || typeof node !== 'object') {
+    return 0;
+  }
+  if (Array.isArray(node)) {
+    let total = 0;
+    for (const child of node) {
+      total += countCalls(child);
+    }
+    return total;
+  }
+  const record = node as Record<string, unknown>;
+  let total = 0;
+  if (record.type === 'CallExpression') {
+    const callee = record.callee as { type?: string; name?: string };
+    if (callee.type === 'Identifier' && COMPILED_CALLEE.test(callee.name ?? '')) {
+      total += 1;
+    }
+  }
+  for (const key in record) {
+    if (key !== 'parent') {
+      total += countCalls(record[key]);
+    }
+  }
+  return total;
 }
 
 /**
- * Pattern that matches one compiled template in the output. Each compiled
- * template becomes exactly one `useSolidStyled(` or `useSolidStyledGlobal(`
- * call, possibly with an underscore prefix. The import line has no `(`.
+ * Counts the compiled templates in compiler output. Each compiled template
+ * becomes one call to `useSolidStyled` or `useSolidStyledGlobal` under the
+ * local name the compiler picked: `_useSolidStyled`, `_useSolidStyled_1` when
+ * the source already uses `_useSolidStyled`, or `useSolidStyled_1` in 0.12.1.
+ * Throws when the output does not parse.
  */
-export const COMPILED_CALL = /useSolidStyled(?:Global)?\(/g;
-
-interface Template {
-  /** Tag expression text plus the template, ready to use as a statement. */
-  statement: (tag: string) => string;
-  vars: string[];
+export function countCompiled(code: string): number {
+  const result = parseSync('output.tsx', code, { lang: 'tsx', sourceType: 'module' });
+  if (result.errors.length > 0) {
+    throw new Error(`output does not parse: ${result.errors[0].message}`);
+  }
+  return countCalls(result.program);
 }
 
-function cssStatement(css: GeneratedCss): Template {
-  return {
-    statement: (tag) => `${tag}\`${css.source}\`;`,
-    vars: css.vars,
-  };
+interface TagSetup {
+  /** The tag expression. */
+  tag: string;
+  /** The local binding that may be shadowed. */
+  local: string;
+  /** What a shadowing declaration assigns to `local`. */
+  initializer: string;
 }
 
 interface ImportSetup {
-  form: ImportForm;
-  /** The import lines. */
-  lines: string;
-  /** The local name that may be shadowed. */
-  local: string;
-  /** The tag expression. */
-  tag: string;
-  /** What a shadowing declaration assigns to `local`. */
-  initializer: string;
-  /** True when the tag resolves to solid-styled's `css`. */
+  /** The import line, or ''. */
+  line: string;
+  /** The tags in use. Most forms have one; `two-aliases` has two. */
+  tags: TagSetup[];
+  /** True when the tags resolve to solid-styled's `css`. */
   live: boolean;
 }
 
-function importSetup(form: ImportForm): ImportSetup {
+const CSS_TAG: TagSetup = { tag: 'css', local: 'css', initializer: 'String.raw' };
+
+function setupImport(form: ImportForm): ImportSetup {
+  const from = "from 'solid-styled';";
   switch (form) {
     case 'named':
-      return {
-        form,
-        lines: "import { css } from 'solid-styled';",
-        local: 'css',
-        tag: 'css',
-        initializer: 'String.raw',
-        live: true,
-      };
+      return { line: `import { css } ${from}`, tags: [CSS_TAG], live: true };
     case 'aliased':
       return {
-        form,
-        lines: "import { css as c } from 'solid-styled';",
-        local: 'c',
-        tag: 'c',
-        initializer: 'String.raw',
+        line: `import { css as c } ${from}`,
+        tags: [{ tag: 'c', local: 'c', initializer: 'String.raw' }],
         live: true,
       };
     case 'namespace':
       return {
-        form,
-        lines: "import * as s from 'solid-styled';",
-        local: 's',
-        tag: 's.css',
-        initializer: '{ css: String.raw }',
+        line: `import * as s ${from}`,
+        tags: [{ tag: 's.css', local: 's', initializer: '{ css: String.raw }' }],
         live: true,
       };
-    case 'foreign':
+    case 'with-type':
+      return { line: `import { css, type CSSProperties } ${from}`, tags: [CSS_TAG], live: true };
+    case 'default-and-named':
+      return { line: `import styled, { css } ${from}`, tags: [CSS_TAG], live: true };
+    case 'two-aliases':
       return {
-        form,
-        lines: "import { css } from 'other-styled';",
-        local: 'css',
-        tag: 'css',
-        initializer: 'String.raw',
-        live: false,
+        line: `import { css, css as c } ${from}`,
+        tags: [CSS_TAG, { tag: 'c', local: 'c', initializer: 'String.raw' }],
+        live: true,
       };
+    case 'type-only':
+      return { line: `import type { css } ${from}`, tags: [CSS_TAG], live: false };
+    case 'type-specifier':
+      return { line: `import { type css } ${from}`, tags: [CSS_TAG], live: false };
+    case 'foreign':
+      return { line: "import { css } from 'other-styled';", tags: [CSS_TAG], live: false };
     default:
       // No import at all. A bare `css` tag is a free variable, so it stays.
-      return {
-        form,
-        lines: '',
-        local: 'css',
-        tag: 'css',
-        initializer: 'String.raw',
-        live: false,
-      };
+      return { line: '', tags: [CSS_TAG], live: false };
   }
 }
 
-/** Wraps a template statement in a construct that hides the import. */
-function shadowed(kind: ShadowKind, setup: ImportSetup, t: string, id: string): string {
-  const { local, initializer } = setup;
+/** Wraps a template statement in a construct that hides the tag's binding. */
+function renderShadow(kind: ShadowKind, tag: TagSetup, t: string, id: number): string {
+  const { local, initializer } = tag;
   switch (kind) {
     case 'let':
       return `{ let ${local} = ${initializer}; ${t} }`;
+    case 'const':
+      return `{ const ${local} = ${initializer}; ${t} }`;
     case 'var-nested':
       return `if (globalThis.a) { var ${local} = ${initializer}; }\n${t}`;
     case 'var-later':
       return `${t}\nif (globalThis.a) { var ${local} = ${initializer}; }`;
+    case 'var-later-top':
+      return `${t}\nvar ${local} = ${initializer};`;
+    case 'var-destructured':
+      return `{ var { ${local} } = { ${local}: ${initializer} }; }\n${t}`;
+    case 'var-labeled':
+      return `label_${id}: { var ${local} = ${initializer}; }\n${t}`;
     case 'parameter':
-      return `function inner_${id}(${local}) { ${t} }`;
+      return `function inner_${id}(${local}: any) { ${t} }`;
+    case 'parameter-destructured':
+      return `function inner_${id}({ ${local} }: any) { ${t} }`;
+    case 'parameter-default':
+      return `function inner_${id}(${local} = ${initializer}) { ${t} }`;
     case 'class-name':
       return `function w_${id}() { class ${local} {}\n${t} }`;
     case 'class-expression-name':
@@ -461,9 +641,9 @@ function shadowed(kind: ShadowKind, setup: ImportSetup, t: string, id: string): 
   }
 }
 
-/** Wraps a template statement in a construct that leaves the import visible. */
-function control(kind: ControlKind, setup: ImportSetup, t: string, id: string): string {
-  const { local, initializer } = setup;
+/** Wraps a template statement in a construct that leaves the binding visible. */
+function renderControl(kind: ControlKind, tag: TagSetup, t: string, id: number): string {
+  const { local, initializer } = tag;
   switch (kind) {
     case 'switch-outside':
       return `switch (globalThis.x) { case 0: let ${local} = ${initializer}; }\n${t}`;
@@ -479,16 +659,19 @@ function control(kind: ControlKind, setup: ImportSetup, t: string, id: string): 
       return `function sibling_${id}() { if (globalThis.a) { var ${local} = ${initializer}; } }\n${t}`;
     case 'var-in-arrow':
       return `const g_${id} = () => { { var ${local} = ${initializer}; } };\n${t}`;
-    default:
+    case 'var-in-static-block':
       return `class S_${id} { static { { var ${local} = ${initializer}; } } }\n${t}`;
+    default:
+      // The template sits in a callback inside the component, and compiles there.
+      return `const cb_${id} = () => { ${t} };`;
   }
 }
 
 type Item =
-  | { kind: 'plain'; css: GeneratedCss }
-  | { kind: 'shadow'; shadow: ShadowKind; css: GeneratedCss }
-  | { kind: 'control'; control: ControlKind; css: GeneratedCss }
-  | { kind: 'style'; global: boolean; css: GeneratedCss };
+  | { kind: 'plain'; tag: number; css: GeneratedCss }
+  | { kind: 'shadow'; tag: number; shadow: ShadowKind; css: GeneratedCss }
+  | { kind: 'control'; tag: number; control: ControlKind; css: GeneratedCss }
+  | { kind: 'style'; global: boolean; list: GeneratedCss[] };
 
 interface ComponentSpec {
   items: Item[];
@@ -499,163 +682,192 @@ interface ComponentSpec {
 
 interface ModuleSpec {
   form: ImportForm;
+  /** A module-level `var` that hides the first tag in every component. */
+  poison: boolean;
   components: ComponentSpec[];
 }
 
-interface Counts {
-  compiled: number;
-  untouched: number;
-  global: number;
-  css: number;
-  style: number;
-}
-
-function renderModule(spec: ModuleSpec): { code: string; counts: Counts; vars: string[] } {
-  const setup = importSetup(spec.form);
-  const counts: Counts = { compiled: 0, untouched: 0, global: 0, css: 0, style: 0 };
-  const vars: string[] = [];
+function renderModule(spec: ModuleSpec): GeneratedModule {
+  const setup = setupImport(spec.form);
+  const templates: GeneratedTemplate[] = [];
   const out: string[] = [];
-  if (setup.lines) {
-    out.push(setup.lines);
+  if (setup.line) {
+    out.push(setup.line);
+  }
+
+  // Locals hidden in every component by a module-level `var`.
+  const modulePoisoned = new Set<string>();
+  if (spec.poison) {
+    const first = setup.tags[0];
+    out.push(`if (globalThis.a) { var ${first.local} = ${first.initializer}; }`);
+    modulePoisoned.add(first.local);
   }
 
   let id = 0;
+  function addTemplate(css: GeneratedCss, kind: TemplateKind, compiled: boolean): string {
+    id += 1;
+    const marker = `/*t${id}*/`;
+    templates.push({ marker, kind, compiled, vars: css.vars });
+    return `\`${marker}${css.source}\``;
+  }
+
   for (const [index, comp] of spec.components.entries()) {
-    const name = `Comp${index}`;
     const body: string[] = [];
     const jsx: string[] = [];
 
-    // A function-scoped `var` hides `css` from every template in the component.
-    let poisoned = false;
+    // A function-scoped `var` hides its local from every template in the component.
+    const poisoned = new Set(modulePoisoned);
     for (const entry of comp.items) {
       if (entry.kind === 'shadow' && FUNCTION_SCOPED_SHADOWS.includes(entry.shadow)) {
-        poisoned = true;
+        poisoned.add(setup.tags[entry.tag % setup.tags.length].local);
       }
     }
 
     for (const entry of comp.items) {
-      id += 1;
-      vars.push(...entry.css.vars);
       if (entry.kind === 'style') {
-        counts.compiled += 1;
-        counts.style += 1;
-        if (entry.global) {
-          counts.global += 1;
+        let children = '';
+        for (const css of entry.list) {
+          children += `{${addTemplate(css, entry.global ? 'global' : 'style', true)}}`;
         }
-        jsx.push(`<style jsx${entry.global ? ' global' : ''}>{\`${entry.css.source}\`}</style>`);
+        jsx.push(`<style jsx${entry.global ? ' global' : ''}>${children}</style>`);
         continue;
       }
-      const t = cssStatement(entry.css).statement(setup.tag);
-      let text: string;
-      let compiled = setup.live && !poisoned;
+      const tag = setup.tags[entry.tag % setup.tags.length];
+      const compiled = setup.live && !poisoned.has(tag.local) && entry.kind !== 'shadow';
+      const t = `${tag.tag}${addTemplate(entry.css, 'css', compiled)};`;
       if (entry.kind === 'plain') {
-        text = t;
+        body.push(t);
       } else if (entry.kind === 'shadow') {
-        text = shadowed(entry.shadow, setup, t, String(id));
-        compiled = false;
+        body.push(renderShadow(entry.shadow, tag, t, id));
       } else {
-        text = control(entry.control, setup, t, String(id));
-      }
-      body.push(text);
-      if (compiled) {
-        counts.compiled += 1;
-        counts.css += 1;
-      } else {
-        counts.untouched += 1;
+        body.push(renderControl(entry.control, tag, t, id));
       }
     }
 
     if (comp.useAttribute) {
       jsx.push('<Child use:solid-styled />');
     }
-    const ret = `return <div class="root">${jsx.join('')}<h1>Hello</h1></div>;`;
-    const inner = `${body.join('\n')}\n${ret}`;
-    const exportPrefix = comp.exported ? 'export ' : '';
+    const inner = `${body.join('\n')}\nreturn <div class="root">${jsx.join('')}<h1>Hello</h1></div>;`;
+    const prefix = comp.exported ? 'export ' : '';
+    const name = `Comp${index}`;
     out.push(
       comp.arrow
-        ? `${exportPrefix}const ${name} = (props: any) => {\n${inner}\n};`
-        : `${exportPrefix}function ${name}(props: any) {\n${inner}\n}`,
+        ? `${prefix}const ${name} = (props: any) => {\n${inner}\n};`
+        : `${prefix}function ${name}(props: any) {\n${inner}\n}`,
     );
   }
 
-  return { code: `${out.join('\n\n')}\n`, counts, vars };
+  return { code: `${out.join('\n\n')}\n`, importForm: spec.form, templates };
 }
 
-function itemArbitrary(opts: Required<ComponentOptions>, form: ImportForm): fc.Arbitrary<Item> {
-  const css = cssTemplate();
+function makeItem(opts: Required<ComponentOptions>, form: ImportForm): fc.Arbitrary<Item> {
+  const css = cssTemplate(opts.css);
+  const tag = fc.integer({ min: 0, max: 1 });
   const options: fc.Arbitrary<Item>[] = [];
   if (form !== 'none') {
-    options.push(css.map((c): Item => ({ kind: 'plain', css: c })));
-  }
-  if (form !== 'none' && opts.shadows.length > 0) {
-    options.push(
-      fc
-        .tuple(fc.constantFrom(...opts.shadows), css)
-        .map(([shadow, c]): Item => ({ kind: 'shadow', shadow, css: c })),
-    );
-  }
-  if (form !== 'none' && opts.controls.length > 0) {
-    options.push(
-      fc
-        .tuple(fc.constantFrom(...opts.controls), css)
-        .map(([ctl, c]): Item => ({ kind: 'control', control: ctl, css: c })),
-    );
+    options.push(fc.tuple(tag, css).map(([t, c]): Item => ({ kind: 'plain', tag: t, css: c })));
+    if (opts.shadows.length > 0) {
+      options.push(
+        fc
+          .tuple(tag, fc.constantFrom(...opts.shadows), css)
+          .map(([t, shadow, c]): Item => ({ kind: 'shadow', tag: t, shadow, css: c })),
+      );
+    }
+    if (opts.controls.length > 0) {
+      options.push(
+        fc
+          .tuple(tag, fc.constantFrom(...opts.controls), css)
+          .map(([t, control, c]): Item => ({ kind: 'control', tag: t, control, css: c })),
+      );
+    }
   }
   if (opts.styleJsx) {
     options.push(
-      fc.tuple(fc.boolean(), css).map(([global, c]): Item => ({ kind: 'style', global, css: c })),
+      fc
+        .tuple(fc.boolean(), fc.array(css, { minLength: 1, maxLength: 3 }))
+        .map(([global, list]): Item => ({ kind: 'style', global, list })),
     );
   }
   if (options.length === 0) {
     // Nothing else allowed: fall back to a plain template.
-    options.push(css.map((c): Item => ({ kind: 'plain', css: c })));
+    options.push(fc.tuple(tag, css).map(([t, c]): Item => ({ kind: 'plain', tag: t, css: c })));
   }
   return fc.oneof(...options);
 }
 
 /**
- * A TSX module that imports `css` (named, aliased, namespaced, from another
- * package, or not at all), declares one or more components that call `css`
- * and `<style jsx>`, and shadows the import locally in many ways.
+ * A TSX module that imports `css` in one of the `ImportForm`s, declares one or
+ * more components that call `css` and `<style jsx>`, and shadows the import
+ * locally in many ways.
  *
- * The result says how many templates must compile, so the tests can assert on
- * it. See `COMPILED_CALL` for the marker to count in the output.
+ * Each template carries a unique marker and says whether it must compile, so
+ * tests can assert which templates remain. `countCompiled(output)` equals the
+ * number of templates with `compiled: true`.
  */
 export function component(opts: ComponentOptions = {}): fc.Arbitrary<GeneratedModule> {
   const full: Required<ComponentOptions> = {
-    imports: opts.imports ?? ['named', 'aliased', 'namespace', 'foreign', 'none'],
+    imports: opts.imports ?? DEFAULT_IMPORT_FORMS,
     shadows: opts.shadows ?? SHADOW_KINDS,
     controls: opts.controls ?? CONTROL_KINDS,
     styleJsx: opts.styleJsx ?? true,
     useAttribute: opts.useAttribute ?? true,
+    modulePoison: opts.modulePoison ?? true,
     maxComponents: opts.maxComponents ?? 2,
+    css: opts.css ?? {},
   };
 
-  const componentSpec = (form: ImportForm): fc.Arbitrary<ComponentSpec> =>
-    fc.record({
-      items: fc.array(itemArbitrary(full, form), { minLength: 1, maxLength: 3 }),
+  return fc.constantFrom(...full.imports).chain((form) => {
+    const componentSpec = fc.record({
+      items: fc.array(makeItem(full, form), { minLength: 1, maxLength: 3 }),
       arrow: fc.boolean(),
       exported: fc.boolean(),
       useAttribute: full.useAttribute ? fc.boolean() : fc.constant(false),
     });
+    // A rare module-level `var`: it hides the first tag everywhere.
+    const poison =
+      full.modulePoison && form !== 'none'
+        ? fc.integer({ min: 0, max: 7 }).map((n) => n === 0)
+        : fc.constant(false);
+    return fc
+      .tuple(poison, fc.array(componentSpec, { minLength: 1, maxLength: full.maxComponents }))
+      .map(([p, components]) => renderModule({ form, poison: p, components }));
+  });
+}
 
-  return fc.constantFrom(...full.imports).chain((form) =>
-    fc
-      .array(componentSpec(form), { minLength: 1, maxLength: full.maxComponents })
-      .map((components) => {
-        const { code, counts, vars } = renderModule({ form, components });
-        const setup = importSetup(form);
-        return {
-          code,
-          expectedCompiled: counts.compiled,
-          expectedUntouched: counts.untouched,
-          expectedGlobal: counts.global,
-          expectedCss: counts.css,
-          expectedStyle: counts.style,
-          importForm: form,
-          local: setup.local,
-          vars,
-        };
-      }),
-  );
+/** The documented cases where `compile` throws a `CompileError`. */
+export type InvalidReason = 'expression-body' | 'style-value' | 'syntax';
+
+export interface InvalidModule {
+  code: string;
+  reason: InvalidReason;
+}
+
+/**
+ * A module that `compile` must reject with a `CompileError`:
+ *
+ * - `expression-body`: an arrow component with an expression body holds a
+ *   `<style jsx>` with an interpolation. The variable holder needs a block body.
+ * - `style-value`: an element with interpolated styles has a `style` value that
+ *   is neither a string nor an expression (`style=<b />`).
+ * - `syntax`: the module does not parse.
+ */
+export function invalidComponent(): fc.Arbitrary<InvalidModule> {
+  // A trailing rule makes sure the template has at least one interpolation.
+  const css = cssTemplate().map((c) => `${c.source}\n.v { color: \${props.color}; }`);
+  const expressionBody = fc.tuple(css, fc.boolean()).map(([source, exported]): InvalidModule => {
+    const prefix = exported ? 'export ' : '';
+    return {
+      code: `${prefix}const Comp = (props: any) => <div><style jsx>{\`${source}\`}</style></div>;\n`,
+      reason: 'expression-body',
+    };
+  });
+  const styleValue = css.map((source): InvalidModule => ({
+    code: `export function Comp(props: any) {\nreturn <div style=<b />><style jsx>{\`${source}\`}</style></div>;\n}\n`,
+    reason: 'style-value',
+  }));
+  const syntax = css.map((source): InvalidModule => ({
+    code: `import { css } from 'solid-styled';\nexport function Comp(props: any) {\ncss\`${source}\`;\nconst = ;\n}\n`,
+    reason: 'syntax',
+  }));
+  return fc.oneof(expressionBody, styleValue, syntax);
 }
