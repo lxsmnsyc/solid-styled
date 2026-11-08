@@ -5,8 +5,6 @@ export interface SolidStyledOptions {
   verbose?: boolean;
   /** Replaces the default `c-` / `v-` prefixes of generated ids. */
   prefix?: string;
-  /** Build mode; forwarded by the bundler plugins. */
-  env?: 'development' | 'production';
   /** Browserslist query used by lightningcss when lowering the sheet. */
   browserslist?: string;
 }

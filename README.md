@@ -24,6 +24,8 @@ npm i solid-styled
 npm i -D unplugin-solid-styled
 ```
 
+A CSS unit written right after an interpolation, as in `${size()}px`, is applied with `calc()`, so `width: ${size()}px` compiles to `width: calc(var(--s-v-...) * 1px)`.
+
 ```bash
 yarn add solid-styled
 yarn add -D unplugin-solid-styled
@@ -36,7 +38,7 @@ pnpm add -D unplugin-solid-styled
 
 ## Setup
 
-Add the plugin before the Solid plugin so it sees your JSX before it is compiled away.
+solid-styled must see your JSX before the Solid plugin compiles it. The Vite entry moves itself ahead of the Solid plugin, so the order in `plugins` does not matter there. With other bundlers, put it before the plugin that compiles JSX.
 
 ```js
 // vite.config.js
@@ -58,17 +60,17 @@ export default defineConfig({
 });
 ```
 
-[`unplugin-solid-styled`](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/unplugin)
+[`unplugin-solid-styled`](https://github.com/lxsmnsyc/solid-styled/tree/1.0/packages/unplugin)
 also provides `rollup`, `webpack` and `esbuild` entries.
 
 ## Docs
 
-- [Setup](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/setup.md) covers plugin options, TypeScript types, Astro and component libraries.
-- [Styling](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/styling.md) covers `css`, `<style jsx>` and reactive values.
-- [Scoping](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/scoping.md) covers `:global`, `@global` and `use:solid-styled`.
-- [SSR](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/ssr.md) covers `StyleRegistry` and `renderSheets`.
-- [How it works](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/how-it-works.md) covers the compiler output.
-- [Editor](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/editor.md) covers syntax highlighting and comment shortcuts.
+- [Setup](https://github.com/lxsmnsyc/solid-styled/blob/1.0/docs/setup.md) covers plugin options, TypeScript types, component libraries and known limits.
+- [Styling](https://github.com/lxsmnsyc/solid-styled/blob/1.0/docs/styling.md) covers `css`, `<style jsx>` and reactive values.
+- [Scoping](https://github.com/lxsmnsyc/solid-styled/blob/1.0/docs/scoping.md) covers `:global`, `@global` and `use:solid-styled`.
+- [SSR](https://github.com/lxsmnsyc/solid-styled/blob/1.0/docs/ssr.md) covers `StyleRegistry` and `renderSheets`.
+- [How it works](https://github.com/lxsmnsyc/solid-styled/blob/1.0/docs/how-it-works.md) covers the compiler output.
+- [Editor](https://github.com/lxsmnsyc/solid-styled/blob/1.0/docs/editor.md) covers syntax highlighting and comment shortcuts.
 
 ## Usage
 
@@ -168,11 +170,11 @@ function Title() {
 }
 ```
 
-Use `:global(...)` for a single selector, `@global { ... }` for a block, and `use:solid-styled` to forward the scope to a component. See [Scoping](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/scoping.md).
+Use `:global(...)` for a single selector, `@global { ... }` for a block, and `use:solid-styled` to forward the scope to a component. See [Scoping](https://github.com/lxsmnsyc/solid-styled/blob/1.0/docs/scoping.md).
 
 ### SSR
 
-Wrap the tree in `<StyleRegistry>` and render the collected sheets into your HTML. See [SSR](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/ssr.md).
+Wrap the tree in `<StyleRegistry>` and render the collected sheets into your HTML. See [SSR](https://github.com/lxsmnsyc/solid-styled/blob/1.0/docs/ssr.md).
 
 ## CSS processing
 
