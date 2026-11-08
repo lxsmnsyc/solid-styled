@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 
 const MODEL = 'test/registry.model.test.ts';
+const RUNTIME = 'test/spread.runtime.test.ts';
 
 export default defineConfig({
   test: {
@@ -9,7 +10,7 @@ export default defineConfig({
         test: {
           name: 'unit',
           include: ['test/**/*.test.ts'],
-          exclude: [MODEL, '**/node_modules/**'],
+          exclude: [MODEL, RUNTIME, '**/node_modules/**'],
         },
       },
       {
@@ -20,6 +21,19 @@ export default defineConfig({
           name: 'registry-client',
           include: [MODEL],
           environment: 'happy-dom',
+        },
+      },
+      {
+        resolve: { conditions: ['browser'] },
+        test: {
+          name: 'runtime-client',
+          include: [RUNTIME],
+          environment: 'happy-dom',
+          // Compiles the fixtures in Node, where the parsers can load.
+          globalSetup: ['test/runtime/compile.ts'],
+          // Inlined, so the test, the fixtures and @solidjs/web share one
+          // solid-js instance.
+          server: { deps: { inline: [/solid-js/, /@solidjs/] } },
         },
       },
       {

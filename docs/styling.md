@@ -5,6 +5,8 @@
 - Call `css` as a statement, not as an expression. The compiler only picks up ``css`...`;`` on its own line.
 - Call it directly inside the component whose elements it styles.
 - You can call it more than once in the same component. Each call becomes its own sheet under the same scope.
+- A `css` call outside any function is not compiled, so it throws at runtime.
+- A `css` call in another function, such as a hook, compiles, but its scoped selectors match nothing. Use it there only for global rules, through `:global` or `@global`.
 
 ```jsx
 import { css } from 'solid-styled';
@@ -30,54 +32,14 @@ function Card() {
 }
 ```
 
-### Linting
-
-- A bare ``css`...`;`` statement is an unused expression to linters. The `no-unused-expressions` rule reports it as `Expected an assignment or function call and instead saw an expression`.
-- Set `allowTaggedTemplates: true` on the rule to allow tagged templates used as statements.
-
-ESLint:
-
-```js
-// eslint.config.js
-export default [
-  {
-    rules: {
-      'no-unused-expressions': ['error', { allowTaggedTemplates: true }],
-    },
-  },
-];
-```
-
-typescript-eslint replaces the core rule, so turn the core rule off and set the option on its own rule:
-
-```js
-// eslint.config.js
-export default [
-  {
-    rules: {
-      'no-unused-expressions': 'off',
-      '@typescript-eslint/no-unused-expressions': ['error', { allowTaggedTemplates: true }],
-    },
-  },
-];
-```
-
-oxlint takes the same option:
-
-```jsonc
-// .oxlintrc.json
-{
-  "rules": {
-    "no-unused-expressions": ["error", { "allowTaggedTemplates": true }],
-  },
-}
-```
+See [Editor and linting](./editor.md#linting) if your linter reports the bare `css` statement.
 
 ## `<style jsx>`
 
 - `<style jsx>` is the same feature written inside JSX, and it compiles to the same output.
 - The element itself is removed from the tree, so it renders nothing.
 - It exists mostly to ease migration from `solid-styled-jsx`.
+- Write it as a child of an element or fragment, inside a component with a block body. See [Known limits](./known-limits.md) for what fails otherwise.
 
 ```jsx
 function Card() {
@@ -96,11 +58,35 @@ function Card() {
 }
 ```
 
+### `<style jsx global>`
+
+- Add `global` to emit the sheet without scoping.
+- Interpolated values are set on the document root (`:root`), so every element can read them.
+
+```jsx
+function Theme(props) {
+  return (
+    <>
+      <style jsx global>
+        {`
+          body {
+            color: ${props.color};
+          }
+        `}
+      </style>
+      {props.children}
+    </>
+  );
+}
+```
+
 ## Reactive values
 
 - Every `${...}` in the template becomes a CSS custom property, and the sheet keeps the `var(...)` reference.
 - The property is written on the component's own elements through the `style` prop, so it stays fine grained.
 - The sheet is never regenerated when the value changes, which is why the sheet can be shared by every instance.
+- A CSS unit written right after an interpolation, as in `${size()}px`, is applied with `calc()`. `width: ${size()}px` becomes `width: calc(var(--s-v-...) * 1px)`.
+- A component that declares reactive values needs a block body, because the compiler declares a variable holder at the top of it. An arrow function with an expression body throws a `CompileError`.
 
 ```jsx
 function Bar(props) {
@@ -114,19 +100,8 @@ function Bar(props) {
 }
 ```
 
-The output is roughly this.
-
-```jsx
-const sheet_1 = 'c-1a2b3c-0';
-const css_1 = 'div[s\\:c-1a2b3c-0]{width:calc(var(--s-v-1a2b3c-1)*1px)}';
-
-function Bar(props) {
-  const vars_1 = createCSSVars();
-  (useSolidStyled(sheet_1, 1, css_1), vars_1(() => ({ '--s-v-1a2b3c-1': props.width })));
-
-  return <div s:c-1a2b3c-0 style={vars_1()} />;
-}
-```
+- An element that already has a `style` prop, or spreads props, keeps its styles. The compiler merges the CSS variables into them.
+- See [How values reach elements](./how-it-works.md#how-values-reach-elements) for the compiled output.
 
 ## What can be interpolated
 
@@ -134,30 +109,14 @@ function Bar(props) {
 - It does not work for selectors, property names or at-rule preludes, because the sheet must stay static.
 - If you need a value to change the shape of the sheet, use a class name or an attribute selector instead.
 
-## Merging with an existing `style` prop
-
-- If an element already has a `style` prop, the compiler merges the CSS variables into it with `mergeStyles`.
-- Object styles, string styles and no style at all are all handled.
-
 ```jsx
-<div style={{ color: 'red' }} />
-// becomes
-<div s:c-1a2b3c-0 style={mergeStyles({ color: 'red' }, vars_1())} />
-```
+function Alert(props) {
+  css`
+    div[data-kind='error'] {
+      color: red;
+    }
+  `;
 
-### Spread attributes
-
-- The scope marker and the generated `style` go after the last spread, so a spread cannot replace them.
-- The generated `style` merges the CSS variables into the style the element would get without it. That is the `style` of the last spread that has a `style` key. If no spread after the last explicit `style` has one, it is that explicit `style`.
-- A `null` or `undefined` spread is skipped, as in Solid.
-- A spread such as `{...getProps()}` is wrapped in a memo, so the call still runs once per change and stays reactive.
-
-```jsx
-<button style={base} {...props} />
-// becomes
-<button
-  {...props}
-  s:c-1a2b3c-0
-  style={mergeStyles(props != null && 'style' in props ? props.style : base, vars_1())}
-/>
+  return <div data-kind={props.kind}>{props.children}</div>;
+}
 ```
