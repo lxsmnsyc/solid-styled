@@ -112,6 +112,10 @@ function hoistStatements(body: Node[], names: Set<string>): void {
           names.add(statement.id.name);
         }
         break;
+      case 'TSEnumDeclaration':
+        // `enum` and `const enum` create a value binding. Types and interfaces do not.
+        names.add(statement.id.name);
+        break;
       case 'VariableDeclaration':
         for (const declarator of statement.declarations) {
           declarePattern(declarator.id, names);

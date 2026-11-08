@@ -232,3 +232,41 @@ describe('css shadowed by a local binding (#50)', () => {
     expectCompiled(`class K { static { { var css = String.raw; } } }\n${TEMPLATE};`);
   });
 });
+
+describe('css shadowed by a local TypeScript declaration', () => {
+  it('leaves css alone inside a function that declares enum css', () => {
+    expectLeftAsIs(`enum css { A }\n${TEMPLATE};`);
+  });
+
+  it('leaves css alone before an enum css declared later in the function', () => {
+    expectLeftAsIs(`${TEMPLATE};\nenum css { A }`);
+  });
+
+  it('leaves css alone inside a function that declares const enum css', () => {
+    expectLeftAsIs(`const enum css { A }\n${TEMPLATE};`);
+  });
+
+  it('leaves css alone inside a block that declares enum css', () => {
+    expectLeftAsIs(`if (globalThis.a) { enum css { A } ${TEMPLATE}; }`);
+  });
+
+  it('compiles css in a sibling function of one that declares enum css', () => {
+    const code = `import { css } from 'solid-styled';\nfunction a() { enum css { A } }\nexport function C() {\n${TEMPLATE};\nreturn <a />;\n}\n`;
+    expect(
+      compile('src/index.tsx', code, options).code,
+      'css template should be compiled',
+    ).not.toContain(TEMPLATE);
+  });
+
+  it('compiles css outside the block that declares enum css', () => {
+    expectCompiled(`if (globalThis.a) { enum css { A } }\n${TEMPLATE};`);
+  });
+
+  it('does not treat type css as a shadowing binding', () => {
+    expectCompiled(`type css = string;\n${TEMPLATE};`);
+  });
+
+  it('does not treat interface css as a shadowing binding', () => {
+    expectCompiled(`interface css {}\n${TEMPLATE};`);
+  });
+});
