@@ -2,6 +2,7 @@ packages:
   - 'packages/**/*'
   - 'examples/**/*'
   - 'benchmarks'
+  - 'website'
 
 linkWorkspacePackages: true
 preferWorkspacePackages: true

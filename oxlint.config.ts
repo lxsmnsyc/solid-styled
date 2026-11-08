@@ -47,6 +47,43 @@ export default defineConfig({
       },
     },
     {
+      // The website writes `css` sheets as tagged templates used as
+      // statements, and its preview script logs the address it serves.
+      files: ['website/**'],
+      rules: {
+        'no-unused-expressions': 'off',
+      },
+    },
+    {
+      files: ['website/scripts/**'],
+      rules: {
+        'no-console': 'off',
+      },
+    },
+    {
+      // @solidjs/vite-plugin requires a named `render` export from the
+      // server entry.
+      files: ['website/src/entry-server.tsx'],
+      rules: {
+        'import/prefer-default-export': 'off',
+      },
+    },
+    {
+      // A module with no imports reads as a script to this rule, but Vite
+      // loads the entry as a module, so nothing leaks into the global scope.
+      files: ['website/src/entry-client.ts'],
+      rules: {
+        'no-implicit-globals': 'off',
+      },
+    },
+    {
+      // An ambient module declaration cannot use a top-level import.
+      files: ['website/src/env.d.ts'],
+      rules: {
+        'typescript/consistent-type-imports': 'off',
+      },
+    },
+    {
       // Global JSX declarations mirror Solid's own type shapes.
       files: ['packages/solid-styled/src/index.ts'],
       rules: {
