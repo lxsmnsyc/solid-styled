@@ -207,23 +207,24 @@ describe('invalidComponent', () => {
   });
 });
 
-// Minimal counterexamples for compiler bugs found by these generators. Each
-// case fails today; `it.fails` turns red once the bug is fixed.
-describe('known compiler bugs', () => {
+// Minimal counterexamples for compiler bugs found by these generators. The
+// fixed ones stay as regression tests. `it.fails` marks a bug still open and
+// turns red once it is fixed.
+describe('compiler bugs found by the generators', () => {
   // A type import has no runtime value. 0.12.1 leaves the template alone.
-  it.fails('leaves css alone when it is imported as a type', () => {
+  it('leaves css alone when it is imported as a type', () => {
     const code = `import type { css } from 'solid-styled';\nexport function C() {\ncss\`a{color:red}\`;\nreturn <a />;\n}\n`;
     expect(compile(FILE, code).code).toContain('css`a{color:red}`');
   });
 
-  it.fails('leaves css alone when it is imported with a type specifier', () => {
+  it('leaves css alone when it is imported with a type specifier', () => {
     const code = `import { type css } from 'solid-styled';\nexport function C() {\ncss\`a{color:red}\`;\nreturn <a />;\n}\n`;
     expect(compile(FILE, code).code).toContain('css`a{color:red}`');
   });
 
-  // The hoisted call lands between `export` and `const`:
-  // `export _useSolidStyled(sheet_1, 1, css_1);`. 0.12.1 emits valid code.
-  it.fails('emits valid code for an exported expression-body arrow with <style jsx>', () => {
+  // The hoisted call used to land between `export` and `const`. 0.12.1 emits
+  // valid code.
+  it('emits valid code for an exported expression-body arrow with <style jsx>', () => {
     const code = 'export const C = () => <div><style jsx>{`a{color:red}`}</style></div>;\n';
     expect(listParseErrors(compile(FILE, code).code)).toEqual([]);
   });
