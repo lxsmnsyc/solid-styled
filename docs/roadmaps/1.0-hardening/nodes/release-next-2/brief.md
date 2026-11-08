@@ -1,6 +1,6 @@
 ---
 id: release-next-2
-status: todo
+status: active
 target: 1.0
 ship: auto
 size: S
@@ -12,6 +12,12 @@ type: release
 milestone: next.2
 owns: []
 depends_on:
+  - on: fix-export-arrow-style
+    kind: hard
+    why: ships it
+  - on: fix-type-only-import
+    kind: hard
+    why: ships it
   - on: deps-update
     kind: hard
     why: ships it

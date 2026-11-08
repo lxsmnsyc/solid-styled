@@ -1,6 +1,6 @@
 ---
 id: deps-update
-status: active
+status: done
 target: 1.0
 ship: auto
 size: M
