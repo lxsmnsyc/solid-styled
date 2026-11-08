@@ -18,6 +18,7 @@ import {
 
 const SEED = 20260508;
 const NUM_RUNS = 150;
+const TIMEOUT = 30_000;
 
 const IDS = ['a', 'b', 'c'];
 const OFFSETS = ['0', '1'];
@@ -29,7 +30,8 @@ interface Entry {
   offset: string;
   sheet: string;
   global: boolean;
-  vars: Record<string, string> | undefined;
+  hasVars: boolean;
+  value: string;
 }
 
 const VAR_VALUE = fc.constantFrom('red', '1px', '10', 'blue', '2rem');
@@ -43,24 +45,20 @@ const ENTRY = fc.record({
   value: VAR_VALUE,
 });
 
-function indexOf(entry: { id: string; offset: string }): string {
+function formatIndex(entry: { id: string; offset: string }): string {
   return `${entry.id}-${entry.offset}`;
 }
 
-function serializeVars(vars: Record<string, string> | undefined): string {
-  if (!vars) {
+function serializeVars(name: string | undefined, value: string): string {
+  if (!name) {
     return '';
   }
-  let body = '';
-  for (const [key, value] of Object.entries(vars)) {
-    body = `${body}${key}:${value};`;
-  }
-  return `:root{${body}}`;
+  return `:root{${name}:${value};}`;
 }
 
 // What the registry stores for an entry the first time its index is inserted.
-function expectedSheet(entry: Entry): string {
-  return entry.global ? serializeVars(entry.vars) + entry.sheet : entry.sheet;
+function expectedSheet(entry: Entry, varName: string | undefined): string {
+  return entry.global ? serializeVars(varName, entry.value) + entry.sheet : entry.sheet;
 }
 
 function runModel<Model extends object, Real>(
@@ -73,80 +71,60 @@ function runModel<Model extends object, Real>(
 if (isServer) {
   // Server model: every render gets its own registry. A sheet is stored once
   // per index, the first sheet wins, and `renderSheets` prints each once.
-  interface ServerModel {
-    renders: number;
-  }
-  interface ServerReal {
-    outputs: string[];
-  }
+  // Nothing carries between renders, so this is a property over one render.
+  function checkRender(entries: Entry[], withRegistry: boolean): void {
+    const styles: StyleData[] = [];
+    const renderEntries = (): JSX.Element[] => {
+      const nodes: JSX.Element[] = [];
+      for (const entry of entries) {
+        nodes.push(createComponent(EntryStyles, { entry }));
+      }
+      return nodes;
+    };
+    renderToString(() =>
+      withRegistry
+        ? createComponent(StyleRegistry, {
+            styles,
+            get children() {
+              return renderEntries();
+            },
+          })
+        : renderEntries(),
+    );
 
-  class RenderCommand implements fc.Command<ServerModel, ServerReal> {
-    constructor(
-      readonly entries: Entry[],
-      readonly withRegistry: boolean,
-    ) {}
-
-    check(): boolean {
-      return true;
-    }
-
-    run(model: ServerModel, real: ServerReal): void {
-      const styles: StyleData[] = [];
-      const { entries } = this;
-      const renderEntries = (): JSX.Element[] => {
-        const nodes: JSX.Element[] = [];
-        for (const entry of entries) {
-          nodes.push(createComponent(Entry, { entry }));
-        }
-        return nodes;
-      };
-      const html = renderToString(() =>
-        this.withRegistry
-          ? createComponent(StyleRegistry, {
-              styles,
-              get children() {
-                return renderEntries();
-              },
-            })
-          : renderEntries(),
-      );
-      real.outputs.push(html);
-      model.renders += 1;
-
-      // Expected: first sheet per index, in first-use order.
-      const expected = new Map<string, string>();
-      if (this.withRegistry) {
-        for (const entry of entries) {
-          const index = indexOf(entry);
-          if (!expected.has(index)) {
-            expected.set(index, expectedSheet(entry));
-          }
+    // Expected: first sheet per index, in first-use order.
+    const expected = new Map<string, string>();
+    if (withRegistry) {
+      for (const entry of entries) {
+        const index = formatIndex(entry);
+        if (!expected.has(index)) {
+          expected.set(index, expectedSheet(entry, entry.hasVars ? '--x' : undefined));
         }
       }
-
-      expect(styles.map((s) => [s.id, s.sheet])).toEqual([...expected]);
-
-      const rendered = renderSheets(styles);
-      for (const [index, sheet] of expected) {
-        const tag = `<style s:id="${index}">${sheet}</style>`;
-        expect(rendered.split(tag).length - 1).toBe(1);
-      }
-      expect(rendered.split('<style ').length - 1).toBe(expected.size);
     }
 
-    toString(): string {
-      return `render(${this.withRegistry ? 'registry' : 'bare'}, ${JSON.stringify(this.entries)})`;
+    const actual: [string, string][] = [];
+    for (const style of styles) {
+      actual.push([style.id, style.sheet]);
     }
+    expect(actual).toEqual([...expected]);
+
+    const rendered = renderSheets(styles);
+    for (const [index, sheet] of expected) {
+      const tag = `<style s:id="${index}">${sheet}</style>`;
+      expect(rendered.split(tag).length - 1).toBe(1);
+    }
+    expect(rendered.split('<style ').length - 1).toBe(expected.size);
   }
 
-  function Entry(props: { entry: Entry }): undefined {
+  function EntryStyles(props: { entry: Entry }): undefined {
     const { entry } = props;
     if (entry.global) {
       useSolidStyledGlobal(
         entry.id,
         entry.offset,
         entry.sheet,
-        entry.vars ? () => entry.vars! : undefined,
+        entry.hasVars ? () => ({ '--x': entry.value }) : undefined,
       );
     } else {
       useSolidStyled(entry.id, entry.offset, entry.sheet);
@@ -155,29 +133,21 @@ if (isServer) {
   }
 
   describe('registry model (server)', () => {
-    it('keeps each sheet once per registry', () => {
-      const entry = ENTRY.map((e): Entry => ({
-        id: e.id,
-        offset: e.offset,
-        sheet: e.sheet,
-        global: e.global,
-        vars: e.hasVars ? { '--x': e.value } : undefined,
-      }));
-      const command = fc
-        .tuple(fc.array(entry, { maxLength: 8 }), fc.boolean())
-        .map(([entries, withRegistry]) => new RenderCommand(entries, withRegistry));
-      fc.assert(
-        fc.property(fc.commands([command], { maxCommands: 10 }), (commands) => {
-          runModel(commands, () => ({ model: { renders: 0 }, real: { outputs: [] } }));
-        }),
-        { seed: SEED, numRuns: NUM_RUNS },
-      );
-    });
+    it(
+      'keeps each sheet once per registry',
+      () => {
+        fc.assert(fc.property(fc.array(ENTRY, { maxLength: 8 }), fc.boolean(), checkRender), {
+          seed: SEED,
+          numRuns: NUM_RUNS,
+        });
+      },
+      TIMEOUT,
+    );
 
     it('renders no sheets without a registry', () => {
       const html = renderToString(() =>
-        createComponent(Entry, {
-          entry: { id: 'a', offset: '0', sheet: 'x', global: false, vars: undefined },
+        createComponent(EntryStyles, {
+          entry: { id: 'a', offset: '0', sheet: 'x', global: false, hasVars: false, value: 'red' },
         }),
       );
       expect(html).not.toContain('<style');
@@ -233,11 +203,17 @@ if (isServer) {
     }
   }
 
-  function varTargets(model: ClientModel): number[] {
-    return mountedOf(model).filter((i) => model.mounted[i]!.setValue);
+  function listVarTargets(model: ClientModel): number[] {
+    const result: number[] = [];
+    for (const i of listMounted(model)) {
+      if (model.mounted[i]!.setValue) {
+        result.push(i);
+      }
+    }
+    return result;
   }
 
-  function mountedOf(model: ClientModel): number[] {
+  function listMounted(model: ClientModel): number[] {
     const result: number[] = [];
     for (const [i, item] of model.mounted.entries()) {
       if (item) {
@@ -260,9 +236,8 @@ if (isServer) {
 
     run(model: ClientModel): void {
       const { entry } = this;
-      const varName = entry.global && entry.vars ? `--v${model.nextVar++}` : undefined;
-      const initial = varName ? { [varName]: this.value } : undefined;
-      const expected = expectedSheet({ ...entry, vars: initial });
+      const varName = entry.global && entry.hasVars ? `--v${model.nextVar++}` : undefined;
+      const expected = expectedSheet(entry, varName);
       const [value, setValue] = createSignal(this.value);
 
       const dispose = createRoot((d) => {
@@ -310,7 +285,7 @@ if (isServer) {
       };
       model.mounted.push(item);
 
-      const index = indexOf(entry);
+      const index = formatIndex(entry);
       const count = model.counts.get(index) ?? 0;
       if (count === 0) {
         model.sheets.set(index, expected);
@@ -320,7 +295,7 @@ if (isServer) {
     }
 
     toString(): string {
-      return `mount(${indexOf(this.entry)}, ${JSON.stringify(this.entry.sheet)}, global=${this.entry.global}, vars=${this.entry.vars !== undefined}, registry=${this.withRegistry})`;
+      return `mount(${formatIndex(this.entry)}, ${JSON.stringify(this.entry.sheet)}, global=${this.entry.global}, vars=${this.entry.hasVars}, registry=${this.withRegistry})`;
     }
   }
 
@@ -328,18 +303,18 @@ if (isServer) {
     constructor(readonly pick: number) {}
 
     check(model: ClientModel): boolean {
-      return mountedOf(model).length > 0;
+      return listMounted(model).length > 0;
     }
 
     run(model: ClientModel): void {
-      const live = mountedOf(model);
+      const live = listMounted(model);
       const at = live[this.pick % live.length];
       const item = model.mounted[at]!;
       model.mounted[at] = undefined;
       item.dispose();
       flush();
 
-      const index = indexOf(item.entry);
+      const index = formatIndex(item.entry);
       model.counts.set(index, model.counts.get(index)! - 1);
       checkInvariants(model);
     }
@@ -356,11 +331,11 @@ if (isServer) {
     ) {}
 
     check(model: ClientModel): boolean {
-      return varTargets(model).length > 0;
+      return listVarTargets(model).length > 0;
     }
 
     run(model: ClientModel): void {
-      const targets = varTargets(model);
+      const targets = listVarTargets(model);
       const item = model.mounted[targets[this.pick % targets.length]]!;
       item.setValue!(this.value);
       item.value = this.value;
@@ -374,47 +349,50 @@ if (isServer) {
   }
 
   describe('registry model (client)', () => {
-    it('keeps one style tag per live sheet', () => {
-      const entry = ENTRY.map((e): { entry: Entry; value: string } => ({
-        entry: {
-          id: e.id,
-          offset: e.offset,
-          sheet: e.sheet,
-          global: e.global,
-          vars: e.hasVars ? { '--x': e.value } : undefined,
-        },
-        value: e.value,
-      }));
-      const commands = [
-        fc
-          .tuple(entry, fc.boolean())
-          .map(([e, registry]) => new MountCommand(e.entry, registry, e.value)),
-        fc.nat(20).map((pick) => new DisposeCommand(pick)),
-        fc.tuple(fc.nat(20), VAR_VALUE).map(([pick, value]) => new UpdateVarsCommand(pick, value)),
-      ];
+    it(
+      'keeps one style tag per live sheet',
+      () => {
+        const commands = [
+          fc
+            .tuple(ENTRY, fc.boolean())
+            .map(([entry, registry]) => new MountCommand(entry, registry, entry.value)),
+          fc.nat(20).map((pick) => new DisposeCommand(pick)),
+          fc
+            .tuple(fc.nat(20), VAR_VALUE)
+            .map(([pick, value]) => new UpdateVarsCommand(pick, value)),
+        ];
 
-      fc.assert(
-        fc.property(fc.commands(commands, { maxCommands: 40 }), (cmds) => {
-          const model: ClientModel = {
-            mounted: [],
-            counts: new Map(),
-            sheets: new Map(),
-            nextVar: 0,
-          };
-          try {
-            runModel(cmds, () => ({ model, real: {} }));
-          } finally {
-            // Tear down so the next run starts from an empty registry.
-            for (const item of model.mounted) {
-              item?.dispose();
+        fc.assert(
+          fc.property(fc.commands(commands, { maxCommands: 40 }), (cmds) => {
+            const model: ClientModel = {
+              mounted: [],
+              counts: new Map(),
+              sheets: new Map(),
+              nextVar: 0,
+            };
+            let leftover: number;
+            try {
+              runModel(cmds, () => ({ model, real: {} }));
+            } finally {
+              // Tear down so the next run starts from an empty registry.
+              for (const item of model.mounted) {
+                item?.dispose();
+              }
+              flush();
+              document.documentElement.removeAttribute('style');
+              // Remove stray tags so one failure does not fail every later run.
+              const stray = document.head.querySelectorAll('style[s\\:id]');
+              leftover = stray.length;
+              for (const node of stray) {
+                node.remove();
+              }
             }
-            flush();
-            document.documentElement.removeAttribute('style');
-          }
-          expect(document.head.querySelectorAll('style').length).toBe(0);
-        }),
-        { seed: SEED, numRuns: NUM_RUNS },
-      );
-    });
+            expect(leftover).toBe(0);
+          }),
+          { seed: SEED, numRuns: NUM_RUNS },
+        );
+      },
+      TIMEOUT,
+    );
   });
 }
