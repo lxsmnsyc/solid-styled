@@ -7,7 +7,7 @@
 - A fast-check property over `component({ modulePoison: false })`. Each module is compiled by `compile` from `../compiler` and by `compile` from `solid-styled-legacy/compiler` (0.12.1, async), with the same options. Options drawn per run: `verbose` (always set), `prefix` (`a`, `my-app`, `x1` or unset), `browserslist` (`chrome 60`, `safari 10`, `firefox 100`, `defaults` or unset). File ids: `src/index.tsx`, `src/components/Button.tsx`, `src/index.tsx?v=1`, `/abs/path/App.tsx?macro=true&lang.tsx`.
 - Five fixed cases for an existing `style` attribute (string, object, expression, no value, empty expression). The generators only emit `class="root"`. All five agree with 0.12.1.
 - One fixed case for an element in a nested function, where the outer and the inner function both call `css` with interpolations. The element gets two `s:` scopes and nested `mergeStyles` calls. The generators only put elements in the component body.
-- One `it.fails` for the spread bug below. It fails through the oracle comparison (the `elements` record), not a string check.
+- The spread bug below was fixed in #71 by merging styles. 1.0 now differs from 0.12.1 there on purpose, so that case is a plain test of the 1.0 output.
 - Nothing is exported. Importing a `.test.ts` file runs its tests in the importer, so the helpers stay private.
 
 ### Normalization
@@ -47,7 +47,7 @@ Both outputs are parsed with oxc-parser (`tsx`, `preserveParens: false`). The te
   }
   ```
 
-  0.12.1: `<a {...props} s:c-186be8d0-0 style={vars_1()} />`. 1.0: `<a s:c-186be8d0-0 style={vars_1()} {...props} />`. In 1.0 a `style` in `props` replaces the CSS variables, so the interpolated values are lost. In 0.12.1 the variables replace `props.style`. Neither merges them. Kept as `it.fails('keeps the added attributes after a spread attribute')`. Not fixed here. A fix node should decide between the 0.12.1 order and merging with `mergeStyles`, and add a changeset either way. The generators never emit spreads, so the property does not reach this case; a `spread` option in `component()` would.
+  0.12.1: `<a {...props} s:c-186be8d0-0 style={vars_1()} />`. 1.0: `<a s:c-186be8d0-0 style={vars_1()} {...props} />`. In 1.0 a `style` in `props` replaces the CSS variables, so the interpolated values are lost. In 0.12.1 the variables replace `props.style`. Neither merges them. Fixed in #71: the maintainer chose merging, so 1.0 emits `<a {...props} s:… style={_mergeStyles(props?.style, vars_1())} />`. This is now an intended difference, checked by `it('merges a spread style with the CSS variables')`. The generators never emit spreads, so the property does not reach this case; a `spread` option in `component()` would.
 
 - No mismatch inside the generated input space. 5000 runs on seed 424242 and 3000 runs on seeds 1, 7 and 99 all agree after the filters above.
 
