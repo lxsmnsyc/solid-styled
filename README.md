@@ -63,11 +63,12 @@ also provides `rollup`, `webpack` and `esbuild` entries.
 
 ## Docs
 
-- [Setup](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/setup.md) covers plugin options and TypeScript types.
+- [Setup](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/setup.md) covers plugin options, TypeScript types, Astro and component libraries.
 - [Styling](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/styling.md) covers `css`, `<style jsx>` and reactive values.
 - [Scoping](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/scoping.md) covers `:global`, `@global` and `use:solid-styled`.
 - [SSR](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/ssr.md) covers `StyleRegistry` and `renderSheets`.
 - [How it works](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/how-it-works.md) covers the compiler output.
+- [Editor](https://github.com/lxsmnsyc/solid-styled/tree/main/docs/editor.md) covers syntax highlighting and comment shortcuts.
 
 ## Usage
 
