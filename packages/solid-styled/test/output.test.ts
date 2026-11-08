@@ -97,6 +97,24 @@ export default function Example() {
     }
   });
 
+  it('should raise a located CompileError for a CSS error in a template', () => {
+    const code = `import { css } from 'solid-styled';
+export function C(props) {
+  css\`@media (min-width: \${props.w}) { a { color: red; } }\`;
+  return <a />;
+}`;
+    try {
+      transform(code);
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(CompileError);
+      // The template starts at the backtick, 6th character of line 3.
+      expect((error as CompileError).line).toBe(3);
+      expect((error as CompileError).column).toBe(6);
+      expect((error as CompileError).message).toContain('Invalid media query');
+    }
+  });
+
   it('should raise a CompileError for a concise arrow body', () => {
     const code = `
 import { css } from 'solid-styled';
