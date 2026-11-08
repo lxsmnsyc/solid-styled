@@ -118,7 +118,7 @@ The output is roughly this.
 
 ```jsx
 const sheet_1 = 'c-1a2b3c-0';
-const css_1 = 'div[s\\:c-1a2b3c-0]{width:var(--s-v-1a2b3c-1)}';
+const css_1 = 'div[s\\:c-1a2b3c-0]{width:calc(var(--s-v-1a2b3c-1)*1px)}';
 
 function Bar(props) {
   const vars_1 = createCSSVars();

@@ -97,6 +97,10 @@ function declarePattern(node: Node | null, names: Set<string>): void {
     case 'RestElement':
       declarePattern(node.argument, names);
       break;
+    case 'TSParameterProperty':
+      // `constructor(private css)` binds `css` as a parameter.
+      declarePattern(node.parameter, names);
+      break;
     default:
       break;
   }
@@ -115,6 +119,12 @@ function hoistStatements(body: Node[], names: Set<string>): void {
       case 'TSEnumDeclaration':
         // `enum` and `const enum` create a value binding. Types and interfaces do not.
         names.add(statement.id.name);
+        break;
+      case 'TSImportEqualsDeclaration':
+        // `import type css = M.x` has no runtime binding.
+        if (statement.importKind !== 'type') {
+          names.add(statement.id.name);
+        }
         break;
       case 'VariableDeclaration':
         for (const declarator of statement.declarations) {
@@ -328,6 +338,11 @@ export function analyze(program: Node): Analysis {
         hoistStatements(node.body, names);
         break;
       case 'BlockStatement':
+        hoistStatements(node.body, names);
+        break;
+      case 'TSModuleBlock':
+        // A namespace body is its own `var` scope.
+        hoistVars(node.body, names);
         hoistStatements(node.body, names);
         break;
       case 'SwitchStatement':

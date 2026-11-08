@@ -1,7 +1,7 @@
 ---
 id: release-next-2
 status: active
-target: 1.0
+target: main
 ship: auto
 size: S
 gate: true
@@ -33,4 +33,4 @@ depends_on:
 
 ## Goal
 
-Merge the Changesets version PR that `release.yml` opens on `1.0`; the workflow publishes to npm under `next`. Maintainer merges it. Then close #49, #50 and, after approval, the answered support issues.
+Merge the Changesets version PR that `release.yml` opens on `main`; the workflow publishes to npm under `next`. Maintainer merges it. Then close #49, #50 and, after approval, the answered support issues.

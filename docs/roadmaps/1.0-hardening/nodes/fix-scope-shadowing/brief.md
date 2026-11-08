@@ -1,7 +1,7 @@
 ---
 id: fix-scope-shadowing
 status: done
-target: 1.0
+target: main
 ship: auto
 size: M
 gate: false

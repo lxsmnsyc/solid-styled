@@ -1,5 +1,5 @@
 import { type CssTask, type ElementRecord, type StyleTask, hasScopedAttribute } from './analyze';
-import { type Node, indentAt } from './ast';
+import { type Node, eachChild, indentAt } from './ast';
 import { RUNTIME_IDENTIFIERS, SHEET_ID, SOLID_STYLED_NS, VARS_ID } from './constants';
 import type { Ctx, ScopedSheet } from './context';
 import processCSSTemplate from './process-css-template';
@@ -107,10 +107,52 @@ function transformCssTask(ctx: Ctx, task: CssTask): void {
   );
 }
 
+/** Finds the nodes from `from` down to `target`, or null when `target` is not below it. */
+function pathTo(from: Node, target: Node): Node[] | null {
+  if (from === target) {
+    return [from];
+  }
+  // Nothing outside a node's range can hold the target.
+  if (target.start < from.start || target.end > from.end) {
+    return null;
+  }
+  let found: Node[] | null = null;
+  eachChild(from, (child) => {
+    if (found) {
+      return;
+    }
+    const rest = pathTo(child, target);
+    if (rest) {
+      found = [from, ...rest];
+    }
+  });
+  return found;
+}
+
+/** True when `child` is the nested statement of a control statement `parent`. */
+function isNestedBody(parent: Node, child: Node): boolean {
+  switch (parent.type) {
+    case 'IfStatement':
+      return parent.consequent === child || parent.alternate === child;
+    case 'ForStatement':
+    case 'ForInStatement':
+    case 'ForOfStatement':
+    case 'WhileStatement':
+    case 'DoWhileStatement':
+    case 'LabeledStatement':
+    case 'WithStatement':
+      return parent.body === child;
+    default:
+      return false;
+  }
+}
+
 /**
- * The statement a `<style jsx>` setup call goes before. A declaration that an
- * `export` wraps resolves to the export, so the call never lands between
- * `export` and the declaration.
+ * The statement a `<style jsx>` setup call goes before. A hook runs once per
+ * render, so the call goes before the outermost control statement whose
+ * unbraced body holds the nearest statement. A declaration that an `export`
+ * wraps resolves to the export, so the call never lands between `export` and
+ * the declaration.
  */
 function getStyleAnchor(task: StyleTask): Node {
   const root = task.root;
@@ -120,7 +162,16 @@ function getStyleAnchor(task: StyleTask): Node {
   ) {
     return root;
   }
-  return task.statement;
+  const path = pathTo(task.fn, task.statement);
+  if (!path) {
+    return task.statement;
+  }
+  // Climb while the statement is the unbraced body of a control statement.
+  let index = path.length - 1;
+  while (index > 0 && isNestedBody(path[index - 1], path[index])) {
+    index -= 1;
+  }
+  return path[index];
 }
 
 /** `<style jsx>` — setup calls hoisted before the enclosing statement. */

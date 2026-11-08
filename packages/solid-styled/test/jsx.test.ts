@@ -209,3 +209,63 @@ describe('jsx in exported expression-body components', () => {
     ).toThrow(CompileError);
   });
 });
+
+describe('jsx in unbraced statements', () => {
+  const STYLE = '<style jsx>{`div { color: red; }`}</style>';
+  const VIEW = `<div>${STYLE}</div>`;
+
+  /** Compiles a component body, checks it parses, and returns the output. */
+  function compileBody(body: string): string {
+    const code = `export const A = (props) => { ${body} };`;
+    const output = compile('src/index.tsx', code, options).code;
+    const parsed = parseSync('index.tsx', output, { lang: 'tsx' });
+    expect(parsed.errors).toEqual([]);
+    return output;
+  }
+
+  /** Checks the call comes first and the statement keeps its own body. */
+  function expectCallBefore(output: string, statement: string): void {
+    const call = output.indexOf('_useSolidStyled(');
+    expect(call).toBeGreaterThanOrEqual(0);
+    expect(output.indexOf(statement)).toBeGreaterThan(call);
+    // The call is a statement of its own, so the control statement starts right after it.
+    const after = output.slice(output.indexOf(');', call) + 2).trimStart();
+    expect(after.startsWith(statement)).toBe(true);
+  }
+
+  it('should keep the call out of an `if` consequent', () => {
+    const output = compileBody(`if (props.x) return ${VIEW}; return null;`);
+    expectCallBefore(output, 'if (props.x)');
+    expect(output).toMatch(/return null;/);
+  });
+  it('should keep the call out of an `else` branch', () => {
+    const output = compileBody(`if (props.x) return null; else return ${VIEW};`);
+    expectCallBefore(output, 'if (props.x)');
+  });
+  it('should keep the call out of an `else if` branch', () => {
+    const output = compileBody(
+      `if (props.x) return null; else if (props.y) return ${VIEW}; return null;`,
+    );
+    expectCallBefore(output, 'if (props.x)');
+  });
+  it('should keep the call out of a loop body', () => {
+    const output = compileBody(`for (const a of props.list) return ${VIEW}; return null;`);
+    expectCallBefore(output, 'for (const a of props.list)');
+  });
+  it('should keep the call out of a `while` body', () => {
+    const output = compileBody(`while (props.x) return ${VIEW}; return null;`);
+    expectCallBefore(output, 'while (props.x)');
+  });
+  it('should keep the call out of a `do` body', () => {
+    const output = compileBody(`do return ${VIEW}; while (props.x); return null;`);
+    expectCallBefore(output, 'do ');
+  });
+  it('should keep the call out of a labeled statement', () => {
+    const output = compileBody(`a: if (props.x) return ${VIEW}; return null;`);
+    expectCallBefore(output, 'a:');
+  });
+  it('should keep the call before a braced `if` as before', () => {
+    const output = compileBody(`if (props.x) { return ${VIEW}; } return null;`);
+    expectCallBefore(output, 'return <div');
+  });
+});

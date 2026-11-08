@@ -48,7 +48,7 @@ The Vite entry sets `enforce: 'pre'` and moves itself ahead of the `solid` plugi
 - `browserslist` sets the browser targets LightningCSS lowers the sheet for. Defaults to `'defaults'`.
 - `filter.include` and `filter.exclude` choose the files to compile.
 
-See [the docs](https://github.com/lxsmnsyc/solid-styled/blob/1.0/docs/setup.md) for the full list.
+See [the docs](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/setup.md) for the full list.
 
 ## Sponsors
 

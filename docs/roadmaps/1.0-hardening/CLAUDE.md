@@ -7,7 +7,7 @@ Rules for agents working on a node:
 - Work only on your own node. Edit files inside your brief's owned paths and your own `nodes/<id>/` folder.
 - Do not edit other briefs, `status` fields, contracts or `GOAL.md`. The orchestrator owns them.
 - If a contract is wrong, write `contracts/<name>.change-request.md` and adapt locally. Do not edit the contract.
-- Branch from `1.0` and target `1.0`. Never touch `main`.
+- Branch from `main` and target `main`. `0.x` is in maintenance mode; do not touch it.
 - Add a changeset (`.changeset/<node-id>.md`) for every change to a published package.
 - Keep notes in your `log.md`. Finish by writing `outcome.md` from the template.
 - Read the outcomes of your direct dependencies. Do not read other nodes' logs.

@@ -270,3 +270,82 @@ describe('css shadowed by a local TypeScript declaration', () => {
     expectCompiled(`interface css {}\n${TEMPLATE};`);
   });
 });
+
+const IMPORT = `import { css } from 'solid-styled';\n`;
+
+/** Compiles a whole `.tsx` file and reports whether the css template was rewritten. */
+function isFileCompiled(code: string): boolean {
+  return !compile('src/index.tsx', code, options).code.includes(TEMPLATE);
+}
+
+function namespaceBody(declaration: string): string {
+  return `${IMPORT}namespace N { ${declaration} export function C() { ${TEMPLATE}; return <h1 />; } }\n`;
+}
+
+describe('css shadowed inside a TypeScript namespace', () => {
+  const declarations = [
+    'const css = (x: any) => x;',
+    'let css = (x: any) => x;',
+    'var css = (x: any) => x;',
+    'function css(x?: any) {}',
+    'enum css { A }',
+    'class css {}',
+    'import css = M.x;',
+    'export const css = (x: any) => x;',
+  ];
+  for (const declaration of declarations) {
+    it(`leaves css alone with ${declaration}`, () => {
+      expect(isFileCompiled(namespaceBody(declaration))).toBe(false);
+    });
+  }
+
+  it('leaves css alone in a dotted namespace', () => {
+    const code = `${IMPORT}namespace N.M { const css = (x: any) => x; export function C() { ${TEMPLATE}; return <h1 />; } }\n`;
+    expect(isFileCompiled(code)).toBe(false);
+  });
+
+  it('leaves css alone in an exported namespace', () => {
+    const code = `${IMPORT}export namespace N { const css = (x: any) => x; export function C() { ${TEMPLATE}; return <h1 />; } }\n`;
+    expect(isFileCompiled(code)).toBe(false);
+  });
+
+  it('leaves s.css alone when a local s shadows import * as s', () => {
+    const code = `import * as s from 'solid-styled';\nnamespace N { const s = { css: (x: any) => x }; export function C() { s.${TEMPLATE}; return <h1 />; } }\n`;
+    expect(compile('src/index.tsx', code, options).code).toContain(`s.${TEMPLATE}`);
+  });
+
+  it('compiles css outside the namespace', () => {
+    const code = `${IMPORT}namespace N { var css = (x: any) => x; }\nexport function C() { ${TEMPLATE}; return <h1 />; }\n`;
+    expect(isFileCompiled(code)).toBe(true);
+  });
+
+  it('compiles css in a sibling namespace', () => {
+    const code = `${IMPORT}namespace N { const css = (x: any) => x; }\nnamespace M { export function C() { ${TEMPLATE}; return <h1 />; } }\n`;
+    expect(isFileCompiled(code)).toBe(true);
+  });
+
+  it('compiles css in a namespace that does not declare it', () => {
+    const code = `${IMPORT}namespace N { export function C() { ${TEMPLATE}; return <h1 />; } }\n`;
+    expect(isFileCompiled(code)).toBe(true);
+  });
+
+  it('does not treat a type-only import equals as a binding', () => {
+    const code = `${IMPORT}import type css = require('m');\nexport function C() { ${TEMPLATE}; return <h1 />; }\n`;
+    expect(isFileCompiled(code)).toBe(true);
+  });
+});
+
+describe('css shadowed by a TypeScript parameter property', () => {
+  const properties = ['private css: any', 'public readonly css: any', 'private css = 1'];
+  for (const property of properties) {
+    it(`leaves css alone with constructor(${property})`, () => {
+      const code = `${IMPORT}class A { constructor(${property}) { ${TEMPLATE}; } }\n`;
+      expect(isFileCompiled(code)).toBe(false);
+    });
+  }
+
+  it('compiles css in another method of the class', () => {
+    const code = `${IMPORT}class A { constructor(private css: any) {} m() { ${TEMPLATE}; return <h1 />; } }\n`;
+    expect(isFileCompiled(code)).toBe(true);
+  });
+});

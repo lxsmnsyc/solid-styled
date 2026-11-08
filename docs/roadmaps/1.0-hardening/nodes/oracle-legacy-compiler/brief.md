@@ -1,7 +1,7 @@
 ---
 id: oracle-legacy-compiler
-status: active
-target: 1.0
+status: done
+target: main
 ship: auto
 size: M
 gate: false

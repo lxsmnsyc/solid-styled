@@ -1,7 +1,7 @@
 ---
 id: fix-error-column
 status: done
-target: 1.0
+target: main
 ship: auto
 size: S
 gate: false

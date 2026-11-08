@@ -7,7 +7,7 @@ type: spike
 spike: true
 gate: true
 milestone: '1.0'
-target: 1.0
+target: main
 ship: auto
 size: M
 outline: false

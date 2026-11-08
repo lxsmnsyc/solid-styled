@@ -1,11 +1,11 @@
 ---
 id: chore-e2e-port
 title: Stop e2e tests from reusing another project's server
-status: active
+status: done
 priority: should
 type: chore
 milestone: '1.0'
-target: 1.0
+target: main
 ship: auto
 size: S
 gate: false

@@ -5,7 +5,7 @@ status: todo
 priority: should
 type: chore
 milestone: '1.0'
-target: 1.0
+target: main
 ship: auto
 size: S
 gate: false

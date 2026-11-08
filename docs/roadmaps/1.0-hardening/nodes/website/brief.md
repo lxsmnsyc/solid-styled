@@ -1,7 +1,7 @@
 ---
 id: website
 status: todo
-target: 1.0
+target: main
 ship: auto
 size: L
 gate: false
