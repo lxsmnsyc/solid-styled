@@ -12,6 +12,12 @@ type: release
 milestone: 1.0
 owns: []
 depends_on:
+  - on: fix-nesting-in-global
+    kind: hard
+    why: ships it
+  - on: fix-global-in-selector-list
+    kind: hard
+    why: ships it
   - on: chore-typecheck-tests
     kind: hard
     why: ships it
