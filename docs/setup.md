@@ -47,41 +47,6 @@ You can also add `solid-styled` to `compilerOptions.types` in your `tsconfig.jso
 - `exclude` is checked first. A file that matches `exclude` is skipped, even when it also matches `include`.
 - Each option replaces its default. Setting only `include` keeps the default `exclude`, which skips everything in `node_modules`.
 
-## Astro
-
-- `unplugin-solid-styled` is a Vite plugin. Put it in `vite.plugins`, not in the top-level `plugins` of the Astro config.
-- Call `solidStyled.vite(...)`. The default export is an object with one entry per bundler, not a plugin.
-- The Vite entry moves itself ahead of the `astro:jsx` and `solid` plugins.
-
-```js
-// astro.config.mjs
-import solidJs from '@astrojs/solid-js';
-import { defineConfig } from 'astro/config';
-import solidStyled from 'unplugin-solid-styled';
-
-export default defineConfig({
-  integrations: [solidJs()],
-  vite: {
-    plugins: [
-      solidStyled.vite({
-        prefix: 'my-app',
-        filter: {
-          include: 'src/**/*.{jsx,tsx}',
-        },
-      }),
-    ],
-  },
-});
-```
-
-### Unstyled content in islands
-
-- Sheets are inserted by the runtime when a component runs. The compiler does not emit `.css` files.
-- On the server, sheets are only collected inside a `<StyleRegistry>`. See [SSR](./ssr.md).
-- Astro renders each Solid island itself. solid-styled has no Astro integration, so it does not write the island's sheets into the page.
-- A server-rendered island therefore shows unstyled until it hydrates and the client inserts its sheets.
-- An island with `client:only` has no server HTML, so it shows nothing until it loads, and is styled when it appears.
-
 ## Component libraries
 
 The `css` tag throws ``Unexpected use of `css`. Make sure that solid-styled's plugin is setup correctly.`` if a module reaches the runtime without passing through the compiler. A library that uses solid-styled has two options.
@@ -155,6 +120,7 @@ export default {
 
 ## Known limits
 
+- **Astro.** solid-styled 1.0 needs Solid 2.0, and `@astrojs/solid-js` 7.1.2 still needs `solid-js@^1.9`, so 1.0 does not run in Astro yet.
 - **StackBlitz.** The compiler uses [LightningCSS](https://lightningcss.dev/), which loads a native binary for the current platform. WebContainers cannot load native binaries, so the plugin fails on StackBlitz with errors such as `wasm is undefined`. Use a local setup, or a Linux container such as GitHub Codespaces.
 
 ## Editor support

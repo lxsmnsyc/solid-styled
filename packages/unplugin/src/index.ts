@@ -47,24 +47,17 @@ const solidStyledPlugin = createUnplugin((options: SolidStyledPluginOptions) => 
     options.filter?.exclude ?? DEFAULT_EXCLUDE,
   );
 
-  let env: SolidStyledOptions['env'];
-
   return {
     name: 'solid-styled',
     transformInclude(id): boolean {
       return filter(id.split('?')[0]);
     },
     transform(code, id): TransformResult {
-      return compile(id, code, {
-        ...options,
-        env,
-      });
+      return compile(id, code, options);
     },
     vite: {
       enforce: 'pre',
       configResolved(config): void {
-        env = config.mode === 'production' ? 'production' : 'development';
-
         // run our plugin before the following plugins:
         repushPlugin(config.plugins as Plugin[], 'solid-styled', [
           // https://github.com/withastro/astro/blob/main/packages/astro/src/vite-plugin-jsx/index.ts#L173
