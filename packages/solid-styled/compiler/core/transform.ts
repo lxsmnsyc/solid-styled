@@ -283,7 +283,8 @@ function bindSpreads(ctx: Ctx, record: ElementRecord, bindings: SpreadBinding[])
 /**
  * Adds a `style` after the last spread. It merges `vars_N()` into the style
  * JSX would resolve without it: the last spread that has a `style` key, else
- * the source before it, down to the last explicit `style`.
+ * the source before it, down to the last explicit `style`. A nullish spread
+ * is skipped, as Solid skips it.
  */
 function addSpreadStyle(
   ctx: Ctx,
@@ -313,7 +314,11 @@ function addSpreadStyle(
       read = `${name}()`;
       ctx.s.overwrite(attr.argument.start, attr.argument.end, read);
     }
-    base = base === null ? `${read}.style` : `("style" in ${read} ? ${read}.style : ${base})`;
+    // Solid skips a null or undefined spread, so the guards skip it too.
+    base =
+      base === null
+        ? `${read}?.style`
+        : `(${read} != null && "style" in ${read} ? ${read}.style : ${base})`;
   }
 
   ctx.s.appendLeft(attributes[lastSpread].end, ` style={${nestStyles(ctx, base, varsList)}}`);
