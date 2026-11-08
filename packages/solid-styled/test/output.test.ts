@@ -80,6 +80,20 @@ export default function Example() {
       transform('const = ;');
     } catch (error) {
       expect((error as CompileError).line).toBe(1);
+      // `=` is the 7th character of the line; columns are 1-based like lines.
+      expect((error as CompileError).column).toBe(7);
+      expect((error as CompileError).message).toContain('(1:7)');
+    }
+  });
+
+  it('should report a 1-based column on a later line', () => {
+    try {
+      transform('let a = 1;\n  const = ;');
+      expect.unreachable();
+    } catch (error) {
+      expect((error as CompileError).line).toBe(2);
+      expect((error as CompileError).column).toBe(9);
+      expect((error as CompileError).message).toContain('(2:9)');
     }
   });
 

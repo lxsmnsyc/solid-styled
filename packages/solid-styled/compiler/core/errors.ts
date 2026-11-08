@@ -8,7 +8,8 @@ export class CompileError extends Error {
   constructor(message: string, code: string, offset: number) {
     const before = code.slice(0, offset);
     const line = before.split('\n').length;
-    const column = offset - (before.lastIndexOf('\n') + 1);
+    // 1-based, like `line`, so `(line:column)` matches what editors show.
+    const column = offset - before.lastIndexOf('\n');
     super(`${message} (${line}:${column})`);
     this.name = 'CompileError';
     this.line = line;
