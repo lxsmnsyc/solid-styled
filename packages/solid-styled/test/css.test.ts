@@ -9,7 +9,7 @@ const options: SolidStyledOptions = {
 const FILE = 'src/index.ts';
 
 describe('css', () => {
-  it('should transform', async () => {
+  it('should transform', () => {
     const code = `
 import { css } from 'solid-styled';
 
@@ -23,9 +23,9 @@ export default function Example() {
   return <h1>Hello World</h1>;
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should work with multiple templates', async () => {
+  it('should work with multiple templates', () => {
     const code = `
 import { css } from 'solid-styled';
 
@@ -49,9 +49,9 @@ export default function Example() {
   );
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should transform dynamic templates', async () => {
+  it('should transform dynamic templates', () => {
     const code = `
 import { css } from 'solid-styled';
 
@@ -65,6 +65,26 @@ export default function Example(props) {
   return <h1>Hello World</h1>;
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
+  });
+  it('should apply units written after an interpolation', () => {
+    const code = `
+import { css } from 'solid-styled';
+
+export default function Example(props) {
+  css\`
+    h1 {
+      width: \${props.width}px;
+      height: \${props.height}%;
+      margin: \${props.margin}rem \${props.margin}em;
+      transition: color \${props.duration}ms;
+      color: \${props.color};
+    }
+  \`;
+
+  return <h1>Hello World</h1>;
+}
+  `;
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
 });

@@ -1,14 +1,114 @@
-import * as lightningcss from 'lightningcss';
-import browserslist from 'browserslist';
-import type { StateContext } from '../types';
+import * as csstree from 'css-tree';
 import { GLOBAL_SELECTOR, SOLID_STYLED_NS } from './constants';
-import tokensToSelectorsList from './token-to-selector';
 
-export default function processScopedSheet(
-  ctx: StateContext,
+/** Replaces `:global(...)` with the selectors it wraps. */
+function pushGlobalChildren(target: csstree.CssNode[], pseudo: csstree.PseudoClassSelector): void {
+  if (!pseudo.children) {
+    return;
+  }
+  for (const child of pseudo.children) {
+    target.push(child);
+  }
+}
+
+/**
+ * Rewrites one selector. With a `marker`, the scoping attribute is inserted
+ * once per compound selector; with `null` (inside `@global`) the selector is
+ * left alone. Either way `:global(...)` is unwrapped.
+ */
+function rewriteSelector(node: csstree.Selector, marker: csstree.AttributeSelector | null): void {
+  const children: csstree.CssNode[] = [];
+  let pending = marker !== null;
+
+  function pushMarker(): void {
+    if (pending && marker) {
+      children.push(marker);
+      pending = false;
+    }
+  }
+
+  for (const child of node.children) {
+    switch (child.type) {
+      // The marker goes after the compound selector it scopes.
+      case 'TypeSelector':
+      case 'ClassSelector':
+      case 'IdSelector':
+      case 'AttributeSelector': {
+        children.push(child);
+        pushMarker();
+        break;
+      }
+      // A pseudo element must stay last, so the marker goes before it.
+      case 'PseudoElementSelector': {
+        pushMarker();
+        children.push(child);
+        break;
+      }
+      // A new compound selector starts here.
+      case 'Combinator':
+      case 'WhiteSpace': {
+        children.push(child);
+        pending = marker !== null;
+        break;
+      }
+      case 'PseudoClassSelector': {
+        if (child.name === GLOBAL_SELECTOR) {
+          pushGlobalChildren(children, child);
+        } else {
+          pushMarker();
+          children.push(child);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  node.children = new csstree.List<csstree.CssNode>().fromArray(children);
+}
+
+/** Prefixes animation names that refer to a keyframes rule of this sheet. */
+function namespaceAnimation(
+  node: csstree.Declaration,
   sheetID: string,
-  content: string,
-): string {
+  keyframes: Set<unknown>,
+): void {
+  // `animation` has an arbitrary value order, so every identifier is checked.
+  if (node.property !== 'animation' && node.property !== 'animation-name') {
+    return;
+  }
+  if (node.value.type !== 'Value') {
+    return;
+  }
+  for (const item of node.value.children) {
+    if (item.type === 'Identifier' && keyframes.has(item.name)) {
+      item.name = `${sheetID}-${item.name}`;
+    }
+  }
+}
+
+/**
+ * Rewrites a preprocessed sheet so every non-global selector carries the
+ * `[s\:<sheetID>]` marker, hoists `@global` blocks, unwraps `:global(...)`,
+ * and namespaces keyframes.
+ */
+export default function processScopedSheet(sheetID: string, content: string): string {
+  const ast = csstree.parse(content);
+  // This selector is going to be inserted
+  // on every non-global selector
+  // [s\:${sheetID}]
+  const selector: csstree.AttributeSelector = {
+    type: 'AttributeSelector',
+    name: {
+      type: 'Identifier',
+      name: `${SOLID_STYLED_NS}\\:${sheetID}`,
+    },
+    matcher: null,
+    flags: null,
+    value: null,
+  };
+
   const keyframes = new Set();
 
   // Flag to indicate that the currently visited
@@ -16,237 +116,85 @@ export default function processScopedSheet(
   let inGlobal = 0;
   let inKeyframes = false;
 
-  const { code: keyframe } = lightningcss.transform({
-    code: Buffer.from(content),
-    filename: ctx.ns,
-    minify: true,
-    targets: lightningcss.browserslistToTargets(
-      browserslist(ctx.opts.browserslist || 'defaults'),
-    ),
-    include:
-      lightningcss.Features.Nesting |
-      lightningcss.Features.Colors |
-      lightningcss.Features.CustomMediaQueries,
-    customAtRules: {
-      global: {
-        body: 'rule-list',
-      },
+  // Check all keyframes first
+  csstree.walk(ast, {
+    leave(node: csstree.CssNode) {
+      // Check if block is `@global`
+      if (node.type === 'Atrule' && node.name === 'global' && node.block) {
+        inGlobal -= 1;
+      }
     },
-    visitor: {
-      Rule: {
-        custom: {
-          global() {
-            inGlobal += 1;
-          },
-        },
-        keyframes(rule) {
-          if (inGlobal === 0) {
-            keyframes.add(rule.value.name.value);
-            return {
-              type: 'keyframes',
-              value: {
-                ...rule.value,
-                name: {
-                  type: rule.value.name.type,
-                  value: `${sheetID}-${rule.value.name.value}`,
-                },
-              },
-            };
+    enter(node: csstree.CssNode) {
+      // No transforms needed if in global
+      // Check if block is `@global`
+      if (node.type === 'Atrule') {
+        if (node.name === 'global' && node.block) {
+          // Shift to global mode
+          inGlobal += 1;
+          return;
+        }
+        if (inGlobal > 0) {
+          return;
+        }
+        if (node.name === 'keyframes' && node.block && node.prelude?.type === 'AtrulePrelude') {
+          for (const child of node.prelude.children) {
+            if (child.type === 'Identifier') {
+              keyframes.add(child.name);
+              child.name = `${sheetID}-${child.name}`;
+            }
           }
-          return undefined;
-        },
-      },
-      RuleExit: {
-        custom: {
-          global() {
-            inGlobal -= 1;
-          },
-        },
-      },
+        }
+      }
     },
   });
 
   inGlobal = 0;
 
-  // This selector is going to be inserted
-  // on every non-global selector
-  // [s\:${sheetID}]
-  const special: lightningcss.SelectorComponent = {
-    type: 'attribute',
-    name: `${SOLID_STYLED_NS}:${sheetID}`,
-  };
-
-  const { code } = lightningcss.transform({
-    code: keyframe,
-    filename: ctx.ns,
-    minify: true,
-    targets: lightningcss.browserslistToTargets(
-      browserslist(ctx.opts.browserslist || 'defaults'),
-    ),
-    include:
-      lightningcss.Features.Nesting |
-      lightningcss.Features.Colors |
-      lightningcss.Features.CustomMediaQueries,
-    customAtRules: {
-      global: {
-        body: 'rule-list',
-      },
-    },
-    visitor: {
-      Rule: {
-        custom: {
-          global() {
-            inGlobal += 1;
-          },
-        },
-        keyframes() {
+  csstree.walk(ast, {
+    leave(node: csstree.CssNode) {
+      // Check if block is `@global`
+      if (node.type === 'Atrule') {
+        if (node.name === 'global' && node.block) {
+          inGlobal -= 1;
+        }
+        if (node.name === 'keyframes') {
           inKeyframes = false;
-        },
-      },
-      RuleExit: {
-        custom: {
-          global(rule) {
-            inGlobal -= 1;
-            return rule.body;
-          },
-        },
-        keyframes() {
+        }
+      }
+      if (node.type === 'StyleSheet' || node.type === 'Block') {
+        const children: csstree.CssNode[] = [];
+        for (const child of node.children) {
+          // This moves all the selectors in `@global`
+          if (child.type === 'Atrule' && child.name === 'global' && child.block) {
+            for (const innerChild of child.block.children) {
+              children.push(innerChild);
+            }
+          } else {
+            children.push(child);
+          }
+        }
+        node.children = new csstree.List<csstree.CssNode>().fromArray(children);
+      }
+    },
+    enter(node: csstree.CssNode) {
+      // Check if block is `@global`
+      if (node.type === 'Atrule') {
+        if (node.name === 'global' && node.block) {
+          // Shift to global mode
+          inGlobal += 1;
+        }
+        if (inGlobal === 0 && node.name === 'keyframes') {
           inKeyframes = true;
-        },
-      },
-      Declaration: {
-        animation(rule) {
-          if (
-            rule.property === 'animation' &&
-            inGlobal === 0 &&
-            Array.isArray(rule.value)
-          ) {
-            const animations: lightningcss.Animation[] = [];
-            for (let i = 0, len = rule.value.length; i < len; i += 1) {
-              const animation = rule.value[i];
-              switch (animation.name.type) {
-                case 'ident':
-                case 'string':
-                  if (keyframes.has(animation.name.value)) {
-                    animations.push({
-                      ...animation,
-                      name: {
-                        ...animation.name,
-                        value: `${sheetID}-${animation.name.value}`,
-                      },
-                    });
-                  } else {
-                    animations.push(animation);
-                  }
-                  break;
-                case 'none':
-                  animations.push(animation);
-                  break;
-                default:
-                  break;
-              }
-            }
-            return {
-              ...rule,
-              value: animations,
-            };
-          }
-          return undefined;
-        },
-        'animation-name'(rule) {
-          if (rule.property === 'animation-name' && inGlobal === 0) {
-            const names: lightningcss.AnimationName[] = [];
-            for (let i = 0, len = rule.value.length; i < len; i += 1) {
-              const name = rule.value[i];
-              switch (name.type) {
-                case 'ident':
-                case 'string':
-                  if (keyframes.has(name.value)) {
-                    names.push({
-                      ...name,
-                      value: `${sheetID}-${name.value}`,
-                    });
-                  } else {
-                    names.push(name);
-                  }
-                  break;
-                case 'none':
-                  names.push(name);
-                  break;
-                default:
-                  break;
-              }
-            }
-            return {
-              ...rule,
-              value: names,
-            };
-          }
-          return undefined;
-        },
-      },
-      Selector(rule) {
-        if (inKeyframes || inGlobal !== 0) {
-          return undefined;
         }
-        const selectors: lightningcss.Selector = [];
-
-        let shouldPush = true;
-
-        for (let i = 0, len = rule.length; i < len; i += 1) {
-          const selector = rule[i];
-
-          switch (selector.type) {
-            // Push the selector after the node
-            case 'universal':
-            case 'type':
-            case 'class':
-            case 'id':
-            case 'attribute':
-              selectors.push(selector);
-              if (shouldPush) {
-                selectors.push(special);
-                shouldPush = false;
-              }
-              break;
-            // Push the selector before the node
-            case 'pseudo-element':
-              if (shouldPush) {
-                selectors.push(special);
-                shouldPush = false;
-              }
-              selectors.push(selector);
-              break;
-            // Not a selector
-            case 'combinator':
-            case 'namespace':
-            case 'nesting':
-              selectors.push(selector);
-              shouldPush = true;
-              break;
-            case 'pseudo-class':
-              // `:global`
-              if (
-                selector.kind === 'custom-function' &&
-                selector.name === GLOBAL_SELECTOR
-              ) {
-                selectors.push(...tokensToSelectorsList(selector.arguments)[0]);
-              } else {
-                if (shouldPush) {
-                  selectors.push(special);
-                  shouldPush = false;
-                }
-                selectors.push(selector);
-              }
-              break;
-            default:
-              break;
-          }
-        }
-        return selectors;
-      },
+      }
+      if (inGlobal === 0 && node.type === 'Declaration') {
+        namespaceAnimation(node, sheetID, keyframes);
+      }
+      if (!inKeyframes && node.type === 'Selector') {
+        rewriteSelector(node, inGlobal === 0 ? selector : null);
+      }
     },
   });
 
-  return new TextDecoder().decode(code);
+  return csstree.generate(ast);
 }

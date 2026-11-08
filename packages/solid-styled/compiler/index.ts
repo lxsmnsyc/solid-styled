@@ -1,53 +1,48 @@
-import babel from '@babel/core';
-import path from 'node:path';
-import solidStyledPlugin from './plugin';
-import type { SolidStyledOptions, StateContext } from './types';
+import MagicString from 'magic-string';
+import { parseSync } from 'oxc-parser';
+import { analyze } from './core/analyze';
+import { Ctx } from './core/context';
+import { CompileError } from './core/errors';
+import transform from './core/transform';
+import type { CompileOutput, SolidStyledOptions } from './types';
 import xxHash32 from './xxhash32';
 
-export type { SolidStyledOptions };
+export type { CompileOutput, SolidStyledOptions };
+export { CompileError };
 
-export interface CompileOutput {
-  code: string;
-  map: babel.BabelFileResult['map'];
+const TS_FILE = /\.[mc]?tsx?$/i;
+
+/**
+ * Infers the parser language from the file extension; query suffixes ignored.
+ * JSX stays enabled for plain `.ts` too, so components written in `.ts` files
+ * keep compiling.
+ */
+function languageOf(filename: string): 'jsx' | 'tsx' {
+  return TS_FILE.test(filename.split('?')[0]) ? 'tsx' : 'jsx';
 }
 
-export async function compile(
-  id: string,
-  code: string,
-  options: SolidStyledOptions,
-): Promise<CompileOutput> {
-  const ctx: StateContext = {
-    hooks: new Map(),
-    sheets: new WeakMap(),
-    vars: new WeakMap(),
-    opts: options,
-    ns: xxHash32(id).toString(16),
-    ids: 0,
-  };
-  const plugins: NonNullable<
-    NonNullable<babel.TransformOptions['parserOpts']>['plugins']
-  > = ['jsx'];
-  if (/\.[mc]?tsx?$/i.test(id.split('?')[0])) {
-    plugins.push('typescript');
-  }
-  const result = await babel.transformAsync(code, {
-    plugins: [[solidStyledPlugin, ctx]],
-    parserOpts: {
-      plugins,
-    },
-    filename: path.basename(id),
-    ast: false,
-    sourceMaps: true,
-    configFile: false,
-    babelrc: false,
-    sourceFileName: id,
+/**
+ * Compiles a module: parse with oxc, collect the templates and JSX elements
+ * (`analyze`), apply every rewrite as a span edit over a MagicString
+ * (`transform`), and return the code plus a hires source map.
+ */
+export function compile(id: string, code: string, options: SolidStyledOptions = {}): CompileOutput {
+  const filename = id.split('?')[0];
+  const result = parseSync(filename, code, {
+    lang: languageOf(id),
+    sourceType: 'module',
+    preserveParens: false,
   });
-
-  if (result) {
-    return {
-      code: result.code || '',
-      map: result.map,
-    };
+  if (result.errors.length > 0) {
+    const first = result.errors[0];
+    throw new CompileError(first.message, code, first.labels?.[0]?.start ?? 0);
   }
-  throw new Error('invariant');
+  const s = new MagicString(code);
+  const analysis = analyze(result.program);
+  const ctx = new Ctx(s, code, analysis, options, xxHash32(filename).toString(16));
+  transform(ctx);
+  return {
+    code: s.toString(),
+    map: s.generateMap({ source: id, hires: true }),
+  };
 }

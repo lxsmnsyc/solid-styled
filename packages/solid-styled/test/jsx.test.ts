@@ -1,6 +1,7 @@
+import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vitest';
 import type { SolidStyledOptions } from '../compiler';
-import { compile } from '../compiler';
+import { CompileError, compile } from '../compiler';
 
 const options: SolidStyledOptions = {
   verbose: false,
@@ -9,7 +10,7 @@ const options: SolidStyledOptions = {
 const FILE = 'src/index.ts';
 
 describe('jsx', () => {
-  it('should transform', async () => {
+  it('should transform', () => {
     const code = `
 export default function Example() {
   return (
@@ -26,9 +27,9 @@ export default function Example() {
   );
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should work with multiple templates', async () => {
+  it('should work with multiple templates', () => {
     const code = `
 export default function Example() {
   return (
@@ -53,9 +54,9 @@ export default function Example() {
   );
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should transform dynamic templates', async () => {
+  it('should transform dynamic templates', () => {
     const code = `
     export default function Example() {
       return (
@@ -72,11 +73,11 @@ export default function Example() {
       );
     }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
 });
 describe('jsx.global', () => {
-  it('should transform', async () => {
+  it('should transform', () => {
     const code = `
 export default function Example() {
   return (
@@ -93,9 +94,9 @@ export default function Example() {
   );
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should work with multiple templates', async () => {
+  it('should work with multiple templates', () => {
     const code = `
 export default function Example() {
   return (
@@ -120,9 +121,9 @@ export default function Example() {
   );
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
-  it('should transform dynamic templates', async () => {
+  it('should transform dynamic templates', () => {
     const code = `
     export default function Example() {
       return (
@@ -139,6 +140,132 @@ export default function Example() {
       );
     }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
+  });
+});
+
+describe('jsx in exported expression-body components', () => {
+  const STYLE = '<style jsx>{`a { color: red; }`}</style>';
+
+  /** Compiles a snippet, checks it parses, and returns the output. */
+  function compileValid(code: string): string {
+    const output = compile('src/index.tsx', code, options).code;
+    const parsed = parseSync('index.tsx', output, { lang: 'tsx' });
+    expect(parsed.errors).toEqual([]);
+    return output;
+  }
+
+  /** Checks the setup call comes before the given statement. */
+  function expectCallBefore(output: string, statement: string, callee = '_useSolidStyled('): void {
+    const call = output.indexOf(callee);
+    expect(call).toBeGreaterThanOrEqual(0);
+    expect(output.indexOf(statement)).toBeGreaterThan(call);
+  }
+
+  it('should place the call before `export const`', () => {
+    const output = compileValid(`export const C = () => <div>${STYLE}</div>;`);
+    expectCallBefore(output, 'export const C = () =>');
+  });
+  it('should place the call before `export const` with a parenthesized body', () => {
+    const output = compileValid(`export const C = () => (\n  <div>${STYLE}</div>\n);`);
+    expectCallBefore(output, 'export const C = () =>');
+  });
+  it('should place the call before `export default`', () => {
+    const output = compileValid(`export default () => <div>${STYLE}</div>;`);
+    expectCallBefore(output, 'export default () =>');
+  });
+  it('should place the call before a non-exported `const`', () => {
+    const output = compileValid(`const C = () => <div>${STYLE}</div>;`);
+    expectCallBefore(output, 'const C = () =>');
+  });
+  it('should place the call before `export class`', () => {
+    const output = compileValid(`export class K { r = () => <div>${STYLE}</div>; }`);
+    expectCallBefore(output, 'export class K');
+  });
+  it('should place the call before `export default class`', () => {
+    const output = compileValid(`export default class { r = () => <div>${STYLE}</div>; }`);
+    expectCallBefore(output, 'export default class');
+  });
+  it('should place the global call before `export const`', () => {
+    const output = compileValid(
+      'export const C = () => <div><style jsx global>{`a { color: red; }`}</style></div>;',
+    );
+    expectCallBefore(output, 'export const C = () =>', '_useSolidStyledGlobal(');
+  });
+  it('should keep the call inside a nested function, before its statement', () => {
+    const output = compileValid(
+      `export function outer() { const C = () => <div>${STYLE}</div>; return C; }`,
+    );
+    expectCallBefore(output, 'const C = () =>');
+    expectCallBefore(output, '_useSolidStyled(', 'export function outer');
+  });
+  it('should still reject dynamic styles in an exported expression body', () => {
+    expect(() =>
+      compile(
+        'src/index.tsx',
+        `export const C = () => <div><style jsx>{\`a { color: \${x}; }\`}</style></div>;`,
+        options,
+      ),
+    ).toThrow(CompileError);
+  });
+});
+
+describe('jsx in unbraced statements', () => {
+  const STYLE = '<style jsx>{`div { color: red; }`}</style>';
+  const VIEW = `<div>${STYLE}</div>`;
+
+  /** Compiles a component body, checks it parses, and returns the output. */
+  function compileBody(body: string): string {
+    const code = `export const A = (props) => { ${body} };`;
+    const output = compile('src/index.tsx', code, options).code;
+    const parsed = parseSync('index.tsx', output, { lang: 'tsx' });
+    expect(parsed.errors).toEqual([]);
+    return output;
+  }
+
+  /** Checks the call comes first and the statement keeps its own body. */
+  function expectCallBefore(output: string, statement: string): void {
+    const call = output.indexOf('_useSolidStyled(');
+    expect(call).toBeGreaterThanOrEqual(0);
+    expect(output.indexOf(statement)).toBeGreaterThan(call);
+    // The call is a statement of its own, so the control statement starts right after it.
+    const after = output.slice(output.indexOf(');', call) + 2).trimStart();
+    expect(after.startsWith(statement)).toBe(true);
+  }
+
+  it('should keep the call out of an `if` consequent', () => {
+    const output = compileBody(`if (props.x) return ${VIEW}; return null;`);
+    expectCallBefore(output, 'if (props.x)');
+    expect(output).toMatch(/return null;/);
+  });
+  it('should keep the call out of an `else` branch', () => {
+    const output = compileBody(`if (props.x) return null; else return ${VIEW};`);
+    expectCallBefore(output, 'if (props.x)');
+  });
+  it('should keep the call out of an `else if` branch', () => {
+    const output = compileBody(
+      `if (props.x) return null; else if (props.y) return ${VIEW}; return null;`,
+    );
+    expectCallBefore(output, 'if (props.x)');
+  });
+  it('should keep the call out of a loop body', () => {
+    const output = compileBody(`for (const a of props.list) return ${VIEW}; return null;`);
+    expectCallBefore(output, 'for (const a of props.list)');
+  });
+  it('should keep the call out of a `while` body', () => {
+    const output = compileBody(`while (props.x) return ${VIEW}; return null;`);
+    expectCallBefore(output, 'while (props.x)');
+  });
+  it('should keep the call out of a `do` body', () => {
+    const output = compileBody(`do return ${VIEW}; while (props.x); return null;`);
+    expectCallBefore(output, 'do ');
+  });
+  it('should keep the call out of a labeled statement', () => {
+    const output = compileBody(`a: if (props.x) return ${VIEW}; return null;`);
+    expectCallBefore(output, 'a:');
+  });
+  it('should keep the call before a braced `if` as before', () => {
+    const output = compileBody(`if (props.x) { return ${VIEW}; } return null;`);
+    expectCallBefore(output, 'return <div');
   });
 });

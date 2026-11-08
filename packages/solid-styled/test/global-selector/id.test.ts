@@ -9,7 +9,7 @@ const options: SolidStyledOptions = {
 const FILE = 'src/index.ts';
 
 describe(':global > id selectors', () => {
-  it('should scope for id selectors', async () => {
+  it('should scope for id selectors', () => {
     const code = `
 import { css } from 'solid-styled';
 
@@ -23,6 +23,6 @@ export default function Example() {
   return <h1 id="example">Hello World</h1>;
 }
   `;
-    expect((await compile(FILE, code, options)).code).toMatchSnapshot();
+    expect(compile(FILE, code, options).code).toMatchSnapshot();
   });
 });
