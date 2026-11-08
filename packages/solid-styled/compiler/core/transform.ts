@@ -1,5 +1,5 @@
 import { type CssTask, type ElementRecord, type StyleTask, hasScopedAttribute } from './analyze';
-import { type Node, eachChild, indentAt, textOf } from './ast';
+import { type Node, eachChild, indentAt } from './ast';
 import { RUNTIME_IDENTIFIERS, SHEET_ID, SOLID_STYLED_NS, VARS_ID } from './constants';
 import type { Ctx, ScopedSheet } from './context';
 import processCSSTemplate from './process-css-template';
@@ -215,24 +215,6 @@ function isStyleAttribute(attr: Node): boolean {
   );
 }
 
-/**
- * True when the expression can be read again without running anything new:
- * `props`, `this.props`, `props.rest`, `props["rest"]`. Getters may run again;
- * calls never do.
- */
-function isReadableAgain(node: Node): boolean {
-  if (node.type === 'Identifier' || node.type === 'ThisExpression') {
-    return true;
-  }
-  if (node.type === 'MemberExpression' && !node.optional) {
-    if (node.computed && node.property.type !== 'Literal') {
-      return false;
-    }
-    return isReadableAgain(node.object);
-  }
-  return false;
-}
-
 /** Wraps a base style in one `mergeStyles` call per sheet. */
 function nestStyles(ctx: Ctx, base: string | null, varsList: string[]): string {
   let expression = base;
@@ -258,38 +240,25 @@ function mergeStyleAttribute(ctx: Ctx, style: Node, varsList: string[]): void {
       ctx.s.overwrite(value.start, value.end, `{${nestStyles(ctx, null, varsList)}}`);
       return;
     }
-    const merge = ctx.importIdent(RUNTIME_IDENTIFIERS.mergeStyles);
-    let closing = '';
-    for (const vars of varsList) {
-      closing += `, ${vars}())`;
-    }
-    ctx.s.appendLeft(expression.start, `${merge}(`.repeat(varsList.length));
-    ctx.s.appendRight(expression.end, closing);
+    wrapStyleValue(ctx, expression, varsList, '');
     return;
   }
   if (value.type === 'Literal') {
-    ctx.s.overwrite(value.start, value.end, `{${nestStyles(ctx, value.raw, varsList)}}`);
+    wrapStyleValue(ctx, value, varsList, '{');
     return;
   }
   ctx.error(value, 'Invalid style value.');
 }
 
-/** Source text of an explicit `style` value, or null when it sets nothing. */
-function readStyleValue(ctx: Ctx, style: Node): string | null {
-  const value = style.value;
-  if (!value) {
-    return null;
+/** Wraps a style value in `mergeStyles` calls by inserting text around it. */
+function wrapStyleValue(ctx: Ctx, value: Node, varsList: string[], brace: '' | '{'): void {
+  const merge = ctx.importIdent(RUNTIME_IDENTIFIERS.mergeStyles);
+  let closing = '';
+  for (const vars of varsList) {
+    closing += `, ${vars}())`;
   }
-  if (value.type === 'JSXExpressionContainer') {
-    if (value.expression.type === 'JSXEmptyExpression') {
-      return null;
-    }
-    return textOf(ctx.code, value.expression);
-  }
-  if (value.type === 'Literal') {
-    return value.raw;
-  }
-  return ctx.error(value, 'Invalid style value.');
+  ctx.s.appendLeft(value.start, `${brace}${`${merge}(`.repeat(varsList.length)}`);
+  ctx.s.appendRight(value.end, `${closing}${brace === '{' ? '}' : ''}`);
 }
 
 const WHITESPACE = /\s/;
@@ -303,78 +272,43 @@ function removeAttribute(ctx: Ctx, attr: Node): void {
   ctx.s.remove(start, attr.end);
 }
 
-interface SpreadBinding {
-  name: string;
-  source: string;
-}
-
-// A JSX child or attribute value needs braces around a plain expression.
-const JSX_HOLDERS = new Set(['JSXElement', 'JSXFragment', 'JSXAttribute']);
-
 /**
- * Binds each spread call to a parameter of an arrow function called in place:
- * `((_spread_1) => <a {..._spread_1()} />)(_trackSpread(() => getProps()))`.
- * `trackSpread` is a memo, so the call runs once per change, and both the
- * spread and the `style` that reads it stay reactive.
+ * Wraps a spread argument in place: `{...x}` becomes
+ * `{..._spreadStyle(x, vars_1)}`. Text only goes around the argument, so
+ * nested edits, `await`, and source maps inside it keep working.
  */
-function bindSpreads(ctx: Ctx, record: ElementRecord, bindings: SpreadBinding[]): void {
-  const track = ctx.importIdent(RUNTIME_IDENTIFIERS.trackSpread);
-  const names: string[] = [];
-  const sources: string[] = [];
-  for (const binding of bindings) {
-    names.push(binding.name);
-    sources.push(`${track}(() => ${binding.source})`);
-  }
-  const inJSX = record.parent !== undefined && JSX_HOLDERS.has(record.parent.type);
-  const element = record.element;
-  ctx.s.prependRight(element.start, `${inJSX ? '{' : ''}((${names.join(', ')}) => `);
-  ctx.s.appendLeft(element.end, `)(${sources.join(', ')})${inJSX ? '}' : ''}`);
+function wrapSpread(ctx: Ctx, spread: Node, varsList: string[]): void {
+  const helper = ctx.importIdent(RUNTIME_IDENTIFIERS.spreadStyle);
+  // `a, b` is the only expression that is not a valid call argument.
+  const isSequence = spread.argument.type === 'SequenceExpression';
+  ctx.s.appendLeft(spread.argument.start, `${helper}(${isSequence ? '(' : ''}`);
+  ctx.s.prependRight(spread.argument.end, `${isSequence ? ')' : ''}, ${varsList.join(', ')})`);
 }
 
 /**
- * Adds a `style` after the last spread. It merges `vars_N()` into the style
- * JSX would resolve without it: the last spread that has a `style` key, else
- * the source before it, down to the last explicit `style`. A nullish spread
- * is skipped, as Solid skips it.
+ * Merges `vars_N()` into the style Solid resolves for an element with
+ * spreads, where the last source with a `style` key wins. The last explicit
+ * `style` merges in place; without one, `style={vars_1()}` goes after the
+ * element name. Each spread after it is wrapped by `spreadStyle`, which
+ * merges the variables into the spread's `style` when it has that key.
  */
-function addSpreadStyle(
+function mergeSpreadStyles(
   ctx: Ctx,
   record: ElementRecord,
   lastStyle: number,
-  lastSpread: number,
   varsList: string[],
 ): void {
-  const attributes = record.element.openingElement.attributes;
-  let base: string | null = null;
+  const opening = record.element.openingElement;
+  const attributes = opening.attributes;
   if (lastStyle >= 0) {
-    // The explicit style moves into the fallback, so it is still evaluated once.
-    base = readStyleValue(ctx, attributes[lastStyle]);
-    removeAttribute(ctx, attributes[lastStyle]);
+    mergeStyleAttribute(ctx, attributes[lastStyle], varsList);
+  } else {
+    ctx.s.appendLeft(opening.name.end, ` style={${nestStyles(ctx, null, varsList)}}`);
   }
-
-  const bindings: SpreadBinding[] = [];
-  for (let index = lastStyle + 1; index <= lastSpread; index++) {
-    const attr = attributes[index];
-    if (attr.type !== 'JSXSpreadAttribute') {
-      continue;
+  for (const attr of attributes.slice(lastStyle + 1)) {
+    if (attr.type === 'JSXSpreadAttribute') {
+      wrapSpread(ctx, attr, varsList);
     }
-    let read = textOf(ctx.code, attr.argument);
-    if (!isReadableAgain(attr.argument)) {
-      const name = ctx.unique('_spread');
-      bindings.push({ name, source: read });
-      read = `${name}()`;
-      ctx.s.overwrite(attr.argument.start, attr.argument.end, read);
-    }
-    // Solid skips a null or undefined spread, so the guards skip it too.
-    base =
-      base === null
-        ? `${read}?.style`
-        : `(${read} != null && "style" in ${read} ? ${read}.style : ${base})`;
-  }
-
-  ctx.s.appendLeft(attributes[lastSpread].end, ` style={${nestStyles(ctx, base, varsList)}}`);
-  if (bindings.length > 0) {
-    bindSpreads(ctx, record, bindings);
   }
 }
 
@@ -421,7 +355,7 @@ function scopeElement(ctx: Ctx, record: ElementRecord): void {
   if (lastStyle > lastSpread) {
     mergeStyleAttribute(ctx, opening.attributes[lastStyle], varsList);
   } else if (lastSpread >= 0) {
-    addSpreadStyle(ctx, record, lastStyle, lastSpread, varsList);
+    mergeSpreadStyles(ctx, record, lastStyle, varsList);
   } else {
     ctx.s.appendLeft(anchor, ` style={${nestStyles(ctx, null, varsList)}}`);
   }

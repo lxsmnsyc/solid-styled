@@ -116,3 +116,6 @@ test-results
 playwright-report
 blob-report
 .playwright
+
+# Claude Code agent worktrees and local settings
+.claude/
