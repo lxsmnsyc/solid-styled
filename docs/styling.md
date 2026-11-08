@@ -2,7 +2,7 @@
 
 ## `css`
 
-- Call `css` as a statement, not as an expression. The compiler only picks up `css\`...\`;` on its own line.
+- Call `css` as a statement, not as an expression. The compiler only picks up ``css`...`;`` on its own line.
 - Call it directly inside the component whose elements it styles.
 - You can call it more than once in the same component. Each call becomes its own sheet under the same scope.
 
@@ -27,6 +27,49 @@ function Card() {
       <h2>Title</h2>
     </section>
   );
+}
+```
+
+### Linting
+
+- A bare ``css`...`;`` statement is an unused expression to linters. The `no-unused-expressions` rule reports it as `Expected an assignment or function call and instead saw an expression`.
+- Set `allowTaggedTemplates: true` on the rule to allow tagged templates used as statements.
+
+ESLint:
+
+```js
+// eslint.config.js
+export default [
+  {
+    rules: {
+      'no-unused-expressions': ['error', { allowTaggedTemplates: true }],
+    },
+  },
+];
+```
+
+typescript-eslint replaces the core rule, so turn the core rule off and set the option on its own rule:
+
+```js
+// eslint.config.js
+export default [
+  {
+    rules: {
+      'no-unused-expressions': 'off',
+      '@typescript-eslint/no-unused-expressions': ['error', { allowTaggedTemplates: true }],
+    },
+  },
+];
+```
+
+oxlint takes the same option:
+
+```jsonc
+// .oxlintrc.json
+{
+  "rules": {
+    "no-unused-expressions": ["error", { "allowTaggedTemplates": true }],
+  },
 }
 ```
 
