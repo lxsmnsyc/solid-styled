@@ -1,6 +1,6 @@
 ---
 id: fix-error-column
-status: todo
+status: done
 target: 1.0
 ship: auto
 size: S

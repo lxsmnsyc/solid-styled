@@ -1,6 +1,6 @@
 ---
 id: mbt-style-registry
-status: todo
+status: active
 target: 1.0
 ship: auto
 size: M

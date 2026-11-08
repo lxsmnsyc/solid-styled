@@ -1,6 +1,6 @@
 ---
 id: release-next-2
-status: todo
+status: active
 target: 1.0
 ship: auto
 size: S
