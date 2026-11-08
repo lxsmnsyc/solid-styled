@@ -1,7 +1,7 @@
 ---
 id: fix-type-only-import
 title: Ignore type-only imports of css
-status: active
+status: done
 priority: must
 type: fix
 milestone: next.2
@@ -11,6 +11,7 @@ size: S
 gate: false
 outline: false
 added: 2026-11-08
+fulfilled_by: '#63'
 owns:
   - packages/solid-styled/compiler/core/analyze.ts
 depends_on: []

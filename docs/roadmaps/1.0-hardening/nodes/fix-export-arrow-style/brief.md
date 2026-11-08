@@ -1,7 +1,7 @@
 ---
 id: fix-export-arrow-style
 title: Emit valid code for exported arrow components with style jsx
-status: active
+status: done
 priority: must
 type: fix
 milestone: next.2
@@ -11,6 +11,7 @@ size: S
 gate: false
 outline: false
 added: 2026-11-08
+fulfilled_by: '#64'
 owns:
   - packages/solid-styled/compiler/core/transform.ts
 depends_on: []
