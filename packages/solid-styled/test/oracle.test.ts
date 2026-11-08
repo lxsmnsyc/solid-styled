@@ -485,15 +485,16 @@ export function C(props: any) {
     await expectSameOutput(FILE, code, ['/*t1*/', '/*t2*/'], {});
   });
 
-  // Bug found while building this oracle, outside what the generators
-  // produce. 0.12.1 appends `s:<scope>` and `style={vars_1()}` after a spread,
-  // so the CSS variables win over `props.style`. 1.0 inserts them before the
-  // spread, so a `style` in the spread replaces the variables and the
-  // interpolated values are lost. The oracle flags it: the added attributes
-  // sit before the spread in 1.0 and after it in 0.12.1. Turns red once 1.0
-  // keeps them after it.
-  it.fails('keeps the added attributes after a spread attribute', async () => {
+  // Intended difference, outside what the generators produce. With a spread,
+  // 0.12.1 appends `s:<scope>` and `style={vars_1()}` after it, so the CSS
+  // variables replace `props.style`. 1.0 also places them after the spread
+  // but merges the spread's style with the variables (#71), so both survive.
+  // The oracle cannot compare this case, so it checks the 1.0 output alone.
+  it('merges a spread style with the CSS variables', () => {
     const code = `import { css } from 'solid-styled';\nexport function C(props: any) {\ncss\`/*t1*/a { color: \${props.c}; }\`;\nreturn <a {...props} />;\n}\n`;
-    await expectSameOutput(FILE, code, ['/*t1*/'], {});
+    const output = compile(FILE, code).code;
+    expect(output).toMatch(
+      /<a \{\.\.\.props\} s:[\w-]+ style=\{_mergeStyles\(props\?\.style, vars_1\(\)\)\} \/>/,
+    );
   });
 });

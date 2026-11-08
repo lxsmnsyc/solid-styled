@@ -32,6 +32,8 @@ export interface ElementRecord {
   functions: Node[];
   /** True when the element carries `use:solid-styled`. */
   hasUseAttribute: boolean;
+  /** The node that holds the element, to tell a JSX child from an expression. */
+  parent: Node | undefined;
 }
 
 export interface Analysis {
@@ -421,6 +423,7 @@ export function analyze(program: Node): Analysis {
           element: node,
           functions: fnStack.slice(),
           hasUseAttribute,
+          parent: parents[parents.length - 1],
         });
       }
     } else if (
