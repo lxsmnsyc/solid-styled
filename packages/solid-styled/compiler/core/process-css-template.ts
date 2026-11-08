@@ -55,9 +55,11 @@ export default function processCSSTemplate(
   isScoped: boolean,
 ): DynamicTemplateResult {
   const { sheet, variables } = replaceDynamicTemplate(ctx, template);
-  const preprocessed = preprocessCSS(ctx, sheet);
+  const preprocessed = preprocessCSS(ctx, sheet, template);
   return {
-    sheet: isScoped ? preprocessCSS(ctx, processScopedSheet(sheetID, preprocessed)) : preprocessed,
+    sheet: isScoped
+      ? preprocessCSS(ctx, processScopedSheet(sheetID, preprocessed), template)
+      : preprocessed,
     variables,
   };
 }

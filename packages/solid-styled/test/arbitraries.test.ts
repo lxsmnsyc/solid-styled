@@ -208,7 +208,7 @@ describe('invalidComponent', () => {
 });
 
 // Minimal counterexamples for compiler bugs found by these generators. The
-// fixed ones stay as regression tests. `it.fails` marks a bug still open and
+// fixed ones stay as regression tests. An `it.fails` marks a bug still open and
 // turns red once it is fixed.
 describe('compiler bugs found by the generators', () => {
   // A type import has no runtime value. 0.12.1 leaves the template alone.
@@ -229,9 +229,9 @@ describe('compiler bugs found by the generators', () => {
     expect(listParseErrors(compile(FILE, code).code)).toEqual([]);
   });
 
-  // lightningcss throws a plain SyntaxError; the docs promise a CompileError.
-  // 0.12.1 also rejects it ("Invalid media query"), so generators avoid it.
-  it.fails('raises a CompileError for an interpolation in a @media query', () => {
+  // lightningcss used to throw a plain SyntaxError. 0.12.1 also rejects the
+  // input ("Invalid media query"), so generators avoid it.
+  it('raises a CompileError for an interpolation in a @media query', () => {
     const code = `import { css } from 'solid-styled';\nexport function C(props: any) {\ncss\`@media (min-width: \${props.w}) { a { color: red; } }\`;\nreturn <a />;\n}\n`;
     expect(() => compile(FILE, code)).toThrow(CompileError);
   });
