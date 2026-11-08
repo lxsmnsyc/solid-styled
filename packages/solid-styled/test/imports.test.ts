@@ -111,4 +111,86 @@ css\`h1 { color: red; }\`;
 `;
     expect(transform(code)).toBe(code);
   });
+
+  it('should ignore a css tag from a type-only import declaration', () => {
+    const code = `
+import type { css } from 'solid-styled';
+
+export function C() {
+  css\`a { color: red; }\`;
+  return <div />;
+}
+`;
+    const result = transform(code);
+    expect(result).toBe(code);
+    expect(result).not.toContain('useSolidStyled');
+  });
+
+  it('should ignore a css tag from a type-only import specifier', () => {
+    const code = `
+import { type css } from 'solid-styled';
+
+export function C() {
+  css\`a { color: red; }\`;
+  return <div />;
+}
+`;
+    const result = transform(code);
+    expect(result).toBe(code);
+    expect(result).not.toContain('useSolidStyled');
+  });
+
+  it('should ignore a css tag from a type-only aliased import', () => {
+    const code = `
+import type { css as styled } from 'solid-styled';
+
+export function C() {
+  styled\`a { color: red; }\`;
+  return <div />;
+}
+`;
+    const result = transform(code);
+    expect(result).toBe(code);
+    expect(result).not.toContain('useSolidStyled');
+  });
+
+  it('should ignore a css tag from a type-only aliased specifier', () => {
+    const code = `
+import { type css as styled } from 'solid-styled';
+
+export function C() {
+  styled\`a { color: red; }\`;
+  return <div />;
+}
+`;
+    const result = transform(code);
+    expect(result).toBe(code);
+    expect(result).not.toContain('useSolidStyled');
+  });
+
+  it('should ignore a css tag from a type-only namespace import', () => {
+    const code = `
+import type * as s from 'solid-styled';
+
+export function C() {
+  s.css\`a { color: red; }\`;
+  return <div />;
+}
+`;
+    const result = transform(code);
+    expect(result).toBe(code);
+    expect(result).not.toContain('useSolidStyled');
+  });
+
+  it('should still transform css next to a type-only specifier', () => {
+    const code = `
+import { css, type Other } from 'solid-styled';
+
+export function C() {
+  css\`a { color: red; }\`;
+  return <div />;
+}
+`;
+    expect(transform(code)).toContain('useSolidStyled');
+  });
 });

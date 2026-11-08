@@ -241,7 +241,15 @@ export function analyze(program: Node): Analysis {
     if (statement.type !== 'ImportDeclaration' || statement.source.value !== SOURCE_MODULE) {
       continue;
     }
+    // `import type { ... }` has no runtime binding.
+    if (statement.importKind === 'type') {
+      continue;
+    }
     for (const specifier of statement.specifiers) {
+      // `import { type css }` has no runtime binding either.
+      if (specifier.type === 'ImportSpecifier' && specifier.importKind === 'type') {
+        continue;
+      }
       if (specifier.type === 'ImportSpecifier') {
         const imported =
           specifier.imported.type === 'Identifier'
