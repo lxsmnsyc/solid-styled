@@ -16,7 +16,8 @@
 
 ## Requirements
 
-- SolidJS 2.0 or newer, along with `@solidjs/web`.
+- `solid-js` and `@solidjs/web` `^2.0.0-rc.5`.
+- Node `^20.19.0 || >=22.12.0`.
 - The build plugin below. The `css` tag throws at runtime if the plugin is not installed.
 
 ## Install
@@ -38,8 +39,6 @@ pnpm add -D unplugin-solid-styled
 
 ## Setup
 
-solid-styled must see your JSX before the Solid plugin compiles it. The Vite entry moves itself ahead of the Solid plugin, so the order in `plugins` does not matter there. With other bundlers, put it before the plugin that compiles JSX.
-
 ```js
 // vite.config.js
 import solid from '@solidjs/vite-plugin';
@@ -47,44 +46,17 @@ import solidStyled from 'unplugin-solid-styled';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [
-    solid(),
-    solidStyled.vite({
-      prefix: 'my-app',
-      filter: {
-        include: 'src/**/*.tsx',
-        exclude: 'node_modules/**/*',
-      },
-    }),
-  ],
+  plugins: [solid(), solidStyled.vite()],
 });
 ```
-
-[`unplugin-solid-styled`](https://github.com/lxsmnsyc/solid-styled/tree/main/packages/unplugin)
-also provides `rollup`, `webpack` and `esbuild` entries.
-
-## Docs
-
-- [Setup](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/setup.md) covers plugin options, TypeScript types, component libraries and known limits.
-- [Styling](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/styling.md) covers `css`, `<style jsx>` and reactive values.
-- [Scoping](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/scoping.md) covers `:global`, `@global` and `use:solid-styled`.
-- [SSR](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/ssr.md) covers `StyleRegistry` and `renderSheets`.
-- [How it works](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/how-it-works.md) covers the compiler output.
-- [Editor](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/editor.md) covers syntax highlighting and comment shortcuts.
-
-## Usage
-
-### `css`
-
-Call `css` as a statement inside your component. The template is a normal stylesheet.
 
 ```jsx
 import { css } from 'solid-styled';
 
-function Title() {
+function Title(props) {
   css`
     h1 {
-      color: red;
+      color: ${props.color};
     }
   `;
 
@@ -92,104 +64,22 @@ function Title() {
 }
 ```
 
-Interpolated values are replaced by CSS custom properties, so the sheet itself is static and only the variable changes.
+- The Vite entry moves itself ahead of the Solid plugin. With other bundlers, put it before the plugin that compiles JSX.
+- `h1` only matches the `h1` written in `Title`. `props.color` becomes a CSS custom property, so the sheet stays the same when it changes.
 
-```jsx
-import { createSignal } from 'solid-js';
-import { css } from 'solid-styled';
+## Docs
 
-function Button() {
-  const [color, setColor] = createSignal('red');
-
-  css`
-    button {
-      color: ${color()};
-    }
-  `;
-
-  return (
-    <button onClick={() => setColor((c) => (c === 'red' ? 'blue' : 'red'))}>
-      Current color: {color()}
-    </button>
-  );
-}
-```
-
-A CSS unit written right after an interpolation, as in `${size()}px`, is applied with `calc()`, so `width: ${size()}px` compiles to `width: calc(var(--s-v-...) * 1px)`.
-
-### `<style jsx>`
-
-`<style jsx>` does exactly what `css` does, written inside JSX instead.
-
-```jsx
-function Button() {
-  const [color, setColor] = createSignal('red');
-
-  return (
-    <>
-      <style jsx>
-        {`
-          button {
-            color: ${color()};
-          }
-        `}
-      </style>
-      <button onClick={() => setColor((c) => (c === 'red' ? 'blue' : 'red'))}>
-        Current color: {color()}
-      </button>
-    </>
-  );
-}
-```
-
-Use `<style jsx global>` to declare global styles.
-
-### Scoping
-
-Styles apply to the DOM elements written inside the component, including elements passed as children to other components. They do not apply to elements rendered by another component.
-
-```jsx
-function ForeignTitle() {
-  return <h1>This is not affected</h1>;
-}
-
-function Title() {
-  css`
-    h1 {
-      color: red;
-    }
-  `;
-
-  return (
-    <>
-      <h1>This is affected.</h1>
-      <ForeignTitle />
-      <Container>
-        <h1>This is also affected.</h1>
-      </Container>
-    </>
-  );
-}
-```
-
-Use `:global(...)` for a single selector, `@global { ... }` for a block, and `use:solid-styled` to forward the scope to a component. See [Scoping](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/scoping.md).
-
-### SSR
-
-Wrap the tree in `<StyleRegistry>` and render the collected sheets into your HTML. See [SSR](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/ssr.md).
-
-## CSS processing
-
-- Sheets are compiled with [LightningCSS](https://lightningcss.dev/), so they are minified and lowered for your browser targets.
-- CSS nesting, modern color syntax and custom media queries are always lowered.
-- Set the `browserslist` plugin option to control the targets.
-
-## Limitations
-
-- Scoped `css` must be called directly inside a component, so the compiler can find the JSX it belongs to.
-- Global `css` (through `:global` or `@global`) can be called from any function, including hooks.
-- Interpolated values can only be used as CSS values, not as selectors or property names.
-- A component that declares reactive values needs a block body, because the compiler declares a variable holder at the top of it.
+- [Getting started](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/getting-started.md) covers requirements, install, Vite and TypeScript setup, and other bundlers.
+- [Styling](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/styling.md) covers `css`, `<style jsx>`, reactive values and what can be interpolated.
+- [Scoping](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/scoping.md) covers how scoping works, CSS nesting, `:global`, `@global`, keyframes and `use:solid-styled`.
+- [SSR](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/ssr.md) covers `StyleRegistry`, `renderSheets` and hydration.
+- [Component libraries](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/component-libraries.md) covers publishing components that use solid-styled.
+- [Configuration](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/configuration.md) covers plugin order, options and file filters.
+- [Editor and linting](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/editor.md) covers syntax highlighting, comment shortcuts and `no-unused-expressions`.
+- [Migrating from 0.x](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/migrating-from-0.x.md) covers every breaking change from 0.12.x to 1.0.
+- [How it works](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/how-it-works.md) covers the compiler pipeline, its output and how values reach elements.
+- [API reference](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/api.md) covers every export of `solid-styled`, `solid-styled/compiler` and `unplugin-solid-styled`.
+- [Known limits](https://github.com/lxsmnsyc/solid-styled/blob/main/docs/known-limits.md) covers unsupported setups and open bugs.
 
 ## Sponsors
 
