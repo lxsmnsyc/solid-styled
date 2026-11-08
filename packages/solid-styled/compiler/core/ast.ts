@@ -75,11 +75,6 @@ export function isStatementNode(node: Node): boolean {
   return STATEMENT_SUFFIX.test(node.type);
 }
 
-/** Source text of a node, verbatim. */
-export function textOf(code: string, node: Node): string {
-  return code.slice(node.start, node.end);
-}
-
 /** Leading whitespace of the line the offset sits on. */
 export function indentAt(code: string, offset: number): string {
   let start = offset;

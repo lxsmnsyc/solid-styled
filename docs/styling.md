@@ -147,17 +147,23 @@ function Bar(props) {
 
 ### Spread attributes
 
-- The scope marker and the generated `style` go after the last spread, so a spread cannot replace them.
-- The generated `style` merges the CSS variables into the style the element would get without it. That is the `style` of the last spread that has a `style` key. If no spread after the last explicit `style` has one, it is that explicit `style`.
-- A `null` or `undefined` spread is skipped, as in Solid.
-- A spread such as `{...getProps()}` is wrapped in a memo, so the call still runs once per change and stays reactive.
+Solid gives an element the `style` of the last source that has a `style` key. A `null` or `undefined` spread is skipped. The compiler keeps that rule and adds the CSS variables to whichever `style` wins.
+
+- The scope marker goes after the last spread, so a spread cannot replace it.
+- An explicit `style` after the last spread merges the CSS variables in place, as above.
+- Otherwise, the last explicit `style` merges them in place. With no explicit `style`, the compiler adds `style={vars_1()}` after the element name.
+- Each spread after that `style` is wrapped by `spreadStyle`. When the spread has a `style` key, `spreadStyle` returns it through Solid's `merge` with that style merged with the CSS variables. Any other spread is returned as is. A function spread such as `{...signal}` is called first, as Solid does.
+- The spread is wrapped where it is. It is not copied or moved, so a call such as `{...getProps()}` runs as often as with any other reactive attribute on the element, and the element stays in its parent template.
+- A static sheet has no CSS variables. The compiler only adds the scope marker after the last spread.
 
 ```jsx
 <button style={base} {...props} />
 // becomes
 <button
-  {...props}
+  style={mergeStyles(base, vars_1())}
+  {...spreadStyle(props, vars_1)}
   s:c-1a2b3c-0
-  style={mergeStyles(props != null && 'style' in props ? props.style : base, vars_1())}
 />
 ```
+
+Solid's compiler (2.0.0-rc.21) emits code that does not parse for `await` or `yield` inside a spread when the element has other attributes. The scope marker is such an attribute, so a scoped element cannot use them in a spread.
