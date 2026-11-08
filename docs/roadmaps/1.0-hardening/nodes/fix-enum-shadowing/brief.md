@@ -2,7 +2,7 @@
 id: fix-enum-shadowing
 title: Treat a local TypeScript enum named css as a shadowing binding
 status: active
-priority: could
+priority: should
 type: fix
 milestone: '1.0'
 target: 1.0

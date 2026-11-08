@@ -12,6 +12,21 @@ type: release
 milestone: 1.0
 owns: []
 depends_on:
+  - on: chore-typecheck-tests
+    kind: hard
+    why: ships it
+  - on: chore-e2e-port
+    kind: hard
+    why: ships it
+  - on: fix-media-compile-error
+    kind: hard
+    why: ships it
+  - on: spike-css-pipeline
+    kind: hard
+    why: ships it
+  - on: perf-fast-path
+    kind: hard
+    why: ships it
   - on: fix-enum-shadowing
     kind: hard
     why: ships it
