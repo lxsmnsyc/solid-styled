@@ -57,6 +57,18 @@ depends_on:
   - on: bench-baseline
     kind: hard
     why: ships it
+  - on: fix-style-jsx-bare-expression
+    kind: hard
+    why: ships it
+  - on: fix-style-jsx-arrow-body
+    kind: hard
+    why: ships it
+  - on: fix-unicode-range-global
+    kind: hard
+    why: ships it
+  - on: fix-css-tag-number-type
+    kind: hard
+    why: ships it
 ---
 
 # Release 1.0.0
