@@ -1,5 +1,29 @@
 # solid-styled
 
+## 1.0.0-next.2
+
+### Major Changes
+
+- 5f3e8c4: Remove the `env` compiler option. The 1.0 compiler never read it, so passing it had no effect. The Vite entry of `unplugin-solid-styled` no longer sets it.
+
+### Minor Changes
+
+- 193df8c: Fix lost CSS variables on elements that spread props. With 0.12.1 the compiler put its `s:` marker and `style` after the spread, so the CSS variables replaced the `style` from the spread. Now the marker goes after the last spread, and the CSS variables merge into the `style` Solid resolves: the last source with a `style` key, with `null` and `undefined` spreads skipped. An explicit `style` merges the CSS variables in place, and each spread after it is wrapped in place by `spreadStyle`, a new runtime export that only compiled code needs to call. When the spread has a `style` key, `spreadStyle` merges the CSS variables into it through Solid's `merge`, so getters and reactivity survive. The spread is not copied or moved, so a call in it runs as often as with any other reactive attribute on the element, and the element stays in its parent template.
+
+### Patch Changes
+
+- e616c0e: Update dependencies: `oxc-parser` 0.157, `magic-string` 1.4, `browserslist` 4.29 and `unplugin` 3.7. Tests now run against `solid-js` and `@solidjs/web` 2.0.0-rc.21. The `engines` field now says `^20.19.0 || >=22.12.0`, the Node range that `oxc-parser` and `unplugin` already required.
+- 5485f5c: A local `enum css` or `const enum css` inside a function now shadows the `css` import. The template in that scope is left as is, like with `let css`. `type css` and `interface css` still do not shadow it.
+- d26a98c: `CompileError` now reports a 1-based column, like its line, so `(line:column)` in the message matches the position editors show. Code that reads `error.column` gets a value one higher than before. Fixes #49.
+- 31d1b34: Fix invalid output for exported components that use `<style jsx>` in an arrow function with an expression body. The compiler put the setup call between `export` and the declaration. It now goes before the whole `export` statement, as in 0.12.1. The same fix applies to `export class` and `export default class` with arrow class fields.
+- d79a8b7: A CSS error in a template, such as `${}` inside an `@media` query, now throws a `CompileError` with the template's line and column. It threw a plain `SyntaxError` before.
+- 6a41309: A local `css` binding inside a TypeScript `namespace` now shadows the `css` import. This covers `const`, `let`, `var`, `function`, `class`, `enum` and `import css = M.x`, and a local that shadows `import * as s`. A constructor parameter property such as `constructor(private css: any)` now shadows it too. The template in those scopes is left as is. Code outside the namespace or class still compiles. Namespace shadowing worked in 0.12.1 and was lost in 1.0. Parameter properties were never handled.
+- 26cc612: An invalid `browserslist` option now throws its own error instead of a `CompileError` that points at a template. `solidStyled.vite()` and the other bundler entries no longer throw when called without options.
+- 6e189a2: A local binding named `css` now stops the compiler from treating `css` templates as `solid-styled` templates in more places. The compiler now sees a `var` declared in a nested block or loop, a `let` or `const` declared in a `switch` case, and the name of a class expression. Before, it compiled these templates anyway. Fixes #50.
+- f1f1983: The source map now covers the `${...}` expressions of `css` templates and `<style jsx>` elements. The compiler keeps those expressions in place, or moves them into the hoisted setup call, instead of copying their text, so they map back to where they were written. The map also embeds the source (`sourcesContent`) and names the file without its query string.
+- 55e4e04: Fix `<style jsx>` in a component whose `return` is the unbraced body of `if`, `else`, a loop or a label. The setup call became that body and the `return` ran every time. The call now goes before the outermost control statement, as in 0.12.1.
+- 8d31c76: Fix type-only imports of `css` being compiled. `import type { css }`, `import { type css }` and `import type * as s` no longer count as the runtime `css` import, so their templates are left as written. This matches 0.12.1.
+
 ## 1.0.0-next.1
 
 ### Patch Changes
