@@ -1,5 +1,30 @@
 # unplugin-solid-styled
 
+## 1.0.0-next.1
+
+### Major Changes
+
+- 5f3e8c4: Remove the `env` compiler option. The 1.0 compiler never read it, so passing it had no effect. The Vite entry of `unplugin-solid-styled` no longer sets it.
+
+### Patch Changes
+
+- e616c0e: Update dependencies: `oxc-parser` 0.157, `magic-string` 1.4, `browserslist` 4.29 and `unplugin` 3.7. Tests now run against `solid-js` and `@solidjs/web` 2.0.0-rc.21. The `engines` field now says `^20.19.0 || >=22.12.0`, the Node range that `oxc-parser` and `unplugin` already required.
+- 26cc612: An invalid `browserslist` option now throws its own error instead of a `CompileError` that points at a template. `solidStyled.vite()` and the other bundler entries no longer throw when called without options.
+- Updated dependencies [e616c0e]
+- Updated dependencies [5485f5c]
+- Updated dependencies [d26a98c]
+- Updated dependencies [31d1b34]
+- Updated dependencies [d79a8b7]
+- Updated dependencies [6a41309]
+- Updated dependencies [26cc612]
+- Updated dependencies [6e189a2]
+- Updated dependencies [f1f1983]
+- Updated dependencies [193df8c]
+- Updated dependencies [55e4e04]
+- Updated dependencies [8d31c76]
+- Updated dependencies [5f3e8c4]
+  - solid-styled@1.0.0-next.2
+
 ## 1.0.0-next.0
 
 ### Major Changes

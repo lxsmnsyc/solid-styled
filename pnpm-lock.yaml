@@ -230,7 +230,7 @@ importers:
         specifier: 2.0.0-rc.21
         version: 2.0.0-rc.21
       solid-styled:
-        specifier: 1.0.0-next.1
+        specifier: 1.0.0-next.2
         version: link:../../packages/solid-styled
     devDependencies:
       '@playwright/test':
@@ -246,7 +246,7 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       unplugin-solid-styled:
-        specifier: 1.0.0-next.0
+        specifier: 1.0.0-next.1
         version: link:../../packages/unplugin
       vite:
         specifier: ^8.3.6
@@ -326,7 +326,7 @@ importers:
         specifier: ^26.6.6
         version: 26.6.6
       solid-styled:
-        specifier: 1.0.0-next.1
+        specifier: 1.0.0-next.2
         version: link:../solid-styled
       tsdown:
         specifier: ^0.23.7
