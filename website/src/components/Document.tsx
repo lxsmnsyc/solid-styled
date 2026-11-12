@@ -53,7 +53,7 @@ export default function Document(props: DocumentProps): JSX.Element {
         <meta name="theme-color" content="#0d0712" media="(prefers-color-scheme: dark)" />
         <meta name="theme-color" content="#fbf7fd" media="(prefers-color-scheme: light)" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        {SITE_URL ? <link rel="canonical" href={url} /> : null}
+        <link rel="canonical" href={url} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="solid-styled" />
         <meta property="og:title" content={props.title} />

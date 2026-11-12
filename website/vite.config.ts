@@ -4,6 +4,14 @@ import solidStyled from 'unplugin-solid-styled';
 import { defineConfig } from 'vite';
 import site from './plugins/site.ts';
 
+// Link previews need absolute URLs, so the site address is fixed at build
+// time. `SITE_URL` overrides it, for a preview or another host.
+const SITE_URL =
+  process.env.SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : 'https://solid-styled.vercel.app');
+
 export default defineConfig({
   plugins: [
     // SSR start mode with authored entries: the server entry renders each
@@ -25,6 +33,6 @@ export default defineConfig({
     site(),
   ],
   define: {
-    'import.meta.env.SITE_URL': JSON.stringify(process.env.SITE_URL ?? ''),
+    'import.meta.env.SITE_URL': JSON.stringify(SITE_URL),
   },
 });

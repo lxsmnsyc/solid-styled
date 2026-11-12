@@ -5,8 +5,8 @@ export const TAGLINE = 'Near zero-runtime, reactive stylesheets for SolidJS';
 export const INSTALL = 'npm i solid-styled';
 
 /**
- * The absolute origin the site is deployed at, for Open Graph tags. Set
- * `SITE_URL` when building; without it the tags use root-relative URLs.
+ * The absolute origin the site is deployed at, for Open Graph tags. See
+ * `SITE_URL` in vite.config.ts.
  */
 export const SITE_URL: string = import.meta.env.SITE_URL;
 
