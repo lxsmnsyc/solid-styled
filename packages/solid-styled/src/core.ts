@@ -17,13 +17,37 @@ const SOLID_SHEET_ATTR_ESCAPED = 's\\:id';
 const tracked = new Set();
 const references = new Map<string, number>();
 
+// The nonce of the server rendered sheets, reused for sheets inserted later.
+let hydratedNonce: string | undefined;
+
+// Browsers hide the `nonce` attribute once the element is in the document, so
+// the property is read first.
+function readNonce(node: HTMLElement): string | undefined {
+  // An empty string means no nonce, so both reads fall through on it.
+  if (node.nonce) {
+    return node.nonce;
+  }
+  const nonce = node.getAttribute('nonce');
+  if (nonce) {
+    return nonce;
+  }
+  return undefined;
+}
+
 // Hydrate the sheets
 if (!isServer) {
-  const nodes = document.head.querySelectorAll(`style[${SOLID_SHEET_ATTR_ESCAPED}]`);
+  const nodes = document.head.querySelectorAll<HTMLStyleElement>(
+    `style[${SOLID_SHEET_ATTR_ESCAPED}]`,
+  );
 
   for (let i = 0, len = nodes.length; i < len; i++) {
     tracked.add(nodes[i].getAttribute(SOLID_SHEET_ATTR));
+    hydratedNonce ??= readNonce(nodes[i]);
   }
+}
+
+function escapeAttribute(value: string): string {
+  return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
 }
 
 function noopInsert(_id: string, _sheet: string): void {
@@ -34,12 +58,15 @@ function noopRemove(_id: string): void {
   // no-op
 }
 
-function clientInsert(id: string, sheet: string): void {
+function clientInsert(id: string, sheet: string, nonce = hydratedNonce): void {
   if (!tracked.has(id)) {
     tracked.add(id);
 
     const node = document.createElement('style');
     node.setAttribute(SOLID_SHEET_ATTR, id);
+    if (nonce) {
+      node.setAttribute('nonce', nonce);
+    }
     node.innerHTML = sheet;
     document.head.appendChild(node);
   }
@@ -82,6 +109,12 @@ export interface StyleData {
 
 export interface StyleRegistryProps {
   auto?: boolean;
+  /**
+   * CSP nonce for the `<style>` elements, matching `'nonce-...'` in the
+   * `style-src` directive. On the client it defaults to the nonce of the
+   * server rendered sheets.
+   */
+  nonce?: string;
   styles?: StyleData[];
   children?: JSX.Element;
 }
@@ -94,13 +127,17 @@ function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {
     styles = current;
     // Solid resolves head tags at flush time, so sheets collected while the
     // children render are still picked up here.
-    useHead(() =>
-      current.map((data) => ({
-        tag: 'style' as const,
-        props: { [SOLID_SHEET_ATTR]: data.id, children: data.sheet },
-        key: data.id,
-      })),
-    );
+    useHead(() => {
+      const tags = [];
+      for (const data of current) {
+        tags.push({
+          tag: 'style' as const,
+          props: { [SOLID_SHEET_ATTR]: data.id, nonce: props.nonce, children: data.sheet },
+          key: data.id,
+        });
+      }
+      return tags;
+    });
   }
 
   const sheets = new Set<string>();
@@ -124,8 +161,12 @@ function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {
 }
 
 function ClientStyleRegistry(props: StyleRegistryProps): JSX.Element {
+  function insertWithNonce(id: string, sheet: string): void {
+    clientInsert(id, sheet, props.nonce ?? hydratedNonce);
+  }
+
   return createComponent(StyleRegistryContext, {
-    value: { insert, remove },
+    value: { insert: insertWithNonce, remove },
     get children() {
       return props.children;
     },
@@ -277,11 +318,16 @@ function hasStyleKey(source: unknown): source is StyledSource {
   return source != null && typeof source === 'object' && 'style' in source;
 }
 
-export function renderSheets(sheets: StyleData[]): string {
+/**
+ * Renders the collected sheets as `<style>` elements. Pass the CSP nonce of
+ * the response to put it on every element.
+ */
+export function renderSheets(sheets: StyleData[], nonce?: string): string {
+  const nonceAttr = nonce ? ` nonce="${escapeAttribute(nonce)}"` : '';
   let sheet = '';
   for (let i = 0, len = sheets.length; i < len; i += 1) {
     const data = sheets[i];
-    sheet = `${sheet}<style ${SOLID_SHEET_ATTR}="${data.id}">${data.sheet}</style>`;
+    sheet = `${sheet}<style ${SOLID_SHEET_ATTR}="${data.id}"${nonceAttr}>${data.sheet}</style>`;
   }
   return sheet;
 }
