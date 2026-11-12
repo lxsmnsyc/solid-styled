@@ -43,3 +43,17 @@ renderToString(() => (
 
 - `<StyleRegistry>` is optional on the client. Without it, sheets are inserted straight into `document.head`.
 - On the server, a render without a registry produces no sheets at all, so add one whenever you server render.
+
+## Content Security Policy
+
+A `style-src` directive without `'unsafe-inline'` blocks `<style>` elements that do not carry its nonce. Create a random nonce for each response, send it in the header, and give it to solid-styled.
+
+```
+Content-Security-Policy: style-src 'self' 'nonce-r4nd0m'
+```
+
+- `renderSheets(styles, nonce)` puts `nonce="..."` on every element.
+- With `auto`, pass the nonce to `<StyleRegistry nonce={nonce}>`, or to `renderToString(..., { nonce })`. The registry prop wins when both are set.
+- On the client, sheets inserted after hydration reuse the nonce of the server rendered sheets. Pass `nonce` to the client `<StyleRegistry>` when there are no server rendered sheets to read it from.
+
+CSS variables bound to an element are written to its `style` attribute. A nonce never covers `style` attributes, so the server rendered HTML still needs `style-src-attr 'unsafe-inline'` when a component uses them.

@@ -5,9 +5,10 @@
 // this file twice: once with the browser condition and happy-dom (client path),
 // once on node (server path). The block that matches the project runs.
 import { children, createComponent, createEffect, createRoot, createSignal, flush } from 'solid-js';
-import { type JSX, isServer, renderToString } from '@solidjs/web';
+import { type JSX, isServer, renderToString, ssr } from '@solidjs/web';
+import type * as Solid from 'solid-js';
 import fc from 'fast-check';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   type StyleData,
   StyleRegistry,
@@ -15,6 +16,7 @@ import {
   useSolidStyled,
   useSolidStyledGlobal,
 } from '../src/core';
+import type * as Core from '../src/core';
 
 const SEED = 20260508;
 const NUM_RUNS = 150;
@@ -151,6 +153,65 @@ if (isServer) {
         }),
       );
       expect(html).not.toContain('<style');
+    });
+  });
+
+  describe('nonce (server)', () => {
+    it('puts the nonce on every rendered sheet', () => {
+      const styles: StyleData[] = [
+        { id: 'a-0', sheet: 'a{}' },
+        { id: 'b-0', sheet: 'b{}' },
+      ];
+      expect(renderSheets(styles, 'abc')).toBe(
+        '<style s:id="a-0" nonce="abc">a{}</style><style s:id="b-0" nonce="abc">b{}</style>',
+      );
+      expect(renderSheets(styles)).toBe(
+        '<style s:id="a-0">a{}</style><style s:id="b-0">b{}</style>',
+      );
+    });
+
+    it('escapes the nonce attribute', () => {
+      expect(renderSheets([{ id: 'a-0', sheet: 'a{}' }], '"&')).toBe(
+        '<style s:id="a-0" nonce="&quot;&amp;">a{}</style>',
+      );
+    });
+
+    // `ssr` builds the document shell, so Solid has a `<head>` to fill.
+    function renderDocument(registryNonce: string | undefined, renderNonce?: string): string {
+      return renderToString(
+        () =>
+          ssr(
+            ['<html><head></head><body>', '</body></html>'],
+            createComponent(StyleRegistry, {
+              auto: true,
+              nonce: registryNonce,
+              get children() {
+                return createComponent(EntryStyles, {
+                  entry: {
+                    id: 'a',
+                    offset: '0',
+                    sheet: 'x',
+                    global: false,
+                    hasVars: false,
+                    value: 'red',
+                  },
+                });
+              },
+            }),
+          ),
+        { nonce: renderNonce },
+      );
+    }
+
+    it('puts the nonce on sheets placed with `auto`', () => {
+      expect(renderDocument('abc')).toMatch(/<style s:id="a-0" nonce="abc"[^>]*>x<\/style>/);
+    });
+
+    it('falls back to the nonce given to `renderToString` with `auto`', () => {
+      expect(renderDocument(undefined, 'xyz')).toMatch(
+        /<style s:id="a-0"[^>]* nonce="xyz">x<\/style>/,
+      );
+      expect(renderDocument('abc', 'xyz')).not.toContain('xyz');
     });
   });
 } else {
@@ -394,5 +455,67 @@ if (isServer) {
       },
       TIMEOUT,
     );
+  });
+
+  describe('nonce (client)', () => {
+    // Mounts one sheet and returns the nonce of the inserted tag.
+    function mountNonce(
+      lib: { core: typeof Core; solid: typeof Solid },
+      nonce: string | undefined,
+      withRegistry: boolean,
+    ): string | null {
+      const { core, solid } = lib;
+      const dispose = solid.createRoot((d) => {
+        if (withRegistry) {
+          const resolved = solid.children(() =>
+            solid.createComponent(core.StyleRegistry, {
+              nonce,
+              get children() {
+                core.useSolidStyled('n', '0', 'a{}');
+                return document.createElement('span');
+              },
+            }),
+          );
+          solid.createEffect(
+            () => resolved(),
+            () => {},
+          );
+        } else {
+          core.useSolidStyled('n', '0', 'a{}');
+        }
+        return d;
+      });
+      solid.flush();
+      const value = document.head.querySelector('style[s\\:id="n-0"]')!.getAttribute('nonce');
+      dispose();
+      solid.flush();
+      return value;
+    }
+
+    it('puts the registry nonce on inserted sheets', async () => {
+      const lib = { core: await import('../src/core'), solid: await import('solid-js') };
+      expect(mountNonce(lib, 'abc', true)).toBe('abc');
+      expect(mountNonce(lib, undefined, true)).toBeNull();
+      expect(mountNonce(lib, undefined, false)).toBeNull();
+    });
+
+    it('reuses the nonce of the server rendered sheets', async () => {
+      // The nonce is read when the module loads, so a fresh copy is imported
+      // after the server rendered tag is in the head.
+      const ssrNode = document.createElement('style');
+      ssrNode.setAttribute('s:id', 'ssr-0');
+      ssrNode.setAttribute('nonce', 'xyz');
+      document.head.appendChild(ssrNode);
+      vi.resetModules();
+      try {
+        const lib = { core: await import('../src/core'), solid: await import('solid-js') };
+        expect(mountNonce(lib, undefined, false)).toBe('xyz');
+        expect(mountNonce(lib, undefined, true)).toBe('xyz');
+        expect(mountNonce(lib, 'abc', true)).toBe('abc');
+      } finally {
+        ssrNode.remove();
+        vi.resetModules();
+      }
+    });
   });
 }
