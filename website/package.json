@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm --filter \"website^...\" run build && vite build",
+    "build": "vite build",
     "preview": "node scripts/preview.ts",
     "typecheck": "tsc --noEmit"
   },
