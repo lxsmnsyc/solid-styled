@@ -1,5 +1,39 @@
 # solid-styled
 
+## 1.0.0
+
+### Major Changes
+
+- cf6a2f4: Support Solid 2.0 and rewrite the compiler on Oxc.
+
+  The peer range is now `solid-js@^2.0.0` and `@solidjs/web@^2.0.0`. Solid 1 users stay on the previous major, `solid-styled@0.x` (the `0.x` branch), which keeps getting fixes.
+
+  The Babel-based plugin is replaced by `oxc-parser` for parsing and `magic-string` for output. Only the spans the compiler rewrites are touched, so untouched code keeps its formatting and comments. The source map is high resolution, covers the `${...}` expressions of `css` templates and `<style jsx>` elements, embeds the source (`sourcesContent`) and names the file without its query string. The generated stylesheets, scope ids and runtime calls match the previous compiler.
+
+  Breaking changes:
+
+  - `solid-js` and `@solidjs/web` `^2.0.0` are required. Solid 1 is not supported. The JSX type augmentation moved from `solid-js` to `@solidjs/web`, where Solid 2.0 exposes the `JSX` namespace.
+  - `vite-plugin-solid-styled` and `rollup-plugin-solid-styled` are discontinued. Use `unplugin-solid-styled` instead. It provides the same options, and `solidStyled.vite(options)` or `solidStyled.rollup(options)` replaces the default export of the old packages.
+  - `compile(id, code, options)` from `solid-styled/compiler` is now synchronous and returns `{ code, map }`. It throws a `CompileError` carrying the 1-based line and column instead of a Babel error.
+  - The `env` compiler option is removed. The compiler never read it in this version, and the Vite entry of `unplugin-solid-styled` no longer sets it.
+  - `StyleRegistry` now provides a default context value. Solid 2.0 throws when a default-less context is read without a provider, so `useSolidStyled` needs one to keep working outside a registry.
+  - `<StyleRegistry auto>` uses Solid 2.0's `useHead` instead of the removed `useAssets`.
+  - The scope hash is derived from the file path without its query string, so the same module compiled with and without a query suffix now shares one scope.
+  - Generated runtime helpers are imported through a single import statement with `_name` locals, instead of one import per helper.
+  - The plugin requires `vite@>=8`.
+  - Node `^20.19.0 || >=22.12.0` is required, the range that `oxc-parser` and `unplugin` need.
+  - `@babel/core`, `@babel/traverse` and `@babel/types` are no longer dependencies.
+
+### Minor Changes
+
+- 6052eb1: Add CSP nonce support. `StyleRegistry` takes a `nonce` prop, and `renderSheets` takes the nonce as a second argument, to put `nonce="..."` on each `<style>` element. On the client, sheets inserted after hydration reuse the nonce of the server rendered sheets when the registry gives none.
+- 193df8c: Fix lost CSS variables on elements that spread props. With 0.12.1 the compiler put its `s:` marker and `style` after the spread, so the CSS variables replaced the `style` from the spread. Now the marker goes after the last spread, and the CSS variables merge into the `style` Solid resolves: the last source with a `style` key, with `null` and `undefined` spreads skipped. An explicit `style` merges the CSS variables in place, and each spread after it is wrapped in place by `spreadStyle`, a new runtime export that only compiled code needs to call. When the spread has a `style` key, `spreadStyle` merges the CSS variables into it through Solid's `merge`, so getters and reactivity survive. The spread is not copied or moved, so a call in it runs as often as with any other reactive attribute on the element, and the element stays in its parent template.
+
+### Patch Changes
+
+- 6a41309: A constructor parameter property such as `constructor(private css: any)` now shadows the `css` import. The template in that class is left as is. Code outside the class still compiles.
+- a473284: Support CSS units written right after an interpolation, as in `width: ${size()}px`. The compiler used to output `var(--id) px`, which browsers drop. It now outputs `calc(var(--id) * 1px)`.
+
 ## 1.0.0-next.2
 
 ### Major Changes
