@@ -52,14 +52,14 @@
   },
   "devDependencies": {
     "@jridgewell/trace-mapping": "^0.3.31",
-    "@solidjs/compiler": "2.0.0-rc.21",
-    "@solidjs/web": "2.0.0-rc.21",
+    "@solidjs/compiler": "2.0.0",
+    "@solidjs/web": "2.0.0",
     "@types/css-tree": "^3.2.0",
     "@types/node": "^26.6.6",
     "fast-check": "^4.10.2",
     "happy-dom": "^21.0.4",
     "js-xxhash": "^5.0.1",
-    "solid-js": "2.0.0-rc.21",
+    "solid-js": "2.0.0",
     "solid-styled-legacy": "npm:solid-styled@0.12.1",
     "tsdown": "^0.23.7",
     "tslib": "^2.9.1",
@@ -67,8 +67,8 @@
     "vitest": "^5.1.0"
   },
   "peerDependencies": {
-    "@solidjs/web": "^2.0.0-rc.5",
-    "solid-js": "^2.0.0-rc.5"
+    "@solidjs/web": "^2.0.0",
+    "solid-js": "^2.0.0"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
