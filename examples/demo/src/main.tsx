@@ -1,15 +1,30 @@
-import { render } from "@solidjs/web";
-import App from "./App";
+import { render } from '@solidjs/web';
+import { StyleRegistry } from 'solid-styled';
+import Main from './App';
 
-const app = document.getElementById("app");
+const app = document.getElementById('app');
 
 if (app) {
-  render(() => <App />, app);
+  render(
+    () => (
+      <StyleRegistry>
+        <Main />
+      </StyleRegistry>
+    ),
+    app,
+  );
 }
 
-const host = document.getElementById("shadow-host");
-const shadowDom = host?.attachShadow({ mode: "open" });
+const host = document.getElementById('shadow-host');
+const shadowDom = host?.attachShadow({ mode: 'open' });
 
 if (shadowDom) {
-  render(() => <App />, shadowDom);
+  render(
+    () => (
+      <StyleRegistry root={shadowDom}>
+        <Main />
+      </StyleRegistry>
+    ),
+    shadowDom,
+  );
 }

@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 
 test('renders the demo tree', async ({ page }) => {
   await expect(page.locator('#app button')).toHaveCount(3);
-  await expect(page.getByRole('button', { name: 'Show Div' })).toBeVisible();
+  await expect(page.locator('#app').getByRole('button', { name: 'Show Div' })).toBeVisible();
 });
 
 test('marks every styled host element with its sheet scope', async ({ page }) => {
@@ -38,7 +38,7 @@ test('applies `:global` rules outside the scope', async ({ page }) => {
 });
 
 test('applies a `<style jsx>` sheet to its own component only', async ({ page }) => {
-  const toggle = page.locator('button.toggle');
+  const toggle = page.locator('#app button.toggle');
   await expect(toggle).toHaveCSS('background-color', 'rgb(17, 24, 39)');
   await expect(toggle).toHaveCSS('border-radius', '8px');
 
@@ -90,7 +90,7 @@ test('keeps the sheet set stable as children mount', async ({ page }) => {
     await page.evaluate(() => document.head.querySelectorAll('style[s\\:id]').length);
 
   const before = await countSheets();
-  await page.getByRole('button', { name: 'Show Div' }).click();
+  await page.locator('#app').getByRole('button', { name: 'Show Div' }).click();
   await expect(page.locator('#app div div button')).toBeVisible();
   expect(await countSheets()).toBe(before);
 });
