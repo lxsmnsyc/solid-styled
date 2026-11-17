@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 const MODEL = 'test/registry.model.test.ts';
 const RUNTIME = 'test/spread.runtime.test.ts';
+const SHADOW = 'test/shadow-root.test.ts';
 
 export default defineConfig({
   test: {
@@ -10,7 +11,7 @@ export default defineConfig({
         test: {
           name: 'unit',
           include: ['test/**/*.test.ts'],
-          exclude: [MODEL, RUNTIME, '**/node_modules/**'],
+          exclude: [MODEL, RUNTIME, SHADOW, '**/node_modules/**'],
         },
       },
       {
@@ -19,7 +20,7 @@ export default defineConfig({
         resolve: { conditions: ['browser'] },
         test: {
           name: 'registry-client',
-          include: [MODEL],
+          include: [MODEL, SHADOW],
           environment: 'happy-dom',
         },
       },

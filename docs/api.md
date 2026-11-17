@@ -21,6 +21,8 @@ function StyleRegistry(props: StyleRegistryProps): JSX.Element;
 
 interface StyleRegistryProps {
   auto?: boolean;
+  nonce?: string;
+  root?: ShadowRoot | Element;
   styles?: StyleData[];
   children?: JSX.Element;
 }
@@ -33,7 +35,9 @@ interface StyleData {
 
 - `styles` collects every sheet used during a server render. Each sheet is pushed once per registry.
 - `auto` inserts the collected sheets into the head through `useHead`.
-- On the client, `auto` and `styles` have no effect. Sheets go into `document.head`.
+- `nonce` is put on every `<style>` element the registry inserts. See [Content Security Policy](./ssr.md#content-security-policy).
+- `root` is the node the sheets are inserted into on the client. It defaults to `document.head`. Pass the `ShadowRoot` when the tree renders inside one. It is read once, when the registry mounts, and has no effect on the server.
+- On the client, `auto` and `styles` have no effect. Sheets go into `root`, or `document.head` without it.
 - The registry is optional on the client. See [SSR](./ssr.md).
 
 #### `renderSheets`

@@ -14,8 +14,24 @@ import { isServer, useHead } from '@solidjs/web';
 const SOLID_SHEET_ATTR = 's:id';
 const SOLID_SHEET_ATTR_ESCAPED = 's\\:id';
 
-const tracked = new Set();
-const references = new Map<string, number>();
+// Sheets are tracked per root node, so the same sheet can live in
+// `document.head` and in a shadow root at once, and reference counts never
+// leak across roots.
+interface RootState {
+  tracked: Set<string>;
+  references: Map<string, number>;
+}
+
+const roots = new WeakMap<ParentNode, RootState>();
+
+function rootState(root: ParentNode): RootState {
+  let state = roots.get(root);
+  if (!state) {
+    state = { tracked: new Set(), references: new Map() };
+    roots.set(root, state);
+  }
+  return state;
+}
 
 // The nonce of the server rendered sheets, reused for sheets inserted later.
 let hydratedNonce: string | undefined;
@@ -39,9 +55,10 @@ if (!isServer) {
   const nodes = document.head.querySelectorAll<HTMLStyleElement>(
     `style[${SOLID_SHEET_ATTR_ESCAPED}]`,
   );
+  const state = rootState(document.head);
 
   for (let i = 0, len = nodes.length; i < len; i++) {
-    tracked.add(nodes[i].getAttribute(SOLID_SHEET_ATTR));
+    state.tracked.add(nodes[i].getAttribute(SOLID_SHEET_ATTR)!);
     hydratedNonce ??= readNonce(nodes[i]);
   }
 }
@@ -58,9 +75,10 @@ function noopRemove(_id: string): void {
   // no-op
 }
 
-function clientInsert(id: string, sheet: string, nonce = hydratedNonce): void {
-  if (!tracked.has(id)) {
-    tracked.add(id);
+function clientInsert(root: ParentNode, id: string, sheet: string, nonce = hydratedNonce): void {
+  const state = rootState(root);
+  if (!state.tracked.has(id)) {
+    state.tracked.add(id);
 
     const node = document.createElement('style');
     node.setAttribute(SOLID_SHEET_ATTR, id);
@@ -68,27 +86,36 @@ function clientInsert(id: string, sheet: string, nonce = hydratedNonce): void {
       node.setAttribute('nonce', nonce);
     }
     node.innerHTML = sheet;
-    document.head.appendChild(node);
+    root.appendChild(node);
   }
-  references.set(id, (references.get(id) ?? 0) + 1);
+  state.references.set(id, (state.references.get(id) ?? 0) + 1);
 }
 
-function clientRemove(id: string): void {
-  const count = references.get(id) ?? 0;
+function clientRemove(root: ParentNode, id: string): void {
+  const state = rootState(root);
+  const count = state.references.get(id) ?? 0;
   if (count > 1) {
-    references.set(id, count - 1);
+    state.references.set(id, count - 1);
   } else {
-    references.set(id, 0);
-    const node = document.head.querySelector(`style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`);
+    state.references.set(id, 0);
+    const node = root.querySelector(`style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`);
     if (node) {
-      document.head.removeChild(node);
+      root.removeChild(node);
     }
-    tracked.delete(id);
+    state.tracked.delete(id);
   }
 }
 
-const insert = isServer ? noopInsert : clientInsert;
-const remove = isServer ? noopRemove : clientRemove;
+function headInsert(id: string, sheet: string): void {
+  clientInsert(document.head, id, sheet);
+}
+
+function headRemove(id: string): void {
+  clientRemove(document.head, id);
+}
+
+const insert = isServer ? noopInsert : headInsert;
+const remove = isServer ? noopRemove : headRemove;
 
 interface StyleRegistryContextValue {
   insert(id: string, sheet: string): void;
@@ -115,6 +142,12 @@ export interface StyleRegistryProps {
    * server rendered sheets.
    */
   nonce?: string;
+  /**
+   * Node the sheets are inserted into (client only). Defaults to
+   * `document.head`; pass a `ShadowRoot` when the tree renders inside one,
+   * because document styles do not cross the shadow boundary.
+   */
+  root?: ShadowRoot | Element;
   styles?: StyleData[];
   children?: JSX.Element;
 }
@@ -161,12 +194,18 @@ function ServerStyleRegistry(props: StyleRegistryProps): JSX.Element {
 }
 
 function ClientStyleRegistry(props: StyleRegistryProps): JSX.Element {
+  const root = untrack(() => props.root) ?? document.head;
+
   function insertWithNonce(id: string, sheet: string): void {
-    clientInsert(id, sheet, props.nonce ?? hydratedNonce);
+    clientInsert(root, id, sheet, props.nonce ?? hydratedNonce);
+  }
+
+  function removeFromRoot(id: string): void {
+    clientRemove(root, id);
   }
 
   return createComponent(StyleRegistryContext, {
-    value: { insert: insertWithNonce, remove },
+    value: { insert: insertWithNonce, remove: removeFromRoot },
     get children() {
       return props.children;
     },

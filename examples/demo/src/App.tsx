@@ -1,5 +1,5 @@
 import { Show, createSignal } from 'solid-js';
-import { StyleRegistry, css } from 'solid-styled';
+import { css } from 'solid-styled';
 import type { JSX } from '@solidjs/web';
 
 function ShowButton(): JSX.Element {
@@ -92,7 +92,7 @@ function ToggleButton(): JSX.Element {
   );
 }
 
-function Main(): JSX.Element {
+export default function Main(): JSX.Element {
   css`
     :global(body) {
       padding: 0;
@@ -135,13 +135,5 @@ function Main(): JSX.Element {
       <ToggleButton />
       <ShowButton />
     </div>
-  );
-}
-
-export default function App(): JSX.Element {
-  return (
-    <StyleRegistry>
-      <Main />
-    </StyleRegistry>
   );
 }
