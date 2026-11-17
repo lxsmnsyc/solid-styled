@@ -147,7 +147,7 @@ export interface StyleRegistryProps {
    * `document.head`; pass a `ShadowRoot` when the tree renders inside one,
    * because document styles do not cross the shadow boundary.
    */
-  root?: ParentNode;
+  root?: ShadowRoot | Element;
   styles?: StyleData[];
   children?: JSX.Element;
 }

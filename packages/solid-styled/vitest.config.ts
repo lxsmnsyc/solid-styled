@@ -20,17 +20,7 @@ export default defineConfig({
         resolve: { conditions: ['browser'] },
         test: {
           name: 'registry-client',
-          include: [MODEL],
-          environment: 'happy-dom',
-        },
-      },
-      {
-        // Same client conditions as registry-client: shadow roots only
-        // exist in the DOM builds of solid-js and @solidjs/web.
-        resolve: { conditions: ['browser'] },
-        test: {
-          name: 'shadow-root-client',
-          include: [SHADOW],
+          include: [MODEL, SHADOW],
           environment: 'happy-dom',
         },
       },

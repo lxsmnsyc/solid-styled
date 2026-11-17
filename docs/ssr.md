@@ -44,6 +44,27 @@ renderToString(() => (
 - `<StyleRegistry>` is optional on the client. Without it, sheets are inserted straight into `document.head`.
 - On the server, a render without a registry produces no sheets at all, so add one whenever you server render.
 
+## Shadow DOM
+
+Styles in the document do not apply inside a shadow root. Pass the shadow root to the registry, and its sheets are inserted there instead of `document.head`.
+
+```tsx
+const shadow = host.attachShadow({ mode: 'open' });
+
+render(
+  () => (
+    <StyleRegistry root={shadow}>
+      <App />
+    </StyleRegistry>
+  ),
+  shadow,
+);
+```
+
+- Each root counts its sheets on its own. The same sheet can be in `document.head` and in a shadow root at once, and unmounting one tree never removes a sheet the other still uses.
+- `root` is read once, when the registry mounts. To move a tree to another root, mount a new registry.
+- Server rendered sheets are only read from `document.head`.
+
 ## Content Security Policy
 
 A `style-src` directive without `'unsafe-inline'` blocks `<style>` elements that do not carry its nonce. Create a random nonce for each response, send it in the header, and give it to solid-styled.

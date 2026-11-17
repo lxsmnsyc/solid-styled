@@ -1,11 +1,7 @@
-// Client-side tests for sheets in shadow roots. An app rendered into a
-// shadow root (host.attachShadow) gets no styling today, because every
-// sheet lands in `document.head` and document styles do not cross the
-// shadow boundary. `StyleRegistry` must accept the root node the sheets
-// belong to (`root`), so a shadow-rendered tree carries its own sheets.
-//
-// Red until the runtime honors `root`: the prop is ignored right now, so
-// every assertion that expects a sheet inside the shadow root fails.
+// Client-side tests for sheets in shadow roots. Document styles do not
+// cross the shadow boundary, so a tree rendered into a shadow root
+// (host.attachShadow) needs its sheets inside that root. `StyleRegistry`
+// takes the node the sheets belong to as `root`.
 import { type JSX, render } from '@solidjs/web';
 import { createComponent } from 'solid-js';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -54,7 +50,6 @@ describe('shadow roots', () => {
       render(
         () =>
           createComponent(StyleRegistry, {
-            // Introduced by the fix; ignored today.
             root: shadow,
             get children() {
               return createComponent(Scoped, {});
