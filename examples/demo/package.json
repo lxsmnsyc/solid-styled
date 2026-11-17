@@ -14,13 +14,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@solidjs/web": "2.0.0-rc.21",
-    "solid-js": "2.0.0-rc.21",
+    "@solidjs/web": "2.0.0",
+    "solid-js": "2.0.0",
     "solid-styled": "1.0.0-next.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",
-    "@solidjs/vite-plugin": "3.0.0-next.57",
+    "@solidjs/vite-plugin": "3.0.0",
     "@types/node": "^26.6.6",
     "typescript": "^7.0.2",
     "unplugin-solid-styled": "1.0.0-next.1",

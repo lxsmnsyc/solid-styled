@@ -4,7 +4,7 @@
 
 [![NPM](https://img.shields.io/npm/v/solid-styled.svg)](https://www.npmjs.com/package/solid-styled)
 
-> This branch holds solid-styled 1.0, published under the `next` tag. The 0.x line (`latest`, Solid 1.x) lives on the [`0.x`](https://github.com/lxsmnsyc/solid-styled/tree/0.x) branch and only gets fixes.
+> This branch holds solid-styled 1.x for Solid 2. The 0.x line (Solid 1) lives on the [`0.x`](https://github.com/lxsmnsyc/solid-styled/tree/0.x) branch and only gets fixes.
 
 ## What it is
 
@@ -16,7 +16,7 @@
 
 ## Requirements
 
-- `solid-js` and `@solidjs/web` `^2.0.0-rc.5`.
+- `solid-js` and `@solidjs/web` `^2.0.0`.
 - Node `^20.19.0 || >=22.12.0`.
 - The build plugin below. The `css` tag throws at runtime if the plugin is not installed.
 
