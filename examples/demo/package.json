@@ -16,7 +16,7 @@
   "dependencies": {
     "@solidjs/web": "2.0.0",
     "solid-js": "2.0.0",
-    "solid-styled": "1.0.0"
+    "solid-styled": "1.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",

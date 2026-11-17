@@ -1,5 +1,11 @@
 # solid-styled
 
+## 1.1.0
+
+### Minor Changes
+
+- 46c2409: Add a `root` prop to `StyleRegistry`. On the client, sheets are inserted into `root` instead of `document.head`, so a tree rendered into a shadow root gets its styles. Each root counts its sheets on its own.
+
 ## 1.0.0
 
 ### Major Changes
