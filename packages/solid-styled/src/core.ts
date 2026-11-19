@@ -77,7 +77,14 @@ function noopRemove(_id: string): void {
 
 function clientInsert(root: ParentNode, id: string, sheet: string, nonce = hydratedNonce): void {
   const state = rootState(root);
-  if (!state.tracked.has(id)) {
+  if (state.tracked.has(id)) {
+    // HMR: same id, new sheet — update the existing node in place so
+    // style edits apply without a full reload.
+    const node = root.querySelector(`style[${SOLID_SHEET_ATTR_ESCAPED}="${id}"]`);
+    if (node && node.innerHTML !== sheet) {
+      node.innerHTML = sheet;
+    }
+  } else {
     state.tracked.add(id);
 
     const node = document.createElement('style');
